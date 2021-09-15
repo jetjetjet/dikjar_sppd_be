@@ -19,6 +19,22 @@ class BidangController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
+	public function search(Request $request)
+	{
+		$results = $this->responses;
+		
+		$results['data'] = Bidang::select('id', 'name as label')->get();
+		$results['state_code'] = 200;
+		$results['success'] = true;
+		
+		return response()->json($results, $results['state_code']);
+	}
+
+	public function getParent(Request $request)
+	{
+
+	}
+
 	public function store(Request $request)
 	{
 		$results = $this->responses;
@@ -38,7 +54,10 @@ class BidangController extends Controller
 		
     Bidang::create([
       'code' => $inputs['code'],
-      'name' => $inputs['name']
+      'name' => $inputs['name'],
+      'remark' => $inputs['remark'] ?? null,
+      // 'is_parent' => $inputs['is_parent'],
+      // 'parent_id' => $inputs['parent_id'] ?? null
     ]);
 
     array_push($results['messages'], 'Berhasil menambahkan Bidang baru.');
@@ -81,6 +100,9 @@ class BidangController extends Controller
     $Bidang->update([
       'code' => $inputs['code'],
       'name' => $inputs['name'],
+      'remark' => $inputs['remark'] ?? null,
+      // 'is_parent' => $inputs['is_parent'],
+      // 'parent_id' => $inputs['parent_id'] ?? null
     ]);
 
     array_push($results['messages'], 'Berhasil mengubah Bidang.');

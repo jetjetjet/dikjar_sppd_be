@@ -27,6 +27,17 @@ class UserController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
+	public function search(Request $request)
+	{
+		$results = $this->responses;
+		
+		$results['data'] = User::select('id as code', 'full_name as label')->get();
+		$results['state_code'] = 200;
+		$results['success'] = true;
+		
+		return response()->json($results, $results['state_code']);
+	}
+
 	/**
 	 * Store a newly created resource in storage.
 	 *

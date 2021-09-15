@@ -5,17 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\LogUser;
 
-class Bidang extends Model
+class SPTDetail extends Model
 {
 	use LogUser;
-	protected $table = 'bidang';
+	protected $table = 'spt_detail';
 	protected $fillable = [
-		'code',
-		'name',
-		'remark',
-		'is_parent',
-		'parent_id',
+		'spt_id',
+		'user_id',
 		'created_by',
-		'updated_by'
+		'updated_by',
+		'deleted_by'
 	];
 }

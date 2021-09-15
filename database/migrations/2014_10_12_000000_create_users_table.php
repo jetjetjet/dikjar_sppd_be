@@ -33,6 +33,8 @@ class CreateUsersTable extends Migration
             $table->timestamps();
             $table->bigInteger('created_by');
             $table->bigInteger('updated_by')->nullable();
+            $table->softDeletes();
+            $table->bigInteger('deleted_by')->nullable();
         });
     }
 

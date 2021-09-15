@@ -36,7 +36,17 @@ class RoleSeeder extends Seeder
 				'action'     => ['view'],
 			],
 			[
-				'name'       => 'setting',
+				'name'       => 'anggaran',
+				'guard_name' => 'sanctum',
+				'action'     => ['view', 'add', 'edit', 'delete'],
+			],
+			[
+				'name'       => 'bidang',
+				'guard_name' => 'sanctum',
+				'action'     => ['view', 'add', 'edit', 'delete'],
+			],
+			[
+				'name'       => 'pejabat',
 				'guard_name' => 'sanctum',
 				'action'     => ['view', 'add', 'edit', 'delete'],
 			],
@@ -46,9 +56,19 @@ class RoleSeeder extends Seeder
 				'action'     => ['view', 'add', 'edit', 'delete'],
 			],
 			[
+				'name'       => 'setting',
+				'guard_name' => 'sanctum',
+				'action'     => ['view', 'add', 'edit', 'delete'],
+			],
+			[
 				'name'       => 'user',
 				'guard_name' => 'sanctum',
 				'action'     => ['view', 'add', 'edit', 'delete'],
+			],
+			[
+				'name'       => 'wilayah',
+				'guard_name' => 'sanctum',
+				'action'     => ['view'],
 			]
 		];
 

@@ -21,12 +21,34 @@ class AnggaranController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
+	public function search(Request $request)
+	{
+		$results = $this->responses;
+		// if($request->has('filter')){
+		// }
+		$datas = Anggaran::where('periode', '2021')->get();
+		foreach($datas as $dt){
+			$ui = Array(
+				'id' => $dt->id,
+				'mak' => $dt->mak,
+				'uraian' => $dt->uraian,
+				'pagu' => 'Rp ' . number_format($dt->pagu)
+			);
+		
+			array_push($results['data'], $ui);
+		}
+
+		$results['state_code'] = 200;
+		$results['success'] = true;
+
+		return response()->json($results, $results['state_code']);
+	}
+
 	public function store(Request $request)
 	{
 		$results = $this->responses;
 
 		$inputs = $request->all();
-		dd($inputs);
 		$rules = array(
 			'mak' => 'required',
       'uraian' => 'required',
@@ -34,7 +56,6 @@ class AnggaranController extends Controller
 		);
 
 		$validator = Validator::make($inputs, $rules);
-		dd($validator->fails());
 		// Validation fails?
 		if ($validator->fails()){
       $results['messages'] = Array($validator->messages()->first());
