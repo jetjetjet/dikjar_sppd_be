@@ -10,6 +10,8 @@ class SPT extends Model
 	use LogUser;
 	protected $table = 'spt';
 	protected $fillable = [
+		'no_index',
+		'spt_file_id',
 		'bidang_id',
 		'anggaran_id',
 		'ppk_user_id',
@@ -29,6 +31,9 @@ class SPT extends Model
 		'tgl_kembali',
 		'created_by',
 		'updated_by',
-		'deleted_by'
+		'deleted_at',
+		'deleted_by',
+		'spt_generated_at',
+		'spt_generated_by'
 	];
 }

@@ -3,8 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AnggaranController;
-use App\Http\Controllers\BidangController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BidangController;
+use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\PejabatTtdController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
@@ -43,6 +44,14 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::post('/bidang', [BidangController::class, 'store']);
 	Route::put('/bidang/{id}', [BidangController::class, 'update']);
 	Route::delete('/bidang/{id}', [BidangController::class, 'destroy']);
+
+	Route::get('/jabatan-grid', [JabatanController::class, 'grid']);
+	Route::get('/jabatan-search', [JabatanController::class, 'search']);
+	Route::get('/jabatan-parent', [JabatanController::class, 'parent']);
+	Route::get('/jabatan/{id}', [JabatanController::class, 'show']);
+	Route::post('/jabatan', [JabatanController::class, 'store']);
+	Route::put('/jabatan/{id}', [JabatanController::class, 'update']);
+	Route::delete('/jabatan/{id}', [JabatanController::class, 'destroy']);
 	
 	Route::get('/pejabat-grid', [PejabatTtdController::class, 'grid']);
 	Route::get('/pejabat-search', [PejabatTtdController::class, 'search']);
@@ -82,4 +91,7 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::get('/spt-grid', [SPTController::class, 'grid']);
 	Route::get('/spt/{id}', [SPTController::class, 'show']);
 	Route::post('/spt', [SPTController::class, 'store']);
+	Route::post('/spt/{id}/cetak-spt', [SPTController::class, 'cetakSPT']);
+	Route::put('/spt/{id}', [SPTController::class, 'update']);
+	Route::delete('/spt/{id}', [SPTController::class, 'destroy']);
 });

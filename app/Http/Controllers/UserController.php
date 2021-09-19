@@ -72,6 +72,7 @@ class UserController extends Controller
 				'nip' => $inputs['nip'],
 				'full_name' => $inputs['full_name'],
 				'password' => $defaultPassword,
+				'jabatan_id' => $inputs['jabatan_id'],
 				'email' => $inputs['email'],
 				'jenis_kelamin' => $inputs['jenis_kelamin'],
 				'address' => $inputs['address'] ?? null,
@@ -150,6 +151,7 @@ class UserController extends Controller
 			'full_name' => $inputs['full_name'],
 			'email' => $inputs['email'],
 			'jenis_kelamin' => $inputs['jenis_kelamin'],
+			'jabatan_id' => $inputs['jabatan_id'],
 			'address' => $inputs['address'] ?? null,
 			'phone' => $inputs['phone'] ?? null,
 			'tgl_lahir' => $inputs['tgl_lahir'] ?? null

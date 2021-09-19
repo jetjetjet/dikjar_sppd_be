@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateBidangsTable extends Migration
+class CreateJabatansTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,17 @@ class CreateBidangsTable extends Migration
      */
     public function up()
     {
-        Schema::create('bidang', function (Blueprint $table) {
+        Schema::create('jabatan', function (Blueprint $table) {
             $table->id();
-            $table->string('code');
+            $table->bigInteger('bidang_id');
             $table->string('name');
+            $table->string('golongan');
             $table->string('remark')->nullable();
+            $table->boolean('is_parent');
+            $table->bigInteger('parent_id')->nullable();
+
             $table->timestamps();
-            $table->bigInteger('created_by')->nullable();
+            $table->bigInteger('created_by');
             $table->bigInteger('updated_by')->nullable();
             $table->softDeletes();
             $table->bigInteger('deleted_by')->nullable();
@@ -33,6 +37,6 @@ class CreateBidangsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('bidang');
+        Schema::dropIfExists('jabatan');
     }
 }

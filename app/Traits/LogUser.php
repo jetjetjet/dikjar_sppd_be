@@ -25,7 +25,7 @@ trait LogUser
       }
 
       if (\Schema::hasColumn(with(new static )->getTable(), 'deleted_by')) {
-        static::creating(function ($table) {
+        static::deleting(function ($table) {
           $table->deleted_by = auth()->user()->id;
         });
       }

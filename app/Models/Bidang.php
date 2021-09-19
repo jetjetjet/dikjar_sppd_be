@@ -13,8 +13,6 @@ class Bidang extends Model
 		'code',
 		'name',
 		'remark',
-		'is_parent',
-		'parent_id',
 		'created_by',
 		'updated_by'
 	];

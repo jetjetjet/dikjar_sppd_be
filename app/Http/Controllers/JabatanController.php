@@ -3,16 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Bidang;
+use App\Models\Jabatan;
 use DB;
 use Validator;
 
-class BidangController extends Controller
+class JabatanController extends Controller
 {
-	public function grid(Request $request)
+  public function grid(Request $request)
 	{
 		$results = $this->responses;
-		$results['data'] = Bidang::all();
+		$results['data'] = Jabatan::all();
 		$results['state_code'] = 200;
 		$results['success'] = true;
 
@@ -23,7 +23,33 @@ class BidangController extends Controller
 	{
 		$results = $this->responses;
 		
-		$results['data'] = Bidang::select('id', 'name')->get();
+		$results['data'] = Jabatan::
+		// whereNotIn('jabatan.id', [DB::raw("select jabatan_id from users where deleted_at is null and jabatan_id is not null")])
+		select('id', 'name')->get();
+		$results['state_code'] = 200;
+		$results['success'] = true;
+		
+		return response()->json($results, $results['state_code']);
+	}
+
+	public function parent(Request $request)
+	{
+		$results = $this->responses;
+		
+		$results['data'] = Jabatan::where("is_parent", "1")
+		->select('id', 'name')->get();
+
+		$results['state_code'] = 200;
+		$results['success'] = true;
+		
+		return response()->json($results, $results['state_code']);
+	}
+
+	public function show($id)
+	{
+		$results = $this->responses;
+		$results['data'] = Jabatan::find($id);
+
 		$results['state_code'] = 200;
 		$results['success'] = true;
 		
@@ -36,8 +62,10 @@ class BidangController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-			'code' => 'required',
-      'name' => 'required'
+			'bidang_id' => 'required',
+      'name' => 'required',
+      'golongan' => 'required',
+      'is_parent' => 'required'
 		);
 
 		$validator = Validator::make($inputs, $rules);
@@ -47,28 +75,20 @@ class BidangController extends Controller
       return response()->json($results, 200);
     }
 		
-    Bidang::create([
-      'code' => $inputs['code'],
+    Jabatan::create([
+      'bidang_id' => $inputs['bidang_id'],
       'name' => $inputs['name'],
-      'remark' => $inputs['remark'] ?? null
+      'golongan' => $inputs['golongan'],
+      'remark' => $inputs['remark'],
+      'is_parent' => $inputs['is_parent'],
+      'parent_id' => $inputs['parent_id']
     ]);
 
-    array_push($results['messages'], 'Berhasil menambahkan Bidang baru.');
+    array_push($results['messages'], 'Berhasil menambahkan Jabatan baru.');
 
     $results['success'] = true;
     $results['state_code'] = 200;
 
-		return response()->json($results, $results['state_code']);
-	}
-
-	public function show($id)
-	{
-		$results = $this->responses;
-		$results['data'] = Bidang::find($id);
-
-		$results['state_code'] = 200;
-		$results['success'] = true;
-		
 		return response()->json($results, $results['state_code']);
 	}
 
@@ -78,8 +98,10 @@ class BidangController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-      'code' => 'required',
-      'name' => 'required'
+			'bidang_id' => 'required',
+      'name' => 'required',
+      'golongan' => 'required',
+      'is_parent' => 'required'
 		);
 
 		$validator = Validator::make($request->all(), $rules);
@@ -89,25 +111,28 @@ class BidangController extends Controller
       return response()->json($results, $results['state_code']);
     }
     
-		$Bidang = Bidang::find($id);
-    $Bidang->update([
-      'code' => $inputs['code'],
+		$Jabatan = Jabatan::find($id);
+    $Jabatan->update([
+      'bidang_id' => $inputs['bidang_id'],
       'name' => $inputs['name'],
-      'remark' => $inputs['remark'] ?? null
+      'golongan' => $inputs['golongan'],
+      'remark' => $inputs['remark'],
+      'is_parent' => $inputs['is_parent'],
+      'parent_id' => $inputs['parent_id']
     ]);
 
-    array_push($results['messages'], 'Berhasil mengubah Bidang.');
+    array_push($results['messages'], 'Berhasil mengubah Jabatan.');
 
     $results['success'] = true;
     $results['state_code'] = 200;
 
 		return response()->json($results, $results['state_code']);
 	}
-  
+
 	public function destroy($id)
 	{
 		$results = $this->responses;
-		$role = Bidang::destroy($id);
+		$Jabatan = Jabatan::destroy($id);
 
 		array_push($results['messages'], 'Berhasil menghapus Bidang.');
 		$results['state_code'] = 200;
