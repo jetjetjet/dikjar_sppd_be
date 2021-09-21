@@ -13,6 +13,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\WilayahController;
 
 use App\Http\Controllers\SPTController;
+use App\Http\Controllers\SPPDController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,12 +39,12 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::put('/anggaran/{id}', [AnggaranController::class, 'update']);
 	Route::delete('/anggaran/{id}', [AnggaranController::class, 'destroy']);
 
-	Route::get('/bidang-grid', [BidangController::class, 'grid']);
-	Route::get('/bidang-search', [BidangController::class, 'search']);
-	Route::get('/bidang/{id}', [BidangController::class, 'show']);
-	Route::post('/bidang', [BidangController::class, 'store']);
-	Route::put('/bidang/{id}', [BidangController::class, 'update']);
-	Route::delete('/bidang/{id}', [BidangController::class, 'destroy']);
+	// Route::get('/bidang-grid', [BidangController::class, 'grid']);
+	// Route::get('/bidang-search', [BidangController::class, 'search']);
+	// Route::get('/bidang/{id}', [BidangController::class, 'show']);
+	// Route::post('/bidang', [BidangController::class, 'store']);
+	// Route::put('/bidang/{id}', [BidangController::class, 'update']);
+	// Route::delete('/bidang/{id}', [BidangController::class, 'destroy']);
 
 	Route::get('/jabatan-grid', [JabatanController::class, 'grid']);
 	Route::get('/jabatan-search', [JabatanController::class, 'search']);
@@ -87,11 +88,16 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::get('/wilayah/kecamatan', [WilayahController::class, 'getKecamatan']);
 	Route::get('/wilayah/desa', [WilayahController::class, 'getDesa']);
 
-	//SPPD
+	//SPT
 	Route::get('/spt-grid', [SPTController::class, 'grid']);
 	Route::get('/spt/{id}', [SPTController::class, 'show']);
+	Route::get('/spt/{id}/lihat-spt', [SPTController::class, 'getSPT']);
 	Route::post('/spt', [SPTController::class, 'store']);
 	Route::post('/spt/{id}/cetak-spt', [SPTController::class, 'cetakSPT']);
 	Route::put('/spt/{id}', [SPTController::class, 'update']);
 	Route::delete('/spt/{id}', [SPTController::class, 'destroy']);
+
+	//SPPD
+	Route::get('/spt/{id}/sppd-grid', [SPPDController::class, 'grid']);
+	Route::get('/spt/{id}/sppd/{userId}', [SPPDController::class, 'show']);
 });

@@ -18,15 +18,39 @@ class RoleSeeder extends Seeder
 	{
 		Role::truncate();
 		$role = Role::insert([
-			'name'       => 'Super Admin',
+			'name'       => 'SUPER ADMIN',
+			'guard_name' => 'sanctum',
+			'created_at' => \Carbon\Carbon::now(),
+		]);
+		
+		$role1 = Role::insert([
+			'name'       => 'KADIN',
+			'guard_name' => 'sanctum',
+			'created_at' => \Carbon\Carbon::now(),
+		]);
+		
+		$role2 = Role::insert([
+			'name'       => 'SEKRETARIS',
+			'guard_name' => 'sanctum',
+			'created_at' => \Carbon\Carbon::now(),
+		]);
+
+		$role2 = Role::insert([
+			'name'       => 'KASUBBAG',
+			'guard_name' => 'sanctum',
+			'created_at' => \Carbon\Carbon::now(),
+		]);
+
+		$role2 = Role::insert([
+			'name'       => 'STAFF',
 			'guard_name' => 'sanctum',
 			'created_at' => \Carbon\Carbon::now(),
 		]);
 
 		$user = User::find('1');
 		$user2 = User::find('2');
-		$user->assignRole('Super Admin');
-		$user2->assignRole('Super Admin');
+		$user->assignRole('SUPER ADMIN');
+		$user2->assignRole('SUPER ADMIN');
 		$role_first = Role::first();
 
 		$permissions = [

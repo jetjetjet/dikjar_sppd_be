@@ -12,7 +12,7 @@ class SPT extends Model
 	protected $fillable = [
 		'no_index',
 		'spt_file_id',
-		'bidang_id',
+		// 'bidang_id',
 		'anggaran_id',
 		'ppk_user_id',
 		'no_spt',

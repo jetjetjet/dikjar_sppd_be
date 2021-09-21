@@ -28,6 +28,7 @@ class SPTController extends Controller
 			DB::raw("tgl_berangkat || ' s/d ' || tgl_kembali as tgl"),
 			'kota_tujuan as tujuan',
 			'untuk',
+			DB::raw("case when spt_file_id is not null then true else false end as spt_file"),
 			DB::raw("'__' as nama")
 		)->get();
 
@@ -87,7 +88,7 @@ class SPTController extends Controller
 					$newPath = base_path('public/storage/template/');
 					$newFileName = time()."_".$spt->no_spt.".docx";
 					$newFile = new \stdClass();
-					$newFile->dbPath ='public/storage/spt/';
+					$newFile->dbPath ='storage/spt/';
 					$newFile->ext = '.docx';
 					$newFile->originalName = "SPT_Generated.docx";
 					$newFile->newName = time()."_".$newFile->originalName;
@@ -127,7 +128,6 @@ class SPTController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-			'bidang_id' => 'required',
       'anggaran_id' => 'required',
       'ppk_user_id' => 'required',
       'dasar_pelaksana' => 'required',
@@ -153,11 +153,11 @@ class SPTController extends Controller
 			DB::transaction(function () use ($inputs) {
 				$noMax = SPT::max('no_index') + 1 ?? 1;
 				$tahun = Carbon::now()->format('Y');
-				$noSpt = $noMax . '/01/SPPD/PDK/' . $tahun ;
+				$noSpt = '090/'. str_pad($noMax, 3, '0', STR_PAD_LEFT) . '/SPPD/PDK/' . $tahun ;
 				$spt = SPT::create([
 					'no_index' => $noMax,
 					'no_spt' => $noSpt,
-					'bidang_id' => $inputs['bidang_id'],
+					// 'bidang_id' => $inputs['bidang_id'],
 					'anggaran_id' => $inputs['anggaran_id'],
 					'ppk_user_id' => $inputs['ppk_user_id'],
 					'dasar_pelaksana' => $inputs['dasar_pelaksana'],
@@ -213,13 +213,29 @@ class SPTController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
+	public function getSPT($id)
+	{
+		$results = $this->responses;
+		$data = SPT::join('files as f', 'f.id', 'spt_file_id')
+		->where('spt.id', $id)
+		->first();
+
+		if($data != null){
+			$results['data'] = $data->file_path . $data->file_name;
+		} else {
+			array_push($results['message'], 'SPT tidak ditemukan!');
+		}
+		return response()->json($results, $results['state_code']);
+	}
+	
+
 	public function update(Request $request, $id)
 	{
 		$results = $this->responses;
 
 		$inputs = $request->all();
 		$rules = array(
-			'bidang_id' => 'required',
+			// 'bidang_id' => 'required',
       'anggaran_id' => 'required',
       'ppk_user_id' => 'required',
       'dasar_pelaksana' => 'required',
@@ -246,7 +262,7 @@ class SPTController extends Controller
 				$spt = SPT::find($id);
 				
 				$updateSpt = $spt->update([
-					'bidang_id' => $inputs['bidang_id'],
+					// 'bidang_id' => $inputs['bidang_id'],
 					'anggaran_id' => $inputs['anggaran_id'],
 					'ppk_user_id' => $inputs['ppk_user_id'],
 					'dasar_pelaksana' => $inputs['dasar_pelaksana'],

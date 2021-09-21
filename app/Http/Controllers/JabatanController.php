@@ -62,7 +62,6 @@ class JabatanController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-			'bidang_id' => 'required',
       'name' => 'required',
       'golongan' => 'required',
       'is_parent' => 'required'
@@ -76,7 +75,7 @@ class JabatanController extends Controller
     }
 		
     Jabatan::create([
-      'bidang_id' => $inputs['bidang_id'],
+      // 'bidang_id' => $inputs['bidang_id'],
       'name' => $inputs['name'],
       'golongan' => $inputs['golongan'],
       'remark' => $inputs['remark'],
@@ -98,7 +97,6 @@ class JabatanController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-			'bidang_id' => 'required',
       'name' => 'required',
       'golongan' => 'required',
       'is_parent' => 'required'
@@ -113,7 +111,7 @@ class JabatanController extends Controller
     
 		$Jabatan = Jabatan::find($id);
     $Jabatan->update([
-      'bidang_id' => $inputs['bidang_id'],
+      // 'bidang_id' => $inputs['bidang_id'],
       'name' => $inputs['name'],
       'golongan' => $inputs['golongan'],
       'remark' => $inputs['remark'],

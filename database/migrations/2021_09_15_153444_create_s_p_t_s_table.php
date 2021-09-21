@@ -16,7 +16,7 @@ class CreateSPTSTable extends Migration
         Schema::create('spt', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('spt_file_id')->nullable();
-            $table->bigInteger('bidang_id');
+            // $table->bigInteger('bidang_id')->nullable();
             $table->bigInteger('anggaran_id');
             $table->bigInteger('ppk_user_id');
             $table->integer('no_index');

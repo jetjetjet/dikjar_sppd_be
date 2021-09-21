@@ -10,7 +10,7 @@ class Jabatan extends Model
   use LogUser;
 	protected $table = 'jabatan';
 	protected $fillable = [
-		'bidang_id',
+		//'bidang_id',
     'name',
     'remark',
     'golongan',
