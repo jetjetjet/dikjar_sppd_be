@@ -7,16 +7,20 @@ use App\Models\SPT;
 use App\Models\SPTDetail;
 use App\Models\User; 
 use App\Models\Jabatan;
+use App\Helpers\Utils;
 use DB;
 use Validator;
 use Carbon\Carbon;
+
+use App\Helpers\MyPdf;
+use Illuminate\Support\Str;
 
 use Illuminate\Support\Facades\File as FaFile;
 use Illuminate\Support\Facades\Log;
 
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\TemplateProcessor;
-use App\Helpers\Utils;
+use NcJoes\OfficeConverter\OfficeConverter;
 
 class SPTController extends Controller
 {
@@ -28,7 +32,7 @@ class SPTController extends Controller
 			'no_spt',
 			'jenis_dinas',
 			DB::raw("tgl_berangkat || ' s/d ' || tgl_kembali as tgl"),
-			'kota_tujuan as tujuan',
+			DB::raw("coalesce(kota_tujuan, kec_tujuan) as tujuan"),
 			'untuk',
 			DB::raw("case when spt_file_id is not null then true else false end as spt_file"),
 			DB::raw("'__' as nama")
@@ -75,7 +79,8 @@ class SPTController extends Controller
 				->select(
 					'full_name',
 					'nip',
-					'j.name as jabatan'
+					'j.name as jabatan',
+					'golongan'
 				)->first();
 				// $jabatanKadin = Jabatan::find($kadin->jabatan_id)->first();
 	
@@ -95,23 +100,25 @@ class SPTController extends Controller
 					$template->setValue('nomor_surat', $spt->no_spt);
 					$template->setValue('nama_pejabat', $pejabat->full_name);
 					$template->setValue('nip_pejabat', $pejabat->nip);
-					$template->setValue('jabatan_pejabat', $pejabat->jabatan);
+					$template->setValue('jabatan_pejabat', strtoupper($pejabat->jabatan));
+					$template->setValue('golongan_pejabat', $pejabat->golongan);
 		
 					$template->cloneRowAndSetValues('index_no', $userValue);
-		
-					// $newPath = base_path('public/storage/template/');
-					// $newFileName = time()."_".$spt->no_spt.".docx";
 					
 					$newFile = new \stdClass();
 					$newFile->dbPath ='storage/spt/';
-					$newFile->ext = '.docx';
-					$newFile->originalName = "SPT_Generated.docx";
+					$newFile->ext = '.pdf';
+					$newFile->originalName = "SPT_Generated";
 					$newFile->newName = time()."_".$newFile->originalName;
 
-					$template->saveAs(base_path('public/' . $newFile->dbPath . $newFile->newName));
+					$template->saveAs(base_path('public/' . $newFile->dbPath . $newFile->newName . ".docx"));
+					//Convert kwe PDF
+					$docPath = base_path('public/' . $newFile->dbPath . $newFile->newName . ".docx");
+          $converter = new OfficeConverter($docPath);
+          //generates pdf file in same directory as test-file.docx
+          $converter->convertTo($newFile->newName.".pdf");
 
 					$file = Utils::saveFile($newFile);
-
 					// update
 					$spt->update([
 						'spt_file_id' => $file,

@@ -80,6 +80,7 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 
 	Route::get('/user-grid', [UserController::class, 'grid']);
 	Route::get('/user-search', [UserController::class, 'search']);
+	Route::get('/user-sptsearch', [UserController::class, 'sptSearch']);
 	Route::get('/user/{id}', [UserController::class, 'show']);
 	Route::post('/user', [UserController::class, 'store']);
 	Route::put('/user/{id}', [UserController::class, 'update']);
@@ -104,6 +105,8 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	//SPPD
 	Route::get('/spt/{id}/sppd-grid', [SPPDController::class, 'grid']);
 	Route::get('/spt/{id}/sppd/{sptDetailId}/{userId}', [SPPDController::class, 'show']);
+	Route::get('/spt/lihat-sppd/{sptDetailId}/{userId}', [SPPDController::class, 'getSPPD']);
+	Route::post('/spt/{id}/cetak-sppd/{sptDetailId}/{userId}', [SPPDController::class, 'cetakSPPD']);
 
 	Route::post('/biaya', [BiayaController::class, 'store']);
 	Route::put('/biaya/{id}', [BiayaController::class, 'update']);

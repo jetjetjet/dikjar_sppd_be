@@ -17,11 +17,13 @@ class CreateSPTDetailsTable extends Migration
             $table->id();
             $table->bigInteger('spt_id');
             $table->bigInteger('user_id');
+            $table->bigInteger('sppd_file_id')->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->bigInteger('created_by');
             $table->bigInteger('updated_by')->nullable();
             $table->bigInteger('deleted_by')->nullable();
+            $table->timestamp('finished_at')->nullable();
         });
     }
 

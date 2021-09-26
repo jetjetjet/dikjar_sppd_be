@@ -13,8 +13,10 @@ class SPTDetail extends Model
 	protected $fillable = [
 		'spt_id',
 		'user_id',
+		'sppd_file_id',
 		'created_by',
 		'updated_by',
-		'deleted_by'
+		'deleted_by',
+		'finished_at'
 	];
 }

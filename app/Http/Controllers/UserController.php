@@ -38,6 +38,19 @@ class UserController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
+	public function sptSearch(Request $request)
+	{
+		$results = $this->responses;
+		
+		$results['data'] = User::select('id as code', 'full_name as label')
+		->whereRaw("id not in ( select user_id from spt_detail where deleted_at is null and finished_at is null)")
+		->get();
+		$results['state_code'] = 200;
+		$results['success'] = true;
+		
+		return response()->json($results, $results['state_code']);
+	}
+
 	/**
 	 * Store a newly created resource in storage.
 	 *

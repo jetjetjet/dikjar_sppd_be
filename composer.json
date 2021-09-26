@@ -14,7 +14,10 @@
         "laravel/tinker": "^2.5",
         "maatwebsite/excel": "^3.1",
         "phpoffice/phpword": "^0.18.2",
-        "spatie/laravel-permission": "^4.4"
+        "spatie/laravel-permission": "^4.4",
+        "ncjoes/office-converter": "^1.0",
+        "setasign/fpdi": "^2.3",
+        "setasign/tfpdf": "1.31.*"
     },
     "require-dev": {
         "facade/ignition": "^2.5",
