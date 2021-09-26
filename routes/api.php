@@ -12,6 +12,9 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WilayahController;
 
+use App\Http\Controllers\BiayaController;
+use App\Http\Controllers\InapController;
+use App\Http\Controllers\TransportController;
 use App\Http\Controllers\SPTController;
 use App\Http\Controllers\SPPDController;
 
@@ -25,6 +28,7 @@ use App\Http\Controllers\SPPDController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Route::get('/tgl', [SPTController::class, 'tgl']);
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
 
@@ -99,5 +103,22 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 
 	//SPPD
 	Route::get('/spt/{id}/sppd-grid', [SPPDController::class, 'grid']);
-	Route::get('/spt/{id}/sppd/{userId}', [SPPDController::class, 'show']);
+	Route::get('/spt/{id}/sppd/{sptDetailId}/{userId}', [SPPDController::class, 'show']);
+
+	Route::post('/biaya', [BiayaController::class, 'store']);
+	Route::put('/biaya/{id}', [BiayaController::class, 'update']);
+
+	Route::get('/inap/{biayaId}/{userId}', [InapController::class, 'grid']);
+	Route::post('/inap', [InapController::class, 'store']);
+	Route::put('/inap/{id}', [InapController::class, 'update']);
+	Route::put('/inap/{id}/checkout', [InapController::class, 'checkout']);
+	Route::put('/inap/{id}/upload-file', [InapController::class, 'uploadFile']);
+	Route::delete('/inap/{id}/{biayaId}/{userId}', [InapController::class, 'destroy']);
+	
+	Route::get('/transport/{biayaId}/{userId}', [TransportController::class, 'grid']);
+	Route::post('/transport', [TransportController::class, 'store']);
+	Route::put('/transport/{id}', [TransportController::class, 'update']);
+	Route::put('/transport/{id}/upload-file', [TransportController::class, 'uploadFile']);
+	Route::delete('/transport/{id}/{biayaId}/{userId}', [TransportController::class, 'destroy']);
+	
 });

@@ -3,18 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\LogUser;
 
 class SPT extends Model
 {
-	use LogUser;
+	use LogUser, SoftDeletes;
 	protected $table = 'spt';
 	protected $fillable = [
 		'no_index',
 		'spt_file_id',
+		'jenis_dinas',
 		// 'bidang_id',
 		'anggaran_id',
-		'ppk_user_id',
+		'pttd_user_id',
 		'no_spt',
 		'dasar_pelaksana',
 		'untuk',

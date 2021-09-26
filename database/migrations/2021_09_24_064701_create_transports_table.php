@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTransPesawatsTable extends Migration
+class CreateTransportsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,19 @@ class CreateTransPesawatsTable extends Migration
      */
     public function up()
     {
-        Schema::create('trans_pesawat', function (Blueprint $table) {
+        Schema::create('transport', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('spt_id');
-            $table->string('type');
-            $table->string('maskapai');
+            $table->bigInteger('biaya_id');
+            $table->bigInteger('user_id');
+            $table->string('jenis_transport');
+            $table->string('perjalanan');
+            $table->string('agen');
             $table->string('no_tiket');
             $table->string('kode_booking')->nullable();
             $table->string('no_penerbangan')->nullable();
+            $table->bigInteger('file_id')->nullable();
             $table->date('tgl');
-            $table->decimal('jml_bayar',16,2);
+            $table->decimal('jml_bayar',16,0);
 
             $table->timestamps();
             $table->softDeletes();
@@ -39,6 +42,6 @@ class CreateTransPesawatsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('trans_pesawat');
+        Schema::dropIfExists('transport');
     }
 }

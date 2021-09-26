@@ -34,22 +34,10 @@ class WilayahController extends Controller
 	{
 		$results = $this->responses;
 		$inputs = $request->all();
-		$rules = array(
-			'provinsi_id' => 'required'
-		);
-
-		$validator = Validator::make($inputs, $rules);
-		// Validation fails?
-		if ($validator->fails()){
-      $results['messages'] = Array($validator->messages()->first());
-      return response()->json($results, $results['state_code']);
-    }
 
 		$cari = $request['q'] ?? '';
-		$provinsi_id = $inputs['provinsi_id'];
 
-		$results['data'] = Kabupaten::where('provinsi_id', $provinsi_id)
-		->whereRaw('UPPER(name) LIKE UPPER(\'%'. $cari .'%\')')
+		$results['data'] = Kabupaten::whereRaw('UPPER(name) LIKE UPPER(\'%'. $cari .'%\')')
 		->select('id', 'name')
 		->orderBy('name')
 		->limit(10)
@@ -65,19 +53,9 @@ class WilayahController extends Controller
 	{
 		$results = $this->responses;
 		$inputs = $request->all();
-		$rules = array(
-			'kota_id' => 'required'
-		);
-
-		$validator = Validator::make($inputs, $rules);
-		// Validation fails?
-		if ($validator->fails()){
-      $results['messages'] = Array($validator->messages()->first());
-      return response()->json($results, $results['state_code']);
-    }
 
 		$cari = $request['q'] ?? '';
-		$kota_id = $inputs['kota_id'];
+		$kota_id = 1501; // ID Kabupaten Kerinci
 
 		$results['data'] = Kecamatan::where('kabupaten_id', $kota_id)
 		->whereRaw('UPPER(name) LIKE UPPER(\'%'. $cari .'%\')')

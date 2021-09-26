@@ -17,7 +17,7 @@ class CreateAnggaransTable extends Migration
             $table->id();
             $table->string('mak');
             $table->string('uraian');
-            $table->decimal('pagu', 18, 2);
+            $table->decimal('pagu', 18, 0);
             $table->integer('periode');
             $table->timestamps();
             $table->bigInteger('created_by');

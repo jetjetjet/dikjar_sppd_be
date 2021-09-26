@@ -12,6 +12,7 @@ use Validator;
 use Carbon\Carbon;
 
 use Illuminate\Support\Facades\File as FaFile;
+use Illuminate\Support\Facades\Log;
 
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\TemplateProcessor;
@@ -25,6 +26,7 @@ class SPTController extends Controller
 		$results['data'] = SPT::select(
 			'id',
 			'no_spt',
+			'jenis_dinas',
 			DB::raw("tgl_berangkat || ' s/d ' || tgl_kembali as tgl"),
 			'kota_tujuan as tujuan',
 			'untuk',
@@ -68,36 +70,49 @@ class SPTController extends Controller
 					array_push($userValue, $temp);
 				}
 	
-				$kadin = User::role('KADIN')->first();
+				$pejabat = User::join('jabatan as j', 'j.id', 'jabatan_id')
+				->where('users.id', $spt->pttd_user_id)
+				->select(
+					'full_name',
+					'nip',
+					'j.name as jabatan'
+				)->first();
 				// $jabatanKadin = Jabatan::find($kadin->jabatan_id)->first();
 	
 				try{
+					
+					$brgkt = new Carbon($spt->tgl_berangkat);
+					$kembali = new Carbon($spt->tgl_kembali);
+					$tglSpt = Carbon::now()->isoFormat('D MMMM Y');
+
 					$template = new TemplateProcessor($templatePath);
 	
 					$template->setValue('dasar_pelaksana', $spt->dasar_pelaksana);
 					$template->setValue('untuk', $spt->untuk);
-					$template->setValue('tgl_berangkat', $spt->tgl_berangkat);
-					$template->setValue('tgl_kembali', $spt->tgl_kembali);
+					$template->setValue('tgl_berangkat', $brgkt->isoFormat('D MMMM Y'));
+					$template->setValue('tgl_kembali', $kembali->isoFormat('D MMMM Y'));
+					$template->setValue('tgl_cetak', $tglSpt);
 					$template->setValue('nomor_surat', $spt->no_spt);
-					$template->setValue('nama_kadin', $kadin->full_name);
-					$template->setValue('nip_kadin', $kadin->nip);
-					// $template->setValue('jabatan_kadin', $jabatanKadin->name);
+					$template->setValue('nama_pejabat', $pejabat->full_name);
+					$template->setValue('nip_pejabat', $pejabat->nip);
+					$template->setValue('jabatan_pejabat', $pejabat->jabatan);
 		
 					$template->cloneRowAndSetValues('index_no', $userValue);
 		
-					$newPath = base_path('public/storage/template/');
-					$newFileName = time()."_".$spt->no_spt.".docx";
+					// $newPath = base_path('public/storage/template/');
+					// $newFileName = time()."_".$spt->no_spt.".docx";
+					
 					$newFile = new \stdClass();
 					$newFile->dbPath ='storage/spt/';
 					$newFile->ext = '.docx';
 					$newFile->originalName = "SPT_Generated.docx";
 					$newFile->newName = time()."_".$newFile->originalName;
 
-					$template->saveAs(base_path($newFile->dbPath . $newFile->newName));
+					$template->saveAs(base_path('public/' . $newFile->dbPath . $newFile->newName));
 
 					$file = Utils::saveFile($newFile);
 
-					//update
+					// update
 					$spt->update([
 						'spt_file_id' => $file,
 						'spt_generated_at' => date('Y-m-d H:i:s'),
@@ -108,8 +123,9 @@ class SPTController extends Controller
 					array_push($results['messages'], 'Berhasil membuat SPT.');
 					$results['success'] = true;
 					$results['state_code'] = 200;
-				} catch (\Exception $e){
-					array_push($results['messages'], $e->getMessage());
+				} catch (\Exception $e) {
+					Log::channel('spderr')->info('spt_cetak_err: '. json_encode($e->getMessage()));
+					array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
 				}
 	
 			} else {
@@ -129,15 +145,15 @@ class SPTController extends Controller
 		$inputs = $request->all();
 		$rules = array(
       'anggaran_id' => 'required',
-      'ppk_user_id' => 'required',
+			'jenis_dinas'=> 'required', 
+      'pttd_user_id' => 'required',
       'dasar_pelaksana' => 'required',
       'untuk' => 'required',
       'transportasi' => 'required',
-      'ppk_user_id' => 'required',
-      'provinsi_asal' => 'required',
-      'kota_asal' => 'required',
-      'provinsi_tujuan' => 'required',
-      'kota_tujuan' => 'required',
+      // 'provinsi_asal' => 'required',
+      // 'kota_asal' => 'required',
+      // 'provinsi_tujuan' => 'required',
+      // 'kota_tujuan' => 'required',
       'tgl_berangkat' => 'required',
       'tgl_kembali' => 'required'
 		);
@@ -158,12 +174,12 @@ class SPTController extends Controller
 					'no_index' => $noMax,
 					'no_spt' => $noSpt,
 					// 'bidang_id' => $inputs['bidang_id'],
+					'jenis_dinas' => $inputs['jenis_dinas'],
 					'anggaran_id' => $inputs['anggaran_id'],
-					'ppk_user_id' => $inputs['ppk_user_id'],
+					'pttd_user_id' => $inputs['pttd_user_id'],
 					'dasar_pelaksana' => $inputs['dasar_pelaksana'],
 					'untuk' => $inputs['untuk'],
 					'transportasi' => $inputs['transportasi'],
-					'ppk_user_id' => $inputs['ppk_user_id'],
 					'provinsi_asal' => $inputs['provinsi_asal'],
 					'kota_asal' => $inputs['kota_asal'],
 					'kec_asal' => $inputs['kec_asal'],
@@ -187,8 +203,9 @@ class SPTController extends Controller
 			array_push($results['messages'], 'Berhasil menambahkan SPT baru.');
 			$results['success'] = true;
 			$results['state_code'] = 200;
-		} catch(\Exception $e){
-			array_push($results['messages'], $e->getMessage());
+		} catch(\Exception $e) {
+			Log::channel('spderr')->info('spt_save_err: '. json_encode($e->getMessage()));
+			array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
 		}
 
 		return response()->json($results, $results['state_code']);
@@ -236,16 +253,17 @@ class SPTController extends Controller
 		$inputs = $request->all();
 		$rules = array(
 			// 'bidang_id' => 'required',
+			'jenis_dinas' => 'required',
       'anggaran_id' => 'required',
-      'ppk_user_id' => 'required',
+      'pttd_user_id' => 'required',
       'dasar_pelaksana' => 'required',
       'untuk' => 'required',
       'transportasi' => 'required',
-      'ppk_user_id' => 'required',
-      'provinsi_asal' => 'required',
-      'kota_asal' => 'required',
-      'provinsi_tujuan' => 'required',
-      'kota_tujuan' => 'required',
+      'pttd_user_id' => 'required',
+      // 'provinsi_asal' => 'required',
+      // 'kota_asal' => 'required',
+      // 'provinsi_tujuan' => 'required',
+      // 'kota_tujuan' => 'required',
       'tgl_berangkat' => 'required',
       'tgl_kembali' => 'required'
 		);
@@ -263,12 +281,12 @@ class SPTController extends Controller
 				
 				$updateSpt = $spt->update([
 					// 'bidang_id' => $inputs['bidang_id'],
+					'jenis_dinas' => $inputs['jenis_dinas'],
 					'anggaran_id' => $inputs['anggaran_id'],
-					'ppk_user_id' => $inputs['ppk_user_id'],
+					'pttd_user_id' => $inputs['pttd_user_id'],
 					'dasar_pelaksana' => $inputs['dasar_pelaksana'],
 					'untuk' => $inputs['untuk'],
 					'transportasi' => $inputs['transportasi'],
-					'ppk_user_id' => $inputs['ppk_user_id'],
 					'provinsi_asal' => $inputs['provinsi_asal'],
 					'kota_asal' => $inputs['kota_asal'],
 					'kec_asal' => $inputs['kec_asal'],
@@ -300,25 +318,12 @@ class SPTController extends Controller
 			$results['success'] = true;
 			$results['state_code'] = 200;
 		} catch(\Exception $e){
-			array_push($results['messages'], $e->getMessage());
+			Log::channel('spderr')->info('spt_update_err: '. json_encode($e->getMessage()));
+			array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
 		}
 
 		return response()->json($results, $results['state_code']);
 	}
-
-	private function removeMissingDetails(&$respon, $id, $details)
-  {
-    $ids = Array();
-    foreach($details as $dt){
-      array_push($ids,$dt->id != null ? $dt->id :0);
-    }
-
-		$data = SPTDetail::where('spt_id', $id)
-		->whereNotIn('id', $ids)
-		->delete();
-
-    return $respon;
-  }
   
 	public function destroy($id)
 	{
@@ -335,7 +340,8 @@ class SPTController extends Controller
 				$results['state_code'] = 200;
 				$results['success'] = true;
 			} catch(\Exception $e){
-				array_push($results['messages'], $e->getMessage());
+				Log::channel('spderr')->info('spt_delete_err: '. json_encode($e->getMessage()));
+				array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
 			}
 		} else {
 			array_push($results['messages'], 'SPT tidak dapat dihapus!');

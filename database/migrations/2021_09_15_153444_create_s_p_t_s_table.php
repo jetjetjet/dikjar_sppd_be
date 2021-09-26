@@ -15,22 +15,23 @@ class CreateSPTSTable extends Migration
     {
         Schema::create('spt', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('spt_file_id')->nullable();
+            $table->bigInteger('spt_file_id')->nullable()->unsigned();
             // $table->bigInteger('bidang_id')->nullable();
+            $table->integer('periode');
+            $table->string('jenis_dinas');
             $table->bigInteger('anggaran_id');
-            $table->bigInteger('ppk_user_id');
+            $table->bigInteger('pttd_user_id');
             $table->integer('no_index');
             $table->string('no_spt');
             $table->string('dasar_pelaksana');
             $table->string('untuk');
             $table->string('status');
             $table->string('transportasi');
-            $table->string('periode', 4);
-            $table->string('provinsi_asal');
-            $table->string('kota_asal');
+            $table->string('provinsi_asal')->nullable();
+            $table->string('kota_asal')->nullable();
             $table->string('kec_asal')->nullable();
-            $table->string('provinsi_tujuan');
-            $table->string('kota_tujuan');
+            $table->string('provinsi_tujuan')->nullable();
+            $table->string('kota_tujuan')->nullable();
             $table->string('kec_tujuan')->nullable();
             $table->date('tgl_berangkat');
             $table->date('tgl_kembali');

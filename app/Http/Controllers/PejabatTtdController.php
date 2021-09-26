@@ -35,7 +35,7 @@ class PejabatTtdController extends Controller
 			$results['data'] = PejabatTtd::join('users', 'users.id', 'user_id')
 			->where('is_active', '1')
 			->where('autorisasi_code', $request->filter)
-			->select('pejabat_ttd.id as id', 'full_name as label')->get();
+			->select('users.id as id', 'full_name as label')->get();
 
 			$results['state_code'] = 200;
 			$results['success'] = true;

@@ -18,7 +18,7 @@ class CreateUsersTable extends Migration
             $table->foreignId('jabatan_id')->nullable();
             $table->string('nip',20);
             // $table->string('username',50);
-            $table->string('email');
+            $table->string('email')->nullable();
             $table->string('full_name', 100)->nullable();
             $table->string('path_foto')->nullable();
             $table->string('password', 100);

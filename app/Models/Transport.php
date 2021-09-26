@@ -6,13 +6,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\LogUser;
 
-class SPTDetail extends Model
+class Transport extends Model
 {
 	use LogUser, SoftDeletes;
-	protected $table = 'spt_detail';
+	protected $table = 'transport';
 	protected $fillable = [
-		'spt_id',
+		'biaya_id',
 		'user_id',
+		'jenis_transport',
+		'perjalanan',
+		'agen',
+		'no_tiket',
+		'kode_booking',
+		'no_penerbangan',
+		'file_id',
+		'tgl',
+		'jml_bayar',
 		'created_by',
 		'updated_by',
 		'deleted_by'
