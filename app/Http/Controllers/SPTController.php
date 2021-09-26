@@ -111,7 +111,7 @@ class SPTController extends Controller
 					$newFile->originalName = "SPT_Generated";
 					$newFile->newName = time()."_".$newFile->originalName;
 
-					$template->saveAs(base_path('public/' . $newFile->dbPath . $newFile->newName . ".docx"));
+					$template->saveAs(base_path('public/' . $newFile->dbPath . $newFile->newName . ".docx"), TRUE);
 					//Convert kwe PDF
 					$docPath = base_path('public/' . $newFile->dbPath . $newFile->newName . ".docx");
           $converter = new OfficeConverter($docPath);
