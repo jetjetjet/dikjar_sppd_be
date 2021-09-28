@@ -121,14 +121,15 @@ class SPPDController extends Controller
 					$template->setValue('no_spt', $spt->no_spt);
 					
 					$newFile = new \stdClass();
-					$newFile->dbPath ='storage/spt/';
+					$newFile->dbPath ='/storage/spt/';
 					$newFile->ext = '.pdf';
 					$newFile->originalName = "SPPD_Generated";
 					$newFile->newName = time()."_".$newFile->originalName;
 
-					$template->saveAs(base_path('public/' . $newFile->dbPath . $newFile->newName . ".docx"), TRUE);
+					$path = base_path('/public');
+					$template->saveAs($path . $newFile->dbPath . $newFile->newName . ".docx", TRUE);
 					//Convert kwe PDF
-					$docPath = base_path('public/' . $newFile->dbPath . $newFile->newName . ".docx");
+					$docPath = $path . $newFile->dbPath . $newFile->newName . ".docx";
           $converter = new OfficeConverter($docPath);
           //generates pdf file in same directory as test-file.docx
           $converter->convertTo($newFile->newName.".pdf");
