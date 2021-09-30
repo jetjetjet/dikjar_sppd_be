@@ -27,7 +27,16 @@ class SPTController extends Controller
   public function grid(Request $request)
 	{
 		$results = $this->responses;
-		$results['data'] = SPT::select(
+		$users = SPTDetail::join('users as u', 'u.id', 'spt_detail.user_id')
+		->groupBy('spt_detail.spt_id')
+		->select(
+			'spt_id',
+			DB::raw("string_agg(u.full_name, '_') as name")
+		);
+
+		$results['data'] = SPT::joinSub($users, 'u', function ($join) {
+			$join->on('spt.id', '=', 'u.spt_id');
+		})->select(
 			'id',
 			'no_spt',
 			'jenis_dinas',
@@ -35,7 +44,9 @@ class SPTController extends Controller
 			DB::raw("coalesce(kota_tujuan, kec_tujuan) as tujuan"),
 			'untuk',
 			DB::raw("case when spt_file_id is not null then true else false end as spt_file"),
-			DB::raw("'__' as nama")
+			DB::raw("'__' as nama"),
+			'finished_at',
+			'u.name'
 		)->get();
 
 		$results['state_code'] = 200;
@@ -125,8 +136,8 @@ class SPTController extends Controller
 					// update
 					$spt->update([
 						'spt_file_id' => $file,
-						'spt_generated_at' => date('Y-m-d H:i:s'),
-						'spt_generated_by' => 1,
+						'spt_generated_at' => DB::raw("now()"),
+						'spt_generated_by' => auth('sanctum')->user()->id,
 						'status' => 'SPTGENERATED'
 					]);
 					
@@ -218,6 +229,29 @@ class SPTController extends Controller
 			array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
 		}
 
+		return response()->json($results, $results['state_code']);
+	}
+
+	public function finish($id)
+	{
+		$results = $this->responses;
+		$spt = SPT::where('id', $id)->whereNull('spt_generated_at');
+		$sppd = SPTDetail::where('spt_id', $id)->whereNull('sppd_generated_at');
+
+		if($spt->count() < 1 && $sppd->count() < 1) {
+			$finish = array(
+				'finished_at' => DB::raw("now()"),
+				'finished_by' => auth('sanctum')->user()->id
+			);
+			SPT::where('id', $id)->first()->update($finish);
+			SPTDetail::where('spt_id', $id)->update($finish);
+
+			array_push($results['messages'], 'Perjalanan Dinas berhasil diselesaikan.');
+			$results['state_code'] = 200;
+			$results['success'] = true;
+		} else {
+			array_push($results['messages'], 'SPT tidak dapat diselesaikan! SPT/SPPD belum dibuat.');
+		}
 		return response()->json($results, $results['state_code']);
 	}
 

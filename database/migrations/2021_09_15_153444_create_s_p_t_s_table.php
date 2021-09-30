@@ -42,6 +42,8 @@ class CreateSPTSTable extends Migration
             $table->bigInteger('deleted_by')->nullable();
             $table->dateTime('spt_generated_at')->nullable();
             $table->bigInteger('spt_generated_by')->nullable();
+            $table->dateTime('finished_at')->nullable();
+            $table->bigInteger('finished_by')->nullable();
         });
     }
 

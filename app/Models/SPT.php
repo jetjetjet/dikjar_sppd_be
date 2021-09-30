@@ -36,6 +36,8 @@ class SPT extends Model
 		'deleted_at',
 		'deleted_by',
 		'spt_generated_at',
-		'spt_generated_by'
+		'spt_generated_by',
+		'finished_at',
+		'finished_by'
 	];
 }

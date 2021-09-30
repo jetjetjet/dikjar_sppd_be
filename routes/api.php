@@ -99,6 +99,7 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::get('/spt/{id}/lihat-spt', [SPTController::class, 'getSPT']);
 	Route::post('/spt', [SPTController::class, 'store']);
 	Route::post('/spt/{id}/cetak-spt', [SPTController::class, 'cetakSPT']);
+	Route::post('/spt/{id}/selesai', [SPTController::class, 'finish']);
 	Route::put('/spt/{id}', [SPTController::class, 'update']);
 	Route::delete('/spt/{id}', [SPTController::class, 'destroy']);
 

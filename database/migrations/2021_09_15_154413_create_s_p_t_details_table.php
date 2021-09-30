@@ -23,7 +23,10 @@ class CreateSPTDetailsTable extends Migration
             $table->bigInteger('created_by');
             $table->bigInteger('updated_by')->nullable();
             $table->bigInteger('deleted_by')->nullable();
+            $table->timestamp('sppd_generated_at')->nullable();
+            $table->bigInteger('sppd_generated_by')->nullable();
             $table->timestamp('finished_at')->nullable();
+            $table->bigInteger('finished_by')->nullable();
         });
     }
 

@@ -17,6 +17,9 @@ class SPTDetail extends Model
 		'created_by',
 		'updated_by',
 		'deleted_by',
-		'finished_at'
+		'sppd_generated_at',
+		'sppd_generated_by',
+		'finished_at',
+		'finished_by'
 	];
 }

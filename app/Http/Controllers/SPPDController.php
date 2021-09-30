@@ -34,19 +34,27 @@ class SPPDController extends Controller
 			DB::raw("to_char(tgl_kembali, 'DD-MM-YYYY') as tgl_kembali"),
 			DB::raw("coalesce(kota_tujuan, kec_tujuan) as kota_tujuan"),
 			DB::raw("coalesce(kota_asal, kec_asal) as kota_asal"),
-			'transportasi'
+			'transportasi',
+			'finished_at'
 		)->first();
 		
 		$child = [];
 		if ($header != null){
+			$biaya = DB::table('biaya')->whereNull('deleted_at')
+			->select('user_id', 'spt_id', 'jml_biaya');
+
 			$child = SPTDetail::join('users as u', 'u.id', 'spt_detail.user_id')
-			->where('spt_id', $id)
+			->leftJoinSub($biaya, 'biaya', function ($join) {
+					$join->on('spt_detail.spt_id', 'biaya.spt_id')
+					->on('spt_detail.user_id', 'biaya.user_id');
+			})->where('spt_detail.spt_id', $id)
 			->select(
 				'spt_detail.id',
 				'sppd_file_id',
 				'u.id as user_id',
 				'full_name',
-				'nip'
+				'nip',
+				'jml_biaya'
 			)->get();
 		}
 
@@ -140,7 +148,9 @@ class SPPDController extends Controller
 					SPTDetail::where('id', $sptDetailId)
 					->where('user_id', $userId)
 					->update([
-						'sppd_file_id' => $file
+						'sppd_file_id' => $file,
+						'sppd_generated_at' => DB::raw("now()"),
+						'sppd_generated_by' => auth('sanctum')->user()->id,
 					]);
 					
 					array_push($results['messages'], 'Berhasil membuat SPPD.');
@@ -174,7 +184,8 @@ class SPPDController extends Controller
 			DB::raw("to_char(tgl_kembali, 'DD-MM-YYYY') as tglk_text"),
 			DB::raw("coalesce(kota_tujuan, kec_tujuan) as kota_tujuan"),
 			DB::raw("coalesce(kota_asal, kec_asal) as kota_asal"),
-			'transportasi'
+			'transportasi',
+			'finished_at'
 		)->first();
 
 		$child = null;

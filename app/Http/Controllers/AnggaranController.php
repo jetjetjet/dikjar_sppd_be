@@ -14,7 +14,27 @@ class AnggaranController extends Controller
 	public function grid(Request $request)
 	{
 		$results = $this->responses;
-		$results['data'] = Anggaran::where('periode', '2021')->get();
+		$realisasi = DB::table('spt as s')
+		->join('biaya as b', 'b.spt_id', 's.id')
+		->whereNull('b.deleted_at')
+		->whereNull('s.deleted_at')
+		->whereNotNull('s.finished_at')
+		->groupBy('s.anggaran_id')
+		->select('s.anggaran_id', DB::raw("sum(b.jml_biaya) as realisasi"));
+
+		$results['data'] = Anggaran::where('periode', date('Y'))
+		->leftJoinSub($realisasi, 'r', function ($join) {
+			$join->on('anggaran.id', '=', 'r.anggaran_id');
+		})->select(
+			'anggaran.id',
+			'mak',
+			'uraian',
+			DB::raw("to_char(pagu, 'FM999,999,999,999') as pagu"),
+			DB::raw("to_char(coalesce(realisasi,0), 'FM999,999,999,999') as realisasi"),
+			DB::raw("to_char(pagu - coalesce(realisasi,0), 'FM999,999,999,999') as sisa"),
+			'periode'
+		)->get();
+		
 		$results['state_code'] = 200;
 		$results['success'] = true;
 
@@ -26,7 +46,7 @@ class AnggaranController extends Controller
 		$results = $this->responses;
 		// if($request->has('filter')){
 		// }
-		$datas = Anggaran::where('periode', '2021')->get();
+		$datas = Anggaran::where('periode', date('Y'))->get();
 		foreach($datas as $dt){
 			$ui = Array(
 				'id' => $dt->id,
@@ -66,7 +86,7 @@ class AnggaranController extends Controller
       'mak' => $inputs['mak'],
       'uraian' => $inputs['uraian'],
       'pagu' => $inputs['pagu'],
-      'periode' => '2021'
+      'periode' => date('Y')
     ]);
 
     array_push($results['messages'], 'Berhasil menambahkan Anggaran baru.');
@@ -124,6 +144,11 @@ class AnggaranController extends Controller
 		$results = $this->responses;
 
     //Validasi
+		$sptCount = DB::table('spt')->whereNull('deleted_at')->where('anggaran_id', $id)->whereNotNull('finished_at')->count();
+		if($sptCount > 0) {
+			array_push($results['messages'], 'Tidak dapat menghapus anggaran yang sedang berjalan!');
+			return response()->json($results, $results['state_code']);
+		}
 
 		$role = Anggaran::destroy($id);
 
