@@ -107,7 +107,7 @@ class RoleSeeder extends Seeder
 			[
 				'name'       => 'laporan',
 				'guard_name' => 'sanctum',
-				'action'     => ['view', 'export'],
+				'action'     => ['view', 'anggaran', 'pegawai', 'tahunan', 'export'],
 			]
 		];
 
