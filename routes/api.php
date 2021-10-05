@@ -33,6 +33,7 @@ use App\Http\Controllers\ReportController;
 Route::get('/tgl', [SPTController::class, 'tgl']);
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
+Route::get('/report/spt/selesai/export', [ReportController::class, 'exportFinishedSPT']);
 
 Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -130,6 +131,5 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 
 	Route::get('/report/spt/selesai', [ReportController::class, 'reportByFinishedSPT']);
 	Route::post('/report/spt/pegawai', [ReportController::class, 'reportByPegawai']);
-	Route::get('/report/spt/selesai/export', [ReportController::class, 'exportFinishedSPT']);
 	
 });
