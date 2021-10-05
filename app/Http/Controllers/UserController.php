@@ -31,7 +31,15 @@ class UserController extends Controller
 	{
 		$results = $this->responses;
 		
-		$results['data'] = User::select('id as code', 'full_name as label')->get();
+		$q = User::select('users.id as code', 'full_name as label');
+		if($request->filter){
+			if($request->filter == 'parent'){
+				$q = $q->join('jabatan as j', 'j.id', 'users.jabatan_id')
+				->where('j.is_parent', '1');
+			}
+		}
+
+		$results['data'] = $q->get();
 		$results['state_code'] = 200;
 		$results['success'] = true;
 		
@@ -42,7 +50,7 @@ class UserController extends Controller
 	{
 		$results = $this->responses;
 		
-		$results['data'] = User::select('id as code', 'full_name as label')
+		$results['data'] = User::exclApp()->select('id as code', 'full_name as label')
 		->whereRaw("id not in ( select user_id from spt_detail where deleted_at is null and finished_at is null)")
 		->get();
 		$results['state_code'] = 200;
@@ -147,7 +155,7 @@ class UserController extends Controller
 			'email' => 'required',
 			'full_name' => 'required',
 			'jenis_kelamin' => 'required',
-			'role' => 'required'
+			// 'role' => 'required'
 		);
 
 		$validator = Validator::make($request->all(), $rules);
@@ -158,7 +166,8 @@ class UserController extends Controller
     }
 		
 		$user = User::find($id);
-		$user->syncRoles([$inputs['role']]);
+		$role = $inputs['role'] ?? null;
+		$user->syncRoles([]);
 		$user->update([
 			'nip' => $inputs['nip'],
 			'full_name' => $inputs['full_name'],

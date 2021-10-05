@@ -34,6 +34,7 @@ class AuthController extends Controller
 		
     $user = Auth::user();
 		$perm = $user->getAllPermissions()->pluck('name')->toArray();
+		$cek = $user->hasRole('SUPER ADMIN') ? array_push($perm, 'is_admin') : false ;
 		$token = $user->createToken($request->nip, $perm);
 
 		$data = Array( "token" => $token->plainTextToken,

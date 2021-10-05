@@ -25,11 +25,36 @@ class UserSeeder extends Seeder
 
 		//Jabatan
 		Jabatan::truncate();
+		$bupati = Jabatan::create([
+			'name' => 'Bupati Kerinci',
+			'golongan' => '-',
+			'is_parent' => '1',
+			'parent_id' => null,
+			'created_at' => now()->toDateTimeString(),
+			'created_by' => '1'
+		]);
+		$wabup = Jabatan::create([
+			'name' => 'Wakil Bupati Kerinci',
+			'golongan' => '-',
+			'is_parent' => '1',
+			'parent_id' => $bupati->id,
+			'created_at' => now()->toDateTimeString(),
+			'created_by' => '1'
+		]);
+		$sekda = Jabatan::create([
+			'name' => 'Sekretaris Daerah Kabupaten Kerinci',
+			'golongan' => '-',
+			'is_parent' => '1',
+			'parent_id' => $bupati->id,
+			'created_at' => now()->toDateTimeString(),
+			'created_by' => '1'
+		]);
+
 		$kadin = Jabatan::create([
 			'name' => 'Kepala Dinas',
 			'golongan' => 'Pembina Tk. I',
 			'is_parent' => '1',
-			'parent_id' => null,
+			'parent_id' => $bupati->id,
 			'created_at' => now()->toDateTimeString(),
 			'created_by' => '1'
 		]);
@@ -223,6 +248,42 @@ class UserSeeder extends Seeder
 			'jenis_kelamin' => 'Laki-laki',
 			'password' => bcrypt('admin'),
 			'email' => 'admin@disdikkerinci.id',
+			'created_at' => now()->toDateTimeString(),
+			'created_by' => 1
+		]);
+
+		User::create([
+			'jabatan_id' => $bupati->id,
+			'nip' => '00000000',
+			'excludeapp' => '1',
+			'full_name' => 'Dr. H. Adirozal M.Si.',
+			'jenis_kelamin' => 'Laki-laki',
+			'password' => bcrypt('admin'),
+			'email' => 'dummy@disdikkerinci.id',
+			'created_at' => now()->toDateTimeString(),
+			'created_by' => 1
+		]);
+
+		User::create([
+			'jabatan_id' => $wabup->id,
+			'nip' => '00000001',
+			'excludeapp' => '1',
+			'full_name' => 'Ir. H. Ami Taher',
+			'jenis_kelamin' => 'Laki-laki',
+			'password' => bcrypt('admin'),
+			'email' => 'dummy@disdikkerinci.id',
+			'created_at' => now()->toDateTimeString(),
+			'created_by' => 1
+		]);
+
+		User::create([
+			'jabatan_id' => $sekda->id,
+			'nip' => '00000001',
+			'excludeapp' => '1',
+			'full_name' => 'nama_sekda',
+			'jenis_kelamin' => 'Laki-laki',
+			'password' => bcrypt('admin'),
+			'email' => 'dummy@disdikkerinci.id',
 			'created_at' => now()->toDateTimeString(),
 			'created_by' => 1
 		]);

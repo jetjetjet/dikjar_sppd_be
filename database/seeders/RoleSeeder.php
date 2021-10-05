@@ -64,18 +64,23 @@ class RoleSeeder extends Seeder
 				'guard_name' => 'sanctum',
 				'action'     => ['view', 'add', 'edit', 'delete'],
 			],
-			[
-				'name'       => 'bidang',
-				'guard_name' => 'sanctum',
-				'action'     => ['view', 'add', 'edit', 'delete'],
-			],
+			// [
+			// 	'name'       => 'bidang',
+			// 	'guard_name' => 'sanctum',
+			// 	'action'     => ['view', 'add', 'edit', 'delete'],
+			// ],
 			[
 				'name'       => 'pejabat',
 				'guard_name' => 'sanctum',
 				'action'     => ['view', 'add', 'edit', 'delete'],
 			],
 			[
-				'name'       => 'role',
+				'name'       => 'peran',
+				'guard_name' => 'sanctum',
+				'action'     => ['view', 'add', 'edit', 'delete'],
+			],
+			[
+				'name'       => 'jabatan',
 				'guard_name' => 'sanctum',
 				'action'     => ['view', 'add', 'edit', 'delete'],
 			],
@@ -85,14 +90,24 @@ class RoleSeeder extends Seeder
 				'action'     => ['view', 'add', 'edit', 'delete'],
 			],
 			[
-				'name'       => 'user',
+				'name'       => 'pegawai',
 				'guard_name' => 'sanctum',
 				'action'     => ['view', 'add', 'edit', 'delete'],
 			],
+			// [
+			// 	'name'       => 'wilayah',
+			// 	'guard_name' => 'sanctum',
+			// 	'action'     => ['view'],
+			// ],
 			[
-				'name'       => 'wilayah',
+				'name'       => 'spt',
 				'guard_name' => 'sanctum',
-				'action'     => ['view'],
+				'action'     => ['view', 'add', 'edit', 'delete', 'finish', 'generate_SPT', 'generate_SPPD'],
+			],
+			[
+				'name'       => 'laporan',
+				'guard_name' => 'sanctum',
+				'action'     => ['view', 'export'],
 			]
 		];
 

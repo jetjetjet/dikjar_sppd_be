@@ -34,6 +34,7 @@ class User extends Authenticatable
         ,'path_foto'
         ,'password'
         ,'phone'
+        ,'excludeapp'
         ,'address'
         ,'active'
         ,'created_by'
@@ -64,5 +65,9 @@ class User extends Authenticatable
     public function getPermissionAttribute()
     {
         return $this->getAllPermissions();
+    }
+
+    public function scopeExclApp($query) {
+        return $query->whereNull('excludeapp');
     }
 }

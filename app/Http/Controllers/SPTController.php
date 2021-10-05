@@ -5,7 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\SPT;
 use App\Models\SPTDetail;
-use App\Models\User; 
+use App\Models\ReportSPPD;
+use App\Models\User;
+use App\Models\Biaya;
+use App\Models\Inap;
+use App\Models\Transport;
 use App\Models\Jabatan;
 use App\Helpers\Utils;
 use DB;
@@ -235,23 +239,117 @@ class SPTController extends Controller
 	public function finish($id)
 	{
 		$results = $this->responses;
-		$spt = SPT::where('id', $id)->whereNull('spt_generated_at');
-		$sppd = SPTDetail::where('spt_id', $id)->whereNull('sppd_generated_at');
+		try {
+			DB::transaction(function () use ($id, &$results) {
+				$spt = SPT::where('id', $id)->whereNull('spt_generated_at');
+				$sppd = SPTDetail::where('spt_id', $id)->whereNull('sppd_generated_at');
+		
+				if($spt->count() < 1 && $sppd->count() < 1) {
+					$loginId = auth('sanctum')->user()->id;
+					$finish = array(
+						'finished_at' => DB::raw("now()"),
+						'finished_by' => $loginId
+					);
+					$spt = SPT::where('id', $id)->first();
+					$sppd = SPTDetail::where('spt_id', $id)->get();
 
-		if($spt->count() < 1 && $sppd->count() < 1) {
-			$finish = array(
-				'finished_at' => DB::raw("now()"),
-				'finished_by' => auth('sanctum')->user()->id
-			);
-			SPT::where('id', $id)->first()->update($finish);
-			SPTDetail::where('spt_id', $id)->update($finish);
+					foreach($sppd as $dtl) {
+						$biaya = Biaya::where('spt_id', $id)
+						->where('user_id', $dtl->user_id)->first();
 
-			array_push($results['messages'], 'Perjalanan Dinas berhasil diselesaikan.');
-			$results['state_code'] = 200;
-			$results['success'] = true;
-		} else {
-			array_push($results['messages'], 'SPT tidak dapat diselesaikan! SPT/SPPD belum dibuat.');
+						$userJbtn = User::join('jabatan as j', 'j.id', 'jabatan_id')
+						->where('users.id', $dtl->user_id)
+						->select(
+							'full_name',
+							//'nip',
+							'j.name as jabatan'
+							//'golongan'
+						)->first();
+
+						$inap = Inap::where('biaya_id', $biaya->id)
+						->where('user_id', $dtl->user_id)->first();
+
+						$pesawatBrgkt = Transport::where('biaya_id', $biaya->id)
+						->where('user_id', $dtl->user_id)
+						->where('perjalanan', 'Berangkat')
+						->where('jenis_transport', 'Pesawat')
+						->first();
+
+						$pesawatPlg = Transport::where('biaya_id', $biaya->id)
+						->where('user_id', $dtl->user_id)
+						->where('perjalanan', 'Pulang')
+						->where('jenis_transport', 'Pesawat')
+						->first();
+
+						$asal = $spt->kota_asal != null ? ucwords(strtolower($spt->kota_asal)) : ucwords(strtolower($spt->kec_asal));
+						$tujuan = $spt->kota_tujuan != null ? ucwords(strtolower($spt->kota_tujuan)) : ucwords(strtolower($spt->kec_tujuan));
+						$checkin = $inap->tgl_checkin ?? null;
+						$checkout = $inap->tgl_checkout ?? null;
+						$pesbrgkt_tgl = $pesawatBrgkt->tgl ?? null;
+						$peskmbl_tgl = $pesawatPlg->tgl ?? null;
+
+						$report = ReportSPPD::insert([
+							'user_id' => $dtl->user_id,
+							'spt_id' => $spt->id,
+							'spt_detail_id' => $dtl->id,
+							'biaya_id' => $biaya->id,
+							'nama_pelaksana' => $userJbtn->full_name,
+							'jabatan' => $userJbtn->jabatan,
+							'no_pku' => null,
+							'no_spt' => $spt->no_spt,
+							'no_sppd' => null,
+							'kegiatan' => $spt->untuk,
+							'penyelenggara' => 'SD Dalam Kab. Kerinci',
+							'lok_asal'=> $asal,
+							'lok_tujuan' => $tujuan,
+							'tgl_berangkat' => $spt->tgl_berangkat,
+							'tgl_kembali' => $spt->tgl_kembali,
+							'uang_saku' => $biaya->uang_saku ?? null,
+							'uang_makan' => $biaya->uang_makan ?? null,
+							'uang_representasi' => $biaya->uang_representasi ?? null,
+							'uang_penginapan'  => $biaya->uang_inap ?? null,
+							'uang_travel' => $biaya->uang_travel ?? null,
+							'uang_total' => $biaya->jml_biaya ?? null,
+							'uang_pesawat' => $biaya->uang_pesawat ?? null,
+							'inap_hotel' => $inap->hotel ?? null,
+							'inap_room' => $inap->room ?? null,
+							'inap_checkin' => $checkin,
+							'inap_checkout' => $checkout,
+							'inap_jml_hari' => $inap->jml_hari ?? null,
+							'inap_per_malam' => $inap->harga ?? null,
+							'inap_jumlah' => $inap->jml_bayar ?? null,
+							'pesbrgkt_maskapai' => $pesawatBrgkt->agen ?? null,
+							'pesbrgkt_no_tiket' => $pesawatBrgkt->no_tiket ?? null,
+							'pesbrgkt_kode_booking' => $pesawatBrgkt->kode_booking ?? null,
+							'pesbrgkt_no_penerbangan' => $pesawatBrgkt->no_penerbangan ?? null,
+							'pesbrgkt_tgl' => $pesbrgkt_tgl,
+							'pesbrgkt_jumlah' => $pesawatBrgkt->jml_bayar ?? null,
+							'peskmbl_maskapai' => $pesawatPlg->agen ?? null,
+							'peskmbl_no_tiket' => $pesawatPlg->agen ?? null,
+							'peskmbl_kode_booking' => $pesawatPlg->agen ?? null,
+							'peskmbl_no_penerbangan' => $pesawatPlg->agen ?? null,
+							'peskmbl_tgl' => $peskmbl_tgl,
+							'peskmbl_jumlah' => $pesawatPlg->jml_bayar ?? null
+						]);
+						
+					}
+
+					$spt->update($finish);
+					SPTDetail::where('spt_id', $id)->update($finish);
+		
+					array_push($results['messages'], 'Perjalanan Dinas berhasil diselesaikan.');
+					$results['state_code'] = 200;
+					$results['success'] = true;
+				} else {
+					array_push($results['messages'], 'SPT tidak dapat diselesaikan! SPT/SPPD belum dibuat.');
+				}
+			});
 		}
+		catch (\Exception $e) {
+			Log::channel('spderr')->info('spt_finish: '. json_encode($e->getMessage()));
+			array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
+		}
+		
 		return response()->json($results, $results['state_code']);
 	}
 

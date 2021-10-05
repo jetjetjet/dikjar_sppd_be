@@ -28,6 +28,7 @@ class CreateUsersTable extends Migration
             $table->string('address', 400)->nullable();
             $table->text('ttd')->nullable();
             $table->dateTime('last_login')->nullable();
+            $table->boolean('excludeapp')->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->bigInteger('created_by');

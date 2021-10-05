@@ -40,4 +40,58 @@ class Controller extends BaseController
       return response()->json($respon, $respon['state_code']);
     }
   }
+
+  public static function getFilter($request)
+  {
+    $filter = new \stdClass();
+    
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+      $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+      $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    } else {
+      $ip = $_SERVER['REMOTE_ADDR'];
+    }
+
+    $filter->ip = $ip;
+
+    // Custom filter.
+    $filter->filter = (object)$request->input('filter');
+
+    // Filter Date
+    $tempDate = new \StdClass;
+    if($request->input('filterDate')){
+      $filterDate = explode(" to ",$request->input('filterDate'));
+      $tempDate->from = $filterDate[0];
+      $tempDate->to = $filterDate[1] ?? $filterDate[0];
+
+      $filter->filterDate = $tempDate;
+    }
+    
+    // Columns.
+    $columns = $request->input('columns') == null ? array() : $request->input('columns');
+    
+    // Filter columns.
+    $filter->filterColumn = $request->input('filterColumn') ?? null;
+    $filter->filterText = $request->input('filterText') ?? null;
+    
+    // Sort columns.
+    $filter->sortColumns = array();
+    $orderColumns = $request->input('order') != null ? $request->input('order') : array();
+    foreach ($orderColumns as $value){
+      $sortColumn = new \stdClass();
+      $sortColumn->field = $columns[$value['column']]['data'];
+      if (empty($sortColumn->field)) continue;
+      
+      $sortColumn->dir = $value['dir'];
+      array_push($filter->sortColumns, $sortColumn);
+    }
+    
+    // Paging.
+    $filter->pageLimit = $request->input('length') ?: 1;
+    $filter->pageOffset = $request->input('start') ?: 0;
+    
+    // Log::info(json_encode($filter));
+    return $filter;
+  }
 }

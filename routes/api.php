@@ -18,6 +18,8 @@ use App\Http\Controllers\TransportController;
 use App\Http\Controllers\SPTController;
 use App\Http\Controllers\SPPDController;
 
+use App\Http\Controllers\ReportController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -36,7 +38,7 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 	//MASTER DATA
-	Route::get('/anggaran-grid', [AnggaranController::class, 'grid']);
+	Route::get('/anggaran-grid', [AnggaranController::class, 'grid'])->middleware('can:anggaran-view');;
 	Route::get('/anggaran-search', [AnggaranController::class, 'search']);
 	Route::get('/anggaran/{id}', [AnggaranController::class, 'show']);
 	Route::post('/anggaran', [AnggaranController::class, 'store']);
@@ -124,5 +126,10 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::put('/transport/{id}', [TransportController::class, 'update']);
 	Route::put('/transport/{id}/upload-file', [TransportController::class, 'uploadFile']);
 	Route::delete('/transport/{id}/{biayaId}/{userId}', [TransportController::class, 'destroy']);
+
+
+	Route::get('/report/spt/selesai', [ReportController::class, 'reportByFinishedSPT']);
+	Route::post('/report/spt/pegawai', [ReportController::class, 'reportByPegawai']);
+	Route::get('/report/spt/selesai/export', [ReportController::class, 'exportFinishedSPT']);
 	
 });
