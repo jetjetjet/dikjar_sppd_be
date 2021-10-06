@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class Otorisasi
 {
-    protected $responses = array('state_code' => 400, 'success' => false, 'messages' => array(), 'data' => Array());
+    protected $responses = array('state_code' => 401, 'success' => false, 'messages' => array(), 'data' => Array());
     /**
      * Handle an incoming request.
      *
@@ -18,7 +18,7 @@ class Otorisasi
      */
     public function handle(Request $request, Closure $next, ...$actions)
     {
-        $user = Auth::user();
+        // $user = Auth::user();
 
         if($request->user()->tokenCan('is_admin')){
           return $next($request);
@@ -33,6 +33,6 @@ class Otorisasi
         
         $respons = $this->responses;
         $respons['message'] = ['Perintah tidak dapat dijalankan!'];
-        return response()->json($respons, 400);
+        return response()->json($respons, 401);
     }
 }

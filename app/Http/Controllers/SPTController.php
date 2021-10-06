@@ -12,6 +12,8 @@ use App\Models\Inap;
 use App\Models\Transport;
 use App\Models\Jabatan;
 use App\Helpers\Utils;
+use Auth;
+
 use DB;
 use Validator;
 use Carbon\Carbon;
@@ -37,6 +39,11 @@ class SPTController extends Controller
 			'spt_id',
 			DB::raw("string_agg(u.full_name, '_') as name")
 		);
+
+		// $isAdmin = auth('sanctum')->user();
+		if (!$request->user()->tokenCan('is_admin')) {
+			$users = $users->where('u.id' , $request->user()->id);
+		}
 
 		$results['data'] = SPT::joinSub($users, 'u', function ($join) {
 			$join->on('spt.id', '=', 'u.spt_id');

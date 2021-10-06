@@ -23,9 +23,13 @@ use NcJoes\OfficeConverter\OfficeConverter;
 class SPPDController extends Controller
 {
   
-	public function grid($id)
+	public function grid(Request $request, $id)
 	{
 		$results = $this->responses;
+		$user = $request->user();
+		$isAdmin = $user->tokenCan('is_admin') ? 1 : 0;
+		$loginid = $user->id;
+		$canGenerate = $isAdmin == 1 || $user->tokenCan('sppd-generate') ? 1 : 0;
 
 		$header = SPT::where('id', $id)
 		->select(
@@ -54,7 +58,9 @@ class SPPDController extends Controller
 				'u.id as user_id',
 				'full_name',
 				'nip',
-				'jml_biaya'
+				'jml_biaya',
+				DB::raw("case when 1 = {$isAdmin} or u.id = {$loginid} then true else false end as can_edit"),
+				DB::raw("case when u.id = {$loginid} and 1 = {$canGenerate} then true else false end as can_generate")
 			)->get();
 		}
 
@@ -171,9 +177,13 @@ class SPPDController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
-  public function show($id, $sptDetailId, $userId)
+  public function show(Request $request, $id, $sptDetailId, $userId)
   {
 		$results = $this->responses;
+
+		$user = $request->user();
+		$isAdmin = $user->tokenCan('is_admin') ? 1 : 0;
+		$loginid = $user->id;
 
 		$header = SPT::where('id', $id)
 		->select(
@@ -185,7 +195,8 @@ class SPPDController extends Controller
 			DB::raw("coalesce(kota_tujuan, kec_tujuan) as kota_tujuan"),
 			DB::raw("coalesce(kota_asal, kec_asal) as kota_asal"),
 			'transportasi',
-			'finished_at'
+			'finished_at',
+			DB::raw("(select sppd_file_id from spt_detail as sd where spt.id = spt_id and deleted_at is null and ( user_id = {$loginid} or 1 = {$isAdmin} ) ) as sppd_file_id")
 		)->first();
 
 		$child = null;

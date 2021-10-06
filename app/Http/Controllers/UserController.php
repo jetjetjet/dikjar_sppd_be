@@ -167,7 +167,7 @@ class UserController extends Controller
 		
 		$user = User::find($id);
 		$role = $inputs['role'] ?? null;
-		$user->syncRoles([]);
+		$user->syncRoles([$role]);
 		$user->update([
 			'nip' => $inputs['nip'],
 			'full_name' => $inputs['full_name'],
