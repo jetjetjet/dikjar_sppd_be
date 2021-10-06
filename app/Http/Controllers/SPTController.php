@@ -33,20 +33,25 @@ class SPTController extends Controller
   public function grid(Request $request)
 	{
 		$results = $this->responses;
+
+		$user = $request->user();
+		$isAdmin = $user->tokenCan('is_admin') ? 1 : 0;
+		$loginid = $user->id;
+		$canGenerate = $user->tokenCan('spt-generate') ? 1 : 0;
+
 		$users = SPTDetail::join('users as u', 'u.id', 'spt_detail.user_id')
+		->join('spt', 'spt.id', 'spt_detail.spt_id')
 		->groupBy('spt_detail.spt_id')
 		->select(
 			'spt_id',
 			DB::raw("string_agg(u.full_name, '_') as name")
 		);
-
-		// $isAdmin = auth('sanctum')->user();
-		if (!$request->user()->tokenCan('is_admin')) {
-			$users = $users->where('u.id' , $request->user()->id);
+		if (!$isAdmin) {
+			$users = $users->where('u.id', $request->user()->id)->orWhere('pttd_user_id', $request->user()->id);
 		}
 
-		$results['data'] = SPT::joinSub($users, 'u', function ($join) {
-			$join->on('spt.id', '=', 'u.spt_id');
+		$q = SPT::joinSub($users, 'u', function ($join) {
+			$join->on('spt.id', 'u.spt_id');
 		})->select(
 			'id',
 			'no_spt',
@@ -55,10 +60,12 @@ class SPTController extends Controller
 			DB::raw("coalesce(kota_tujuan, kec_tujuan) as tujuan"),
 			'untuk',
 			DB::raw("case when spt_file_id is not null then true else false end as spt_file"),
-			DB::raw("'__' as nama"),
 			'finished_at',
-			'u.name'
-		)->get();
+			'u.name',
+			DB::raw("case when 1 = {$canGenerate} and (pttd_user_id = {$loginid} or 1 = {$isAdmin} ) then true else false end as can_generate")
+		);
+
+		$results['data'] = $q->get();
 
 		$results['state_code'] = 200;
 		$results['success'] = true;
