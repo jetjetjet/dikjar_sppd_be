@@ -12,11 +12,11 @@ use Illuminate\Support\Facades\Log;
 
 class TransportController extends Controller
 {
-	public function grid($biayaId, $userId)
+	public function grid($biayaId, $pegawaiId)
 	{
 		$results = $this->responses;
 		$results['data'] = Transport::where('biaya_id', $biayaId)
-		->where('user_id', $userId)
+		->where('pegawai_id', $pegawaiId)
 		->select(
 			'id',
 			'jenis_transport',
@@ -41,7 +41,7 @@ class TransportController extends Controller
 		
 		$inputs = $request->all();
 		$rules = array(
-			'user_id' 	=> 'required',
+			'pegawai_id' 	=> 'required',
       'biaya_id' => 'required',
       'jenis_transport' => 'required',
       'perjalanan' => 'required',
@@ -61,9 +61,10 @@ class TransportController extends Controller
 		try{
 			DB::transaction(function () use ($inputs, $results) {
 				$transport = Transport::create([
-					'user_id' => $inputs['user_id'],
+					'pegawai_id' => $inputs['pegawai_id'],
 					'biaya_id' => $inputs['biaya_id'],
 					'jenis_transport' => $inputs['jenis_transport'],
+					'catatan' => $inputs['catatan'],
 					'perjalanan' => $inputs['perjalanan'],
 					'agen' => $inputs['agen'],
 					'no_tiket' => $inputs['no_tiket'],
@@ -73,13 +74,8 @@ class TransportController extends Controller
 					'jml_bayar' => $inputs['jml_bayar']
 				]);
 		
-				//update Biaya
-				// $sumTransport = Transport::where('user_id', $inputs['user_id'])
-				// ->where('biaya_id', $inputs['biaya_id'])
-				// ->sum('jml_bayar');
-		
 				$biaya = Biaya::where('id', $inputs['biaya_id'])
-				->where('user_id', $inputs['user_id'])
+				->where('pegawai_id', $inputs['pegawai_id'])
 				->first();
 
 				if($inputs['jenis_transport'] == 'Travel' || $inputs['jenis_transport'] == 'Taksi'){
@@ -115,7 +111,7 @@ class TransportController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-			'user_id' 	=> 'required',
+			'pegawai_id' 	=> 'required',
       'biaya_id' => 'required',
       'jenis_transport' => 'required',
       'perjalanan' => 'required',
@@ -133,7 +129,7 @@ class TransportController extends Controller
     }
 		
 		$transport = Transport::where('id',$id)
-		->where('user_id', $inputs['user_id'])
+		->where('pegawai_id', $inputs['pegawai_id'])
 		->where('biaya_id', $inputs['biaya_id'])
 		->first();
 
@@ -144,12 +140,13 @@ class TransportController extends Controller
 				$jenis_transport = $transport->jenis_transport;
 
 				$biaya = Biaya::where('id', $inputs['biaya_id'])
-				->where('user_id', $inputs['user_id'])
+				->where('pegawai_id', $inputs['pegawai_id'])
 				->first();
 
 				$transport->update([
 					'jenis_transport' => $inputs['jenis_transport'],
 					'perjalanan' => $inputs['perjalanan'],
+					'catatan' => $inputs['catatan'],
 					'agen' => $inputs['agen'],
 					'no_tiket' => $inputs['no_tiket'],
 					'kode_booking' => $inputs['kode_booking'],
@@ -190,7 +187,7 @@ class TransportController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-			'user_id' 	=> 'required',
+			'pegawai_id' 	=> 'required',
       'biaya_id' => 'required',
       'file' => 'required'
 		);
@@ -203,7 +200,7 @@ class TransportController extends Controller
     }
 
 		$transport = Transport::where('id',$id)
-		->where('user_id', $inputs['user_id'])
+		->where('pegawai_id', $inputs['pegawai_id'])
 		->where('biaya_id', $inputs['biaya_id'])
 		->first();
 
@@ -218,22 +215,22 @@ class TransportController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
-	public function destroy($id, $biayaId, $userId)
+	public function destroy($id, $biayaId, $pegawaiId)
 	{
 		$results = $this->responses;
 
 		$transport = Transport::where('id',$id)
-		->where('user_id', $userId)
+		->where('pegawai_id', $pegawaiId)
 		->where('biaya_id', $biayaId)
 		->first();
 		
 		try{
-			DB::transaction(function () use ($transport, $biayaId, $userId) {
+			DB::transaction(function () use ($transport, $biayaId, $pegawaiId) {
 				$jml_bayar = $transport->jml_bayar;
 				$jenis_transport = $transport->jenis_transport;
 		
 				$biaya = Biaya::where('id', $biayaId)
-				->where('user_id', $userId)
+				->where('pegawai_id', $pegawaiId)
 				->first();
 		
 				if($jenis_transport == 'Travel' || $jenis_transport == 'Taksi'){

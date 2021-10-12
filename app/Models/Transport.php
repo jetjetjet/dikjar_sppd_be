@@ -12,8 +12,9 @@ class Transport extends Model
 	protected $table = 'transport';
 	protected $fillable = [
 		'biaya_id',
-		'user_id',
+		'nip',
 		'jenis_transport',
+		'catatan',
 		'perjalanan',
 		'agen',
 		'no_tiket',

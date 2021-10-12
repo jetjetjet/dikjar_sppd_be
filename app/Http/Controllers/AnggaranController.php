@@ -27,7 +27,8 @@ class AnggaranController extends Controller
 			$join->on('anggaran.id', '=', 'r.anggaran_id');
 		})->select(
 			'anggaran.id',
-			'mak',
+			'kode_rekening',
+			'nama_rekening',
 			'uraian',
 			DB::raw("to_char(pagu, 'FM999,999,999,999') as pagu"),
 			DB::raw("to_char(coalesce(realisasi,0), 'FM999,999,999,999') as realisasi"),
@@ -50,7 +51,8 @@ class AnggaranController extends Controller
 		foreach($datas as $dt){
 			$ui = Array(
 				'id' => $dt->id,
-				'mak' => $dt->mak,
+				'kode_rekening' => $dt->kode_rekening,
+				'nama_rekening' => $dt->nama_rekening,
 				'uraian' => $dt->uraian,
 				'pagu' => 'Rp ' . number_format($dt->pagu)
 			);
@@ -70,7 +72,8 @@ class AnggaranController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-			'mak' => 'required',
+			'kode_rekening' => 'required',
+			'nama_rekening' => 'required',
       'uraian' => 'required',
       'pagu' => 'required|numeric|min:4'
 		);
@@ -83,7 +86,8 @@ class AnggaranController extends Controller
     }
 		
     Anggaran::create([
-      'mak' => $inputs['mak'],
+      'kode_rekening' => $inputs['kode_rekening'],
+      'nama_rekening' => $inputs['nama_rekening'],
       'uraian' => $inputs['uraian'],
       'pagu' => $inputs['pagu'],
       'periode' => date('Y')
@@ -114,6 +118,8 @@ class AnggaranController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
+			'kode_rekening' => 'required',
+			'nama_rekening' => 'required',
       'uraian' => 'required',
       'pagu' => 'required'
 		);
@@ -127,6 +133,8 @@ class AnggaranController extends Controller
     
 		$anggaran = Anggaran::find($id);
     $anggaran->update([
+      'kode_rekening' => $inputs['kode_rekening'],
+      'nama_rekening' => $inputs['nama_rekening'],
       'uraian' => $inputs['uraian'],
       'pagu' => $inputs['pagu'],
     ]);

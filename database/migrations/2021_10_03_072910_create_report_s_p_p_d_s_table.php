@@ -15,7 +15,7 @@ class CreateReportSPPDSTable extends Migration
     {
         Schema::create('report_sppd', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('user_id');
+            $table->bigInteger('pegawai_id');
             $table->bigInteger('spt_id');
             $table->bigInteger('spt_detail_id');
             $table->bigInteger('biaya_id');

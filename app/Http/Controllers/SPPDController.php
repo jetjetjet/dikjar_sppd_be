@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\SPT;
 use App\Models\SPTDetail;
-use App\Models\User;
+use App\Models\Pegawai;
 use App\Models\Transport;
 use App\Models\Inap;
 use App\Models\Biaya;
@@ -45,17 +45,17 @@ class SPPDController extends Controller
 		$child = [];
 		if ($header != null){
 			$biaya = DB::table('biaya')->whereNull('deleted_at')
-			->select('user_id', 'spt_id', 'jml_biaya');
+			->select('pegawai_id', 'spt_id', 'jml_biaya');
 
-			$child = SPTDetail::join('users as u', 'u.id', 'spt_detail.user_id')
+			$child = SPTDetail::join('pegawai as p', 'p.id', 'spt_detail.pegawai_id')
 			->leftJoinSub($biaya, 'biaya', function ($join) {
 					$join->on('spt_detail.spt_id', 'biaya.spt_id')
-					->on('spt_detail.user_id', 'biaya.user_id');
+					->on('spt_detail.pegawai_id', 'biaya.pegawai_id');
 			})->where('spt_detail.spt_id', $id)
 			->select(
 				'spt_detail.id',
 				'sppd_file_id',
-				'u.id as user_id',
+				'p.id as pegawai_id',
 				'full_name',
 				'nip',
 				'jml_biaya',
@@ -72,12 +72,12 @@ class SPPDController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
-	public function getSPPD($id, $userId)
+	public function getSPPD($id, $pegawaiId)
 	{
 		$results = $this->responses;
 		$data = SPTDetail::join('files as f', 'f.id', 'sppd_file_id')
 		->where('spt_detail.id', $id)
-		->where('user_id', $userId)
+		->where('pegawai_id', $pegawaiId)
 		->first();
 
 		if($data != null){
@@ -88,7 +88,7 @@ class SPPDController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
-	public function cetakSPPD($id, $sptDetailId, $userId)
+	public function cetakSPPD($id, $sptDetailId, $pegawaiId)
 	{
 		$results = $this->responses;
 		$spt = SPT::find($id);
@@ -97,8 +97,8 @@ class SPPDController extends Controller
 			$templatePath = base_path('public/storage/template/template_sppd.docx');
 			$checkFile = FaFile::exists($templatePath);
 			if($checkFile){
-				$user = User::join('jabatan as j', 'j.id', 'users.jabatan_id')
-				->where('users.id',$userId)
+				$pegawai = Pegawai::join('jabatan as j', 'j.id', 'pegawai.jabatan_id')
+				->where('pegawai.id',$pegawaiId)
 				->select(
 					'full_name as nama_pegawai', 
 					'j.name as jabatan_pegawai', 
@@ -121,7 +121,7 @@ class SPPDController extends Controller
 					$template = new TemplateProcessor($templatePath);
 	
 					// $template->setValue('dasar_pelaksana', $spt->dasar_pelaksana);
-					$template->setValue('nama_pegawai', $user->nama_pegawai);
+					$template->setValue('nama_pegawai', $pegawai->nama_pegawai);
 					$template->setValue('untuk', $spt->untuk);
 					$template->setValue('transportasi', $spt->transportasi);
 					$template->setValue('jml_hari', $jmlHari . " Hari");
@@ -152,7 +152,7 @@ class SPPDController extends Controller
 					$file = Utils::saveFile($newFile);
 					// update
 					SPTDetail::where('id', $sptDetailId)
-					->where('user_id', $userId)
+					->where('pegawai_id', $pegawaiId)
 					->update([
 						'sppd_file_id' => $file,
 						'sppd_generated_at' => DB::raw("now()"),
@@ -177,7 +177,7 @@ class SPPDController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
-  public function show(Request $request, $id, $sptDetailId, $userId)
+  public function show(Request $request, $id, $sptDetailId, $pegawaiId)
   {
 		$results = $this->responses;
 
@@ -196,13 +196,13 @@ class SPPDController extends Controller
 			DB::raw("coalesce(kota_asal, kec_asal) as kota_asal"),
 			'transportasi',
 			'finished_at',
-			DB::raw("(select sppd_file_id from spt_detail as sd where spt.id = spt_id and deleted_at is null and ( user_id = {$loginid} or 1 = {$isAdmin} ) ) as sppd_file_id")
+			DB::raw("(select sppd_file_id from spt_detail as sd where spt.id = spt_id and deleted_at is null and ( pegawai_id = {$loginid} or 1 = {$isAdmin} ) ) as sppd_file_id")
 		)->first();
 
 		$child = null;
 		if ($header != null){
 			$check = Biaya::where('spt_id', $id)
-			->where('user_id', $userId)
+			->where('pegawai_id', $pegawaiId)
 			->select(
 				'id',
 				'uang_makan',

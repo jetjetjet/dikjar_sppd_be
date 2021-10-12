@@ -16,8 +16,9 @@ class CreateTransportsTable extends Migration
         Schema::create('transport', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('biaya_id');
-            $table->bigInteger('user_id');
+            $table->bigInteger('pegawai_id');
             $table->string('jenis_transport');
+            $table->string('catatan')->nullable();
             $table->string('perjalanan');
             $table->string('agen');
             $table->string('no_tiket');
@@ -25,7 +26,7 @@ class CreateTransportsTable extends Migration
             $table->string('no_penerbangan')->nullable();
             $table->bigInteger('file_id')->nullable();
             $table->date('tgl');
-            $table->decimal('jml_bayar',16,0);
+            $table->decimal('total_bayar',16,0);
 
             $table->timestamps();
             $table->softDeletes();

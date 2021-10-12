@@ -18,10 +18,11 @@ class CreateBidangsTable extends Migration
             $table->string('code');
             $table->string('name');
             $table->string('remark')->nullable();
+            
             $table->timestamps();
-            $table->bigInteger('created_by')->nullable();
-            $table->bigInteger('updated_by')->nullable();
             $table->softDeletes();
+            $table->bigInteger('created_by');
+            $table->bigInteger('updated_by')->nullable();
             $table->bigInteger('deleted_by')->nullable();
         });
     }

@@ -15,7 +15,7 @@ class CreateInapsTable extends Migration
     {
         Schema::create('inap', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('user_id');
+            $table->bigInteger('pegawai_id');
             $table->bigInteger('biaya_id');
 
             $table->string('hotel');
@@ -24,15 +24,16 @@ class CreateInapsTable extends Migration
             $table->date('tgl_checkin');
             $table->date('tgl_checkout')->nullable();
             $table->integer('jml_hari')->nullable();
-            $table->decimal('jml_bayar',16,0)->nullable();
+            $table->decimal('total_bayar',16,0)->nullable();
             $table->string('catatan')->nullable();
             $table->bigInteger('file_id')->nullable();
+            $table->dateTime('checkout_at')->nullable();
+
             $table->timestamps();
             $table->softDeletes();
             $table->bigInteger('created_by');
             $table->bigInteger('updated_by')->nullable();
             $table->bigInteger('deleted_by')->nullable();
-            $table->dateTime('checkout_at')->nullable();
         });
     }
 

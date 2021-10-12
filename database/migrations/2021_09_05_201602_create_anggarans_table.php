@@ -15,14 +15,16 @@ class CreateAnggaransTable extends Migration
     {
         Schema::create('anggaran', function (Blueprint $table) {
             $table->id();
-            $table->string('mak');
+            $table->string('kode_rekening');
+            $table->string('nama_rekening');
             $table->string('uraian');
             $table->decimal('pagu', 18, 0);
             $table->integer('periode');
+            
             $table->timestamps();
+            $table->softDeletes();
             $table->bigInteger('created_by');
             $table->bigInteger('updated_by')->nullable();
-            $table->softDeletes();
             $table->bigInteger('deleted_by')->nullable();
         });
     }

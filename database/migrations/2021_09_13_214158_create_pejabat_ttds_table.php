@@ -16,7 +16,7 @@ class CreatePejabatTtdsTable extends Migration
         Schema::create('pejabat_ttd', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->bigInteger('user_id')->unsigned();
+            $table->bigInteger('pegawai_id')->unsigned();
             $table->string('autorisasi');
             $table->string('autorisasi_code');
             $table->boolean('is_active');

@@ -10,7 +10,7 @@ class ReportSPPD extends Model
 	use LogUser;
 	protected $table = 'report_sppd';
 	protected $fillable = [
-		'user_id',
+		'pegawai_id',
 		'spt_id',
 		'spt_detail_id',
 		'biaya_id',

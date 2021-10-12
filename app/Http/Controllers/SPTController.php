@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\SPT;
 use App\Models\SPTDetail;
 use App\Models\ReportSPPD;
-use App\Models\User;
+use App\Models\Pegawai;
 use App\Models\Biaya;
 use App\Models\Inap;
 use App\Models\Transport;
@@ -36,21 +36,19 @@ class SPTController extends Controller
 
 		$user = $request->user();
 		$isAdmin = $user->tokenCan('is_admin') ? 1 : 0;
-		$loginid = $user->id;
-		$canGenerate = $user->tokenCan('spt-generate') ? 1 : 0;
 
-		$users = SPTDetail::join('users as u', 'u.id', 'spt_detail.user_id')
+		$pegawai = SPTDetail::join('pegawai as p', 'p.id', 'spt_detail.pegawai_id')
 		->join('spt', 'spt.id', 'spt_detail.spt_id')
 		->groupBy('spt_detail.spt_id')
 		->select(
 			'spt_id',
-			DB::raw("string_agg(u.full_name, '_') as name")
+			DB::raw("string_agg(p.full_name, '_') as name")
 		);
 		if (!$isAdmin) {
-			$users = $users->where('u.id', $request->user()->id)->orWhere('pttd_user_id', $request->user()->id);
+			$pegawai = $pegawai->where('p.id', $request->user()->getPegawaiId())->orWhere('pttd_id', $request->user()->getPegawaiId());
 		}
 
-		$q = SPT::joinSub($users, 'u', function ($join) {
+		$q = SPT::joinSub($pegawai, 'u', function ($join) {
 			$join->on('spt.id', 'u.spt_id');
 		})->select(
 			'id',
@@ -61,8 +59,7 @@ class SPTController extends Controller
 			'untuk',
 			DB::raw("case when spt_file_id is not null then true else false end as spt_file"),
 			'finished_at',
-			'u.name',
-			DB::raw("case when 1 = {$canGenerate} and (pttd_user_id = {$loginid} or 1 = {$isAdmin} ) then true else false end as can_generate")
+			'u.name'
 		);
 
 		$results['data'] = $q->get();
@@ -82,8 +79,8 @@ class SPTController extends Controller
 			$templatePath = base_path('public/storage/template/template_spt.docx');
 			$checkFile = FaFile::exists($templatePath);
 			if($checkFile){
-				$users = SPTDetail::join('users as u', 'u.id', 'spt_detail.user_id')
-				->join('jabatan as j', 'j.id', 'u.jabatan_id')
+				$users = SPTDetail::join('pegawai as p', 'p.id', 'spt_detail.pegawai_id')
+				->join('jabatan as j', 'j.id', 'p.jabatan_id')
 				->where('spt_id',$id)
 				->select(
 					DB::raw("ROW_NUMBER() OVER (ORDER BY spt_detail.id) AS index_no"), 
@@ -103,8 +100,8 @@ class SPTController extends Controller
 					array_push($userValue, $temp);
 				}
 	
-				$pejabat = User::join('jabatan as j', 'j.id', 'jabatan_id')
-				->where('users.id', $spt->pttd_user_id)
+				$pejabat = Pegawai::join('jabatan as j', 'j.id', 'jabatan_id')
+				->where('pegawai.id', $spt->pttd_id)
 				->select(
 					'full_name',
 					'nip',
@@ -155,7 +152,7 @@ class SPTController extends Controller
 					$spt->update([
 						'spt_file_id' => $file,
 						'spt_generated_at' => DB::raw("now()"),
-						'spt_generated_by' => auth('sanctum')->user()->id,
+						'spt_generated_by' => auth('sanctum')->user()->getPegawaiId(),
 						'status' => 'SPTGENERATED'
 					]);
 					
@@ -185,14 +182,11 @@ class SPTController extends Controller
 		$rules = array(
       'anggaran_id' => 'required',
 			'jenis_dinas'=> 'required', 
-      'pttd_user_id' => 'required',
+      'pttd_id' => 'required',
+      'pelaksana_id' => 'required',
       'dasar_pelaksana' => 'required',
       'untuk' => 'required',
       'transportasi' => 'required',
-      // 'provinsi_asal' => 'required',
-      // 'kota_asal' => 'required',
-      // 'provinsi_tujuan' => 'required',
-      // 'kota_tujuan' => 'required',
       'tgl_berangkat' => 'required',
       'tgl_kembali' => 'required'
 		);
@@ -215,7 +209,8 @@ class SPTController extends Controller
 					// 'bidang_id' => $inputs['bidang_id'],
 					'jenis_dinas' => $inputs['jenis_dinas'],
 					'anggaran_id' => $inputs['anggaran_id'],
-					'pttd_user_id' => $inputs['pttd_user_id'],
+					'pttd_id' => $inputs['pttd_id'],
+					'pelaksana_id' => $inputs['pelaksana_id'],
 					'dasar_pelaksana' => $inputs['dasar_pelaksana'],
 					'untuk' => $inputs['untuk'],
 					'transportasi' => $inputs['transportasi'],
@@ -231,10 +226,10 @@ class SPTController extends Controller
 					'periode' => '2021'
 				]);
 
-				foreach($inputs['user_id'] as $userid){
+				foreach($inputs['pegawai_id'] as $pegawaiId){
 					$detail = SPTDetail::create([
 						'spt_id' => $spt->id,
-						'user_id' => $userid
+						'pegawai_id' => $pegawaiId
 					]);
 				}
 			});
@@ -259,7 +254,7 @@ class SPTController extends Controller
 				$sppd = SPTDetail::where('spt_id', $id)->whereNull('sppd_generated_at');
 		
 				if($spt->count() < 1 && $sppd->count() < 1) {
-					$loginId = auth('sanctum')->user()->id;
+					$loginId = auth('sanctum')->user()->getPegawaiId();
 					$finish = array(
 						'finished_at' => DB::raw("now()"),
 						'finished_by' => $loginId
@@ -269,28 +264,26 @@ class SPTController extends Controller
 
 					foreach($sppd as $dtl) {
 						$biaya = Biaya::where('spt_id', $id)
-						->where('user_id', $dtl->user_id)->first();
+						->where('pegawai_id', $dtl->pegawai_id)->first();
 
-						$userJbtn = User::join('jabatan as j', 'j.id', 'jabatan_id')
-						->where('users.id', $dtl->user_id)
+						$userJbtn = Pegawai::join('jabatan as j', 'j.id', 'jabatan_id')
+						->where('pegawai.id', $dtl->pegawai_id)
 						->select(
 							'full_name',
-							//'nip',
 							'j.name as jabatan'
-							//'golongan'
 						)->first();
 
 						$inap = Inap::where('biaya_id', $biaya->id)
-						->where('user_id', $dtl->user_id)->first();
+						->where('pegawai_id', $dtl->pegawai_id)->first();
 
 						$pesawatBrgkt = Transport::where('biaya_id', $biaya->id)
-						->where('user_id', $dtl->user_id)
+						->where('pegawai_id', $dtl->pegawai_id)
 						->where('perjalanan', 'Berangkat')
 						->where('jenis_transport', 'Pesawat')
 						->first();
 
 						$pesawatPlg = Transport::where('biaya_id', $biaya->id)
-						->where('user_id', $dtl->user_id)
+						->where('pegawai_id', $dtl->pegawai_id)
 						->where('perjalanan', 'Pulang')
 						->where('jenis_transport', 'Pesawat')
 						->first();
@@ -303,7 +296,7 @@ class SPTController extends Controller
 						$peskmbl_tgl = $pesawatPlg->tgl ?? null;
 
 						$report = ReportSPPD::insert([
-							'user_id' => $dtl->user_id,
+							'pegawai_id' => $dtl->pegawai_id,
 							'spt_id' => $spt->id,
 							'spt_detail_id' => $dtl->id,
 							'biaya_id' => $biaya->id,
@@ -377,7 +370,7 @@ class SPTController extends Controller
 			'ag.mak as anggaran_text'
 		)->first();
 
-		$data->user_id = SPTDetail::where('spt_id', $id)->get()->pluck('user_id');
+		$data->pegawai_id = SPTDetail::where('spt_id', $id)->get()->pluck('pegawai_id');
 		$results['data'] = $data;
 
 		$results['state_code'] = 200;
@@ -411,15 +404,11 @@ class SPTController extends Controller
 			// 'bidang_id' => 'required',
 			'jenis_dinas' => 'required',
       'anggaran_id' => 'required',
-      'pttd_user_id' => 'required',
+      'pttd_id' => 'required',
       'dasar_pelaksana' => 'required',
       'untuk' => 'required',
       'transportasi' => 'required',
-      'pttd_user_id' => 'required',
-      // 'provinsi_asal' => 'required',
-      // 'kota_asal' => 'required',
-      // 'provinsi_tujuan' => 'required',
-      // 'kota_tujuan' => 'required',
+			'pelaksana_id' => 'required',
       'tgl_berangkat' => 'required',
       'tgl_kembali' => 'required'
 		);
@@ -439,7 +428,7 @@ class SPTController extends Controller
 					// 'bidang_id' => $inputs['bidang_id'],
 					'jenis_dinas' => $inputs['jenis_dinas'],
 					'anggaran_id' => $inputs['anggaran_id'],
-					'pttd_user_id' => $inputs['pttd_user_id'],
+					'pttd_id' => $inputs['pttd_id'],
 					'dasar_pelaksana' => $inputs['dasar_pelaksana'],
 					'untuk' => $inputs['untuk'],
 					'transportasi' => $inputs['transportasi'],
@@ -453,18 +442,18 @@ class SPTController extends Controller
 					'tgl_kembali' => $inputs['tgl_kembali']
 				]);
 
-				//Delete Missing User Id
+				//Delete Missing Pegawai Id
 				$data = SPTDetail::where('spt_id', $id)
-				->whereNotIn('id', $inputs['user_id'])
+				->whereNotIn('pegawai_id', $inputs['pegawai_id'])
 				->delete();
 
 				//Insert new or skip
-				foreach($inputs['user_id'] as $userid){
-					$detailSPT = SPTDetail::where('user_id', $userid)->where('spt_id', $id)->first();
+				foreach($inputs['pegawai_id'] as $pegawaiId){
+					$detailSPT = SPTDetail::where('pegawai_id', $pegawaiId)->where('spt_id', $id)->first();
 					if ($detailSPT == null ){
 						$detail = SPTDetail::create([
 							'spt_id' => $id,
-							'user_id' => $userid
+							'pegawai_id' => $pegawaiId
 						]);
 					}
 				}

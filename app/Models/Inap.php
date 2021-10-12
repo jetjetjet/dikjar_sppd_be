@@ -12,7 +12,7 @@ class Inap extends Model
 	protected $table = 'inap';
 	protected $fillable = [
 		'biaya_id',
-		'user_id',
+		'pegawai_id',
 		'hotel',
 		'room',
 		'harga',

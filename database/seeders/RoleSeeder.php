@@ -48,9 +48,9 @@ class RoleSeeder extends Seeder
 		]);
 
 		$user = User::find('1');
-		$user2 = User::find('2');
+		$user2 = User::find(2);
 		$user->assignRole('SUPER ADMIN');
-		$user2->assignRole('SUPER ADMIN');
+		$user2->assignRole('KADIN');
 		$role_first = Role::first();
 
 		$permissions = [

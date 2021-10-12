@@ -11,7 +11,8 @@ class Anggaran extends Model
 	use LogUser, SoftDeletes;
 	protected $table = 'anggaran';
 	protected $fillable = [
-		'mak',
+		'kode_rekening',
+		'nama_rekening',
 		'uraian',
 		'pagu',
 		'periode',

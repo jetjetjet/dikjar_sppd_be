@@ -12,7 +12,7 @@ class PejabatTtdController extends Controller
 	public function grid(Request $request)
 	{
 		$results = $this->responses;
-		$results['data'] = PejabatTtd::join('users', 'users.id', 'user_id')
+		$results['data'] = PejabatTtd::join('pegawai as p', 'p.id', 'pegawai_id')
 		->select(
 			'pejabat_ttd.id as id',
 			'nip',
@@ -32,7 +32,7 @@ class PejabatTtdController extends Controller
 	{
 		$results = $this->responses;
 		if($request->has('filter')){
-			$results['data'] = PejabatTtd::join('users', 'users.id', 'user_id')
+			$results['data'] = PejabatTtd::join('pegawai as p', 'p.id', 'pegawai_id')
 			->where('is_active', '1')
 			->where('autorisasi_code', $request->filter)
 			->select('users.id as id', 'full_name as label')->get();
@@ -50,7 +50,7 @@ class PejabatTtdController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-			'user_id' => 'required',
+			'pegawai_id' => 'required',
       'autorisasi' => 'required',
       'is_active' => 'required'
 		);
@@ -63,7 +63,7 @@ class PejabatTtdController extends Controller
     }
 		$code = $inputs['autorisasi'] == 'Pejabat Pembuat Komitmen' ? 'PPK' : 'PTTD';
     PejabatTtd::create([
-      'user_id' => $inputs['user_id'],
+      'pegawai_id' => $inputs['pegawai_id'],
       'autorisasi' => $inputs['autorisasi'],
       'autorisasi_code' => $code,
       'is_active' => $inputs['is_active']
@@ -80,11 +80,11 @@ class PejabatTtdController extends Controller
 	public function show($id)
 	{
 		$results = $this->responses;
-		$results['data'] = PejabatTtd::join('users', 'users.id', 'user_id')
+		$results['data'] = PejabatTtd::join('pegawai as p', 'p.id', 'pegawai_id')
 		->where('pejabat_ttd.id', $id)
 		->select(
 			'pejabat_ttd.id as id',
-			'user_id',
+			'pegawai_id',
 			'nip',
 			'autorisasi',
 			DB::raw("case when is_active is true then 'Aktif' else 'Tidak Aktif' end as status_aktif"),
@@ -103,7 +103,7 @@ class PejabatTtdController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-			'user_id' => 'required',
+			'pegawai_id' => 'required',
       'autorisasi' => 'required'
 		);
 
@@ -118,7 +118,7 @@ class PejabatTtdController extends Controller
 
 		$code = $inputs['autorisasi'] == 'Pejabat Pembuat Komitmen' ? 'PPK' : 'PTTD';
     $PejabatTtd->update([
-      'user_id' => $inputs['user_id'],
+      'pegawai_id' => $inputs['pegawai_id'],
       'autorisasi' => $inputs['autorisasi'],
       'autorisasi_code' => $code
     ]);

@@ -34,7 +34,6 @@ class User extends Authenticatable
         ,'path_foto'
         ,'password'
         ,'phone'
-        ,'excludeapp'
         ,'address'
         ,'active'
         ,'created_by'
@@ -67,7 +66,13 @@ class User extends Authenticatable
         return $this->getAllPermissions();
     }
 
-    public function scopeExclApp($query) {
-        return $query->whereNull('excludeapp');
+    public function getNip()
+    {
+        return $this->attributes['nip'];
+    }
+
+    public function pegawai()
+    {
+        return $this->belongsTo(Pegawai::class, 'nip', 'nip');
     }
 }

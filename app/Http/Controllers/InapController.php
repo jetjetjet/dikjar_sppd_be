@@ -12,11 +12,11 @@ use Illuminate\Support\Facades\Log;
 
 class InapController extends Controller
 {
-	public function grid($biayaId, $userId)
+	public function grid($biayaId, $pegawaiId)
 	{
 		$results = $this->responses;
 		$results['data'] = Inap::where('biaya_id', $biayaId)
-		->where('user_id', $userId)
+		->where('pegawai_id', $pegawaiId)
 		->select(
 			'id',
 			'hotel',
@@ -44,7 +44,7 @@ class InapController extends Controller
 		
 		$inputs = $request->all();
 		$rules = array(
-			'user_id' 	=> 'required',
+			'pegawai_id' 	=> 'required',
       'biaya_id' => 'required',
       'hotel' => 'required',
       'room' => 'required',
@@ -59,7 +59,7 @@ class InapController extends Controller
     }
 		
     Inap::create([
-      'user_id' => $inputs['user_id'],
+      'pegawai_id' => $inputs['pegawai_id'],
       'biaya_id' => $inputs['biaya_id'],
 			'hotel' => $inputs['hotel'],
 			'room' => $inputs['room'],
@@ -82,7 +82,7 @@ class InapController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-			'user_id' 	=> 'required',
+			'pegawai_id' 	=> 'required',
       'biaya_id' => 'required',
       'hotel' => 'required',
       'room' => 'required',
@@ -97,7 +97,7 @@ class InapController extends Controller
     }
 
 		$inap = Inap::where('id',$id)
-		->where('user_id', $inputs['user_id'])
+		->where('pegawai_id', $inputs['pegawai_id'])
 		->where('biaya_id', $inputs['biaya_id'])
 		->first();
 
@@ -121,7 +121,7 @@ class InapController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-			'user_id' 	=> 'required',
+			'pegawai_id' 	=> 'required',
       'biaya_id' => 'required',
       'tgl_checkout' => 'required',
       'jml_hari' => 'required',
@@ -138,7 +138,7 @@ class InapController extends Controller
 		try{
 			DB::transaction(function () use ($inputs, $id) {
 				$inap = Inap::where('id',$id)
-				->where('user_id', $inputs['user_id'])
+				->where('pegawai_id', $inputs['pegawai_id'])
 				->where('biaya_id', $inputs['biaya_id'])
 				->first();
 
@@ -151,7 +151,7 @@ class InapController extends Controller
 				]);
 		
 				$biaya = Biaya::where('id', $inputs['biaya_id'])
-				->where('user_id', $inputs['user_id'])
+				->where('pegawai_id', $inputs['pegawai_id'])
 				->first();
 				$biaya->update([
 					'uang_inap' => ($biaya->uang_inap ?? 0) + $inputs['jml_bayar'],
@@ -177,7 +177,7 @@ class InapController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-			'user_id' 	=> 'required',
+			'pegawai_id' 	=> 'required',
       'biaya_id' => 'required',
       'file' => 'required'
 		);
@@ -190,7 +190,7 @@ class InapController extends Controller
     }
 
 		$inap = Inap::where('id',$id)
-		->where('user_id', $inputs['user_id'])
+		->where('pegawai_id', $inputs['pegawai_id'])
 		->where('biaya_id', $inputs['biaya_id'])
 		->first();
 
@@ -205,22 +205,22 @@ class InapController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
-	public function destroy($id, $biayaId, $userId)
+	public function destroy($id, $biayaId, $pegawaiId)
 	{
 		$results = $this->responses;
 
 		$inap = Inap::where('id',$id)
-		->where('user_id', $userId)
+		->where('pegawai_id', $pegawaiId)
 		->where('biaya_id', $biayaId)
 		->first();
 		
 		try{
-			DB::transaction(function () use ($inap, $biayaId, $userId) {
+			DB::transaction(function () use ($inap, $biayaId, $pegawaiId) {
 				$jml_bayar = $inap->jml_bayar;
 
 				if(!empty($inap->checkout_at)){
 					$biaya = Biaya::where('id', $biayaId)
-					->where('user_id', $userId)
+					->where('pegawai_id', $pegawaiId)
 					->first();
 					
 					$biaya->update([

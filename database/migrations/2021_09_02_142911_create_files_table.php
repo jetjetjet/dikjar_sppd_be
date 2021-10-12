@@ -20,8 +20,8 @@ class CreateFilesTable extends Migration
             $table->string('file_path');
             $table->string('ext')->nullable();
             $table->timestamps();
-            $table->integer('created_by');
-            $table->integer('updated_by')->nullable();
+            $table->bigInteger('created_by');
+            $table->bigInteger('updated_by')->nullable();
         });
     }
 

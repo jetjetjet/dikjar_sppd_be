@@ -11,7 +11,7 @@ class PejabatTtd extends Model
 	use HasFactory, LogUser;
 	protected $table = 'pejabat_ttd';
 	protected $fillable = [
-		'user_id',
+		'pegawai_id',
 		'autorisasi',
 		'autorisasi_code',
 		'is_active',

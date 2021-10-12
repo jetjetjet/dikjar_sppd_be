@@ -17,7 +17,7 @@ class BiayaController extends Controller
 		$inputs = $request->all();
 		$rules = array(
 			'spt_id' 	=> 'required',
-      'user_id' => 'required'
+      'pegawai_id' => 'required'
 		);
 
 		$validator = Validator::make($inputs, $rules);
@@ -28,7 +28,7 @@ class BiayaController extends Controller
     }
 		
     $biaya = Biaya::create([
-      'user_id' => $inputs['user_id'],
+      'pegawai_id' => $inputs['pegawai_id'],
       'spt_id' => $inputs['spt_id'],
 			'uang_makan' => $inputs['uang_makan'],
 			'uang_saku' => $inputs['uang_saku'],

@@ -13,29 +13,20 @@ class CreateUsersTable extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('jabatan_id')->nullable();
-            $table->string('nip',20);
-            // $table->string('username',50);
-            $table->string('email')->nullable();
-            $table->string('full_name', 100)->nullable();
-            $table->string('path_foto')->nullable();
-            $table->string('password', 100);
-            $table->date('tgl_lahir')->nullable();
-            $table->string('jenis_kelamin');
-            $table->string('phone', 15)->nullable();
-            $table->string('address', 400)->nullable();
-            $table->text('ttd')->nullable();
-            $table->dateTime('last_login')->nullable();
-            $table->boolean('excludeapp')->nullable();
-            $table->rememberToken();
-            $table->timestamps();
-            $table->bigInteger('created_by');
-            $table->bigInteger('updated_by')->nullable();
-            $table->softDeletes();
-            $table->bigInteger('deleted_by')->nullable();
-        });
+        // Schema::create('users', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->string('nip',20);
+        //     $table->string('password', 100);
+        //     $table->dateTime('last_login')->nullable();
+        //     $table->rememberToken();
+        //     $table->timestamps();
+        //     $table->bigInteger('created_by');
+        //     $table->bigInteger('updated_by')->nullable();
+        //     $table->softDeletes();
+        //     $table->bigInteger('deleted_by')->nullable();
+
+        //     $table->foreign('nip')->references('nip')->on('pegawai')->onUpdate('cascade')->onDelete('cascade');
+        // });
     }
 
     /**
@@ -45,6 +36,6 @@ class CreateUsersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users');
+        // Schema::dropIfExists('users');
     }
 }

@@ -12,7 +12,7 @@ class Biaya extends Model
 	protected $table = 'biaya';
 	protected $fillable = [
 		'spt_id',
-		'user_id',
+		'pegawai_id',
 		'uang_makan',
 		'uang_saku',
 		'uang_representasi',

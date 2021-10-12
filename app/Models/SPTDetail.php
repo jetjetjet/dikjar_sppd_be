@@ -12,7 +12,7 @@ class SPTDetail extends Model
 	protected $table = 'spt_detail';
 	protected $fillable = [
 		'spt_id',
-		'user_id',
+		'pegawai_id',
 		'sppd_file_id',
 		'created_by',
 		'updated_by',

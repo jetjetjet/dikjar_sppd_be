@@ -16,17 +16,19 @@ class CreateSPTDetailsTable extends Migration
         Schema::create('spt_detail', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('spt_id');
-            $table->bigInteger('user_id');
+            $table->bigInteger('pegawai_id');
             $table->bigInteger('sppd_file_id')->nullable();
+            
+            $table->timestamp('sppd_generated_at')->nullable();
+            $table->bigInteger('sppd_generated_by')->nullable();
+            $table->timestamp('finished_at')->nullable();
+            $table->bigInteger('finished_by')->nullable();
+            
             $table->timestamps();
             $table->softDeletes();
             $table->bigInteger('created_by');
             $table->bigInteger('updated_by')->nullable();
             $table->bigInteger('deleted_by')->nullable();
-            $table->timestamp('sppd_generated_at')->nullable();
-            $table->bigInteger('sppd_generated_by')->nullable();
-            $table->timestamp('finished_at')->nullable();
-            $table->bigInteger('finished_by')->nullable();
         });
     }
 

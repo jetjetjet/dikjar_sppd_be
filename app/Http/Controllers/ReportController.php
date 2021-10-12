@@ -44,7 +44,7 @@ class ReportController extends Controller
 		$results = $this->responses;
 		$inputs = $request->all();
 		$rules = array(
-			'user_id' => 'required',
+			'pegawai_id' => 'required',
 			'tgl_berangkat' => 'required',
 			'tgl_kembali' => 'required'
 		);
@@ -59,14 +59,14 @@ class ReportController extends Controller
 		$q = SPT::join('spt_detail as sd', function($on){
 			$on->on('sd.spt_id', 'spt.id');
 			$on->whereNull('sd.deleted_at');
-		})->join('users as u', 'u.id', 'sd.user_id')
+		})->join('pegawai as p', 'p.id', 'sd.pegawai_id')
 		->join('biaya as b', function($on) use($inputs){
 			$on->on('b.spt_id', 'spt.id');
-			$on->where('b.user_id', $inputs['user_id']);
+			$on->where('b.pegawai_id', $inputs['pegawai_id']);
 			$on->whereNull('b.deleted_at');
 		})
 		// ->join('jabatan as j', 'u.jabatan_id', 'j.id')
-		->where('u.id', $inputs['user_id']);
+		->where('p.id', $inputs['pegawai_id']);
 
 		if(isset($inputs['tgl_berangkat']) && isset($inputs['tgl_kembali'])){
 			$q = $q->whereRaw("tgl_berangkat::date >= '". $inputs['tgl_berangkat'] . "'::date and tgl_kembali::date <= '" . $inputs['tgl_kembali'] . "'::date");

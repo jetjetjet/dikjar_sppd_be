@@ -20,7 +20,9 @@ class CreateSPTSTable extends Migration
             $table->integer('periode');
             $table->string('jenis_dinas');
             $table->bigInteger('anggaran_id');
-            $table->bigInteger('pttd_user_id');
+            $table->bigInteger('pelaksana_id');
+            $table->bigInteger('pttd_id');
+            $table->date('tgl_spt');
             $table->integer('no_index');
             $table->string('no_spt');
             $table->string('dasar_pelaksana');
@@ -35,15 +37,16 @@ class CreateSPTSTable extends Migration
             $table->string('kec_tujuan')->nullable();
             $table->date('tgl_berangkat');
             $table->date('tgl_kembali');
+            $table->dateTime('spt_generated_at')->nullable();
+            $table->bigInteger('spt_generated_by')->nullable();
+            $table->dateTime('finished_at')->nullable();
+            $table->bigInteger('finished_by')->nullable();
+
             $table->timestamps();
             $table->softDeletes();
             $table->bigInteger('created_by');
             $table->bigInteger('updated_by')->nullable();
             $table->bigInteger('deleted_by')->nullable();
-            $table->dateTime('spt_generated_at')->nullable();
-            $table->bigInteger('spt_generated_by')->nullable();
-            $table->dateTime('finished_at')->nullable();
-            $table->bigInteger('finished_by')->nullable();
         });
     }
 

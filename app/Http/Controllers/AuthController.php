@@ -38,15 +38,14 @@ class AuthController extends Controller
 		$token = $user->createToken($request->nip, $perm);
 
 		$data = Array( "token" => $token->plainTextToken,
-			"userid" => $user->id,
-			"username" => $user->username,
-			"email" => $user->email,
-			"full_name" => $user->full_name,
-			"nip" => $user->nip,
-			"address" => $user->address,
-			"phone" => $user->phone,
-			"jenis_kelamin" => $user->jenis_kelamin,
-			"ttl" => $user->ttl,
+			"pegawai_id" => $user->pegawai->id,
+			"email" => $user->pegawai->email,
+			"full_name" => $user->pegawai->full_name,
+			"nip" => $user->pegawai->nip,
+			"address" => $user->pegawai->address,
+			"phone" => $user->pegawai->phone,
+			"jenis_kelamin" => $user->pegawai->jenis_kelamin,
+			"ttl" => $user->pegawai->ttl,
 			"perms" => $perm
 		);
 		$results['success'] = true;
