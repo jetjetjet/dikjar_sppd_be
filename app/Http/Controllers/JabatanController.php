@@ -23,9 +23,10 @@ class JabatanController extends Controller
 	{
 		$results = $this->responses;
 		
-		$results['data'] = Jabatan::
-		// whereNotIn('jabatan.id', [DB::raw("select jabatan_id from users where deleted_at is null and jabatan_id is not null")])
-		select('id', 'name')->get();
+		$results['data'] = Jabatan::select('id', 'name')
+		->whereNotIn('jabatan.id', [DB::raw("select jabatan_id from pegawai where deleted_at is null and jabatan_id is not null")])
+		->get();
+
 		$results['state_code'] = 200;
 		$results['success'] = true;
 		

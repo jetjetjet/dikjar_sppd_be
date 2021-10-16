@@ -10,6 +10,17 @@ use Carbon\Carbon;
 
 class BiayaController extends Controller
 {
+	public function grid(Request $request, $id, $pegawaiId)
+	{
+		$results = $this->responses;
+
+		$results['data'] = DB::select("select * from biaya_grid({$id}, {$pegawaiId})");
+		$results['state_code'] = 200;
+		$results['success'] = true;
+
+		return response()->json($results, $results['state_code']);
+	}
+
 	public function store(Request $request)
 	{
 		$results = $this->responses;

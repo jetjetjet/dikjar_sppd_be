@@ -29,12 +29,8 @@ class CreateSPTSTable extends Migration
             $table->string('untuk');
             $table->string('status');
             $table->string('transportasi');
-            $table->string('provinsi_asal')->nullable();
-            $table->string('kota_asal')->nullable();
-            $table->string('kec_asal')->nullable();
-            $table->string('provinsi_tujuan')->nullable();
-            $table->string('kota_tujuan')->nullable();
-            $table->string('kec_tujuan')->nullable();
+            $table->string('daerah_asal')->nullable();
+            $table->string('daerah_tujuan')->nullable();
             $table->date('tgl_berangkat');
             $table->date('tgl_kembali');
             $table->dateTime('spt_generated_at')->nullable();

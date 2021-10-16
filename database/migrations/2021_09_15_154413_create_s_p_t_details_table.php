@@ -17,6 +17,7 @@ class CreateSPTDetailsTable extends Migration
             $table->id();
             $table->bigInteger('spt_id');
             $table->bigInteger('pegawai_id');
+            $table->boolean('is_pelaksana');
             $table->bigInteger('sppd_file_id')->nullable();
             
             $table->timestamp('sppd_generated_at')->nullable();

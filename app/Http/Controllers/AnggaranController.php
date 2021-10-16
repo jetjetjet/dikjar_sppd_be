@@ -20,7 +20,7 @@ class AnggaranController extends Controller
 		->whereNull('s.deleted_at')
 		->whereNotNull('s.finished_at')
 		->groupBy('s.anggaran_id')
-		->select('s.anggaran_id', DB::raw("sum(b.jml_biaya) as realisasi"));
+		->select('s.anggaran_id', DB::raw("sum(b.total_biaya) as realisasi"));
 
 		$results['data'] = Anggaran::where('periode', date('Y'))
 		->leftJoinSub($realisasi, 'r', function ($join) {
@@ -45,16 +45,34 @@ class AnggaranController extends Controller
 	public function search(Request $request)
 	{
 		$results = $this->responses;
-		// if($request->has('filter')){
-		// }
-		$datas = Anggaran::where('periode', date('Y'))->get();
+		
+		$realisasi = DB::table('spt as s')
+		->join('biaya as b', 'b.spt_id', 's.id')
+		->whereNull('b.deleted_at')
+		->whereNull('s.deleted_at')
+		->whereNotNull('s.finished_at')
+		->groupBy('s.anggaran_id')
+		->select('s.anggaran_id', DB::raw("sum(b.total_biaya) as realisasi"));
+
+		$datas = Anggaran::leftJoinSub($realisasi, 'r', function ($join) {
+			$join->on('anggaran.id', '=', 'r.anggaran_id');
+		})->where('periode', date('Y'))
+		->select(
+			'anggaran.id',
+			'kode_rekening',
+			'nama_rekening',
+			'uraian',
+			'pagu',
+			DB::raw("pagu - coalesce(realisasi,0) as sisa")
+		)->get();
 		foreach($datas as $dt){
 			$ui = Array(
 				'id' => $dt->id,
 				'kode_rekening' => $dt->kode_rekening,
 				'nama_rekening' => $dt->nama_rekening,
 				'uraian' => $dt->uraian,
-				'pagu' => 'Rp ' . number_format($dt->pagu)
+				'pagu' => 'Rp ' . number_format($dt->pagu),
+				'sisa' => 'Rp ' . number_format($dt->sisa)
 			);
 		
 			array_push($results['data'], $ui);

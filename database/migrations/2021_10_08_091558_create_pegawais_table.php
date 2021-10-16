@@ -17,6 +17,7 @@ class CreatePegawaisTable extends Migration
             $table->id();
             $table->string('nip')->unique();
             $table->foreignId('jabatan_id')->nullable();
+            $table->boolean('pegawai_app')->nullable();
             // $table->string('nip',20);
             // $table->string('username',50);
             $table->string('email')->nullable();

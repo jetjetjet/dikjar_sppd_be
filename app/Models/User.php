@@ -66,9 +66,9 @@ class User extends Authenticatable
         return $this->getAllPermissions();
     }
 
-    public function getNip()
+    public function getPegawaiId()
     {
-        return $this->attributes['nip'];
+        return $this->attributes['pegawai_id'];
     }
 
     public function pegawai()

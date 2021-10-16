@@ -36,6 +36,7 @@ class SPTController extends Controller
 
 		$user = $request->user();
 		$isAdmin = $user->tokenCan('is_admin') ? 1 : 0;
+		$canGenerate = $user->tokenCan('spt_generate') || $isAdmin == 1 ? 1 : 0;
 
 		$pegawai = SPTDetail::join('pegawai as p', 'p.id', 'spt_detail.pegawai_id')
 		->join('spt', 'spt.id', 'spt_detail.spt_id')
@@ -55,11 +56,12 @@ class SPTController extends Controller
 			'no_spt',
 			'jenis_dinas',
 			DB::raw("tgl_berangkat || ' s/d ' || tgl_kembali as tgl"),
-			DB::raw("coalesce(kota_tujuan, kec_tujuan) as tujuan"),
+			'daerah_tujuan',
 			'untuk',
 			DB::raw("case when spt_file_id is not null then true else false end as spt_file"),
 			'finished_at',
-			'u.name'
+			'u.name',
+			DB::raw($canGenerate . " as can_generate")
 		);
 
 		$results['data'] = $q->get();
@@ -68,6 +70,30 @@ class SPTController extends Controller
 		$results['success'] = true;
 
 		return response()->json($results, $results['state_code']);
+	}
+
+	
+	function mapSPT($db){
+		$ui = new \stdClass();
+		$brgkt = isset($db->tgl_berangkat) ? new Carbon($db->tgl_berangkat) : "";
+		$kembali = isset($db->tgl_kembali) ? new Carbon($db->tgl_kembali) : "";
+		$ui->jml_hari = "";
+
+		if (isset($db->tgl_berangkat) && isset($db->tgl_kembali)) {
+			$ui->jml_hari = $brgkt->diff($kembali)->days;
+		}
+		$ui->tgl_berangkat = isset($db->tgl_berangkat) ? $brgkt->isoFormat('D MMMM Y') : "";
+		$ui->tgl_kembali = isset($db->tgl_kembali) ? $kembali->isoFormat('D MMMM Y') : "";
+		$ui->tgl_spt = isset($db->tgl_spt) ? (new Carbon($db->tgl_spt))->isoFormat('D MMMM Y') : "";
+
+		$ui->daerah_asal = ucwords(strtolower($db->daerah_asal));
+		$ui->daerah_tujuan = ucwords(strtolower($db->daerah_tujuan));
+		$ui->no_spt = isset($db->no_spt) ? $db->no_spt : "";
+		$ui->untuk = isset($db->untuk) ? $db->untuk : "";
+		$ui->transportasi = isset($db->transportasi) ? $db->transportasi : "";
+		$ui->dasar_pelaksana = isset($db->dasar_pelaksana) ? $db->dasar_pelaksana : "";
+
+		return $ui;
 	}
 
 	public function cetakSPT($id)
@@ -86,19 +112,11 @@ class SPTController extends Controller
 					DB::raw("ROW_NUMBER() OVER (ORDER BY spt_detail.id) AS index_no"), 
 					'full_name as nama_pegawai', 
 					'j.name as jabatan_pegawai', 
+					'j.golongan as golongan_pegawai',
+					'spt_detail.id',
+					'pegawai_id',
 					'nip as nip_pegawai')
 				->get();
-	
-				$userValue = array();
-				foreach($users as $user){
-					$temp = array(
-						'index_no' => $user->index_no,
-						'nama_pegawai' => $user->nama_pegawai,
-						'jabatan_pegawai' => $user->jabatan_pegawai,
-						'nip_pegawai' => $user->nip_pegawai
-					);
-					array_push($userValue, $temp);
-				}
 	
 				$pejabat = Pegawai::join('jabatan as j', 'j.id', 'jabatan_id')
 				->where('pegawai.id', $spt->pttd_id)
@@ -110,26 +128,94 @@ class SPTController extends Controller
 				)->first();
 				// $jabatanKadin = Jabatan::find($kadin->jabatan_id)->first();
 	
+				$sptData = $this->mapSPT($spt);
+
 				try{
+					$userValue = array();
+					$templateSppdPath = base_path('public/storage/template/template_sppd.docx');
+					$sppdFile = FaFile::exists($templateSppdPath);
 					
-					$brgkt = new Carbon($spt->tgl_berangkat);
-					$kembali = new Carbon($spt->tgl_kembali);
-					$tglSpt = Carbon::now()->isoFormat('D MMMM Y');
+					if(!$sppdFile) {
+						throw new \Exception('Template SPPD tidak ditemukan');
+					}
+
+					foreach($users as $user){
+						$tempSppd = new TemplateProcessor($templateSppdPath);
+							
+						// $template->setValue('dasar_pelaksana', $spt->dasar_pelaksana);
+						$tempSppd->setValue('nama_pegawai', $user->nama_pegawai);
+						$tempSppd->setValue('jabatan_pegawai', $user->jabatan_pegawai);
+						$tempSppd->setValue('golongan_pegawai', $user->golongan_pegawai);
+						$tempSppd->setValue('untuk', $sptData->untuk);
+						$tempSppd->setValue('transportasi', $sptData->transportasi);
+						$tempSppd->setValue('jml_hari', $sptData->jml_hari . " Hari");
+						$tempSppd->setValue('daerah_asal', $sptData->daerah_asal);
+						$tempSppd->setValue('daerah_tujuan', $sptData->daerah_tujuan);
+						$tempSppd->setValue('tgl_berangkat', $sptData->tgl_berangkat);
+						$tempSppd->setValue('tgl_kembali', $sptData->tgl_kembali);
+						// $template->setValue('tgl_berangkat_plus', $brgktPlus->isoFormat('D MMMM Y'));
+						// $template->setValue('tgl_kembali_minus', $kembaliMinus->isoFormat('D MMMM Y'));
+						$tempSppd->setValue('tgl_sppd', $sptData->tgl_spt);
+						$tempSppd->setValue('no_spt', $sptData->no_spt);
+						
+						$newFile = new \stdClass();
+						$newFile->dbPath ='/storage/spt/';
+						$newFile->ext = '.pdf';
+						$newFile->originalName = "SPPD_" . $user->nama_pegawai;
+						$newFile->newName = time()."_".$newFile->originalName;
+
+						$path = base_path('/public');
+						$tempSppd->saveAs($path . $newFile->dbPath . $newFile->newName . ".docx", TRUE);
+						//Convert kwe PDF
+						$docPath = $path . $newFile->dbPath . $newFile->newName . ".docx";
+						$converter = new OfficeConverter($docPath);
+						//generates pdf file in same directory as test-file.docx
+						$converter->convertTo($newFile->newName.".pdf");
+
+						$newFile->newName = $newFile->newName.".pdf";
+						$file = Utils::saveFile($newFile);
+						// update
+						SPTDetail::where('id', $user->id)
+						->where('pegawai_id', $user->pegawai_id)
+						->update([
+							'sppd_file_id' => $file,
+							'sppd_generated_at' => DB::raw("now()"),
+							'sppd_generated_by' => auth('sanctum')->user()->pegawai->id,
+						]);
+
+						//create biaya awal
+						Biaya::create([
+							'spt_id' => $id,
+							'pegawai_id' => $user->pegawai_id,
+							'total_biaya_lainnya' => 0,
+							'total_biaya_inap' => 0,
+							'total_biaya_travel' => 0,
+							'total_biaya' => 0,
+						]);
+
+						$temp = array(
+							'n-o' => $user->index_no,
+							'nama_pegawai' => $user->nama_pegawai,
+							'jabatan_pegawai' => $user->jabatan_pegawai,
+							'nip_pegawai' => $user->nip_pegawai
+						);
+						array_push($userValue, $temp);
+					}
 
 					$template = new TemplateProcessor($templatePath);
 	
-					$template->setValue('dasar_pelaksana', $spt->dasar_pelaksana);
-					$template->setValue('untuk', $spt->untuk);
-					$template->setValue('tgl_berangkat', $brgkt->isoFormat('D MMMM Y'));
-					$template->setValue('tgl_kembali', $kembali->isoFormat('D MMMM Y'));
-					$template->setValue('tgl_cetak', $tglSpt);
-					$template->setValue('nomor_surat', $spt->no_spt);
+					$template->setValue('dasar_pelaksana', $sptData->dasar_pelaksana);
+					$template->setValue('untuk', $sptData->untuk);
+					$template->setValue('tgl_berangkat', $sptData->tgl_berangkat);
+					$template->setValue('tgl_kembali', $sptData->tgl_kembali);
+					$template->setValue('tgl_spt', $sptData->tgl_spt);
+					$template->setValue('nomor_surat', $sptData->no_spt);
 					$template->setValue('nama_pejabat', $pejabat->full_name);
 					$template->setValue('nip_pejabat', $pejabat->nip);
 					$template->setValue('jabatan_pejabat', strtoupper($pejabat->jabatan));
 					$template->setValue('golongan_pejabat', $pejabat->golongan);
 		
-					$template->cloneRowAndSetValues('index_no', $userValue);
+					$template->cloneRowAndSetValues('n-o', $userValue);
 					
 					$newFile = new \stdClass();
 					$newFile->dbPath ='/storage/spt/';
@@ -152,7 +238,7 @@ class SPTController extends Controller
 					$spt->update([
 						'spt_file_id' => $file,
 						'spt_generated_at' => DB::raw("now()"),
-						'spt_generated_by' => auth('sanctum')->user()->getPegawaiId(),
+						'spt_generated_by' => auth('sanctum')->user()->pegawai->id,
 						'status' => 'SPTGENERATED'
 					]);
 					
@@ -183,12 +269,15 @@ class SPTController extends Controller
       'anggaran_id' => 'required',
 			'jenis_dinas'=> 'required', 
       'pttd_id' => 'required',
+      'tgl_spt' => 'required',
       'pelaksana_id' => 'required',
       'dasar_pelaksana' => 'required',
       'untuk' => 'required',
       'transportasi' => 'required',
       'tgl_berangkat' => 'required',
-      'tgl_kembali' => 'required'
+      'tgl_kembali' => 'required',
+			'daerah_asal' => 'required',
+			'daerah_tujuan' => 'required'
 		);
 
 		$validator = Validator::make($inputs, $rules);
@@ -214,22 +303,26 @@ class SPTController extends Controller
 					'dasar_pelaksana' => $inputs['dasar_pelaksana'],
 					'untuk' => $inputs['untuk'],
 					'transportasi' => $inputs['transportasi'],
-					'provinsi_asal' => $inputs['provinsi_asal'],
-					'kota_asal' => $inputs['kota_asal'],
-					'kec_asal' => $inputs['kec_asal'],
-					'provinsi_tujuan' => $inputs['provinsi_tujuan'],
-					'kota_tujuan' => $inputs['kota_tujuan'],
-					'kec_tujuan' => $inputs['kec_tujuan'],
+					'daerah_asal' => $inputs['daerah_asal'],
+					'daerah_tujuan' => $inputs['daerah_tujuan'],
 					'tgl_berangkat' => $inputs['tgl_berangkat'],
 					'tgl_kembali' => $inputs['tgl_kembali'],
+					'tgl_spt' => $inputs['tgl_spt'],
 					'status' => 'DRAFT',
-					'periode' => '2021'
+					'periode' => date('Y')
+				]);
+
+				SPTDetail::create([
+					'spt_id' => $spt->id,
+					'pegawai_id' => $inputs['pelaksana_id'],
+					'is_pelaksana' => '1'
 				]);
 
 				foreach($inputs['pegawai_id'] as $pegawaiId){
 					$detail = SPTDetail::create([
 						'spt_id' => $spt->id,
-						'pegawai_id' => $pegawaiId
+						'pegawai_id' => $pegawaiId,
+						'is_pelaksana' => '0'
 					]);
 				}
 			});
@@ -288,8 +381,8 @@ class SPTController extends Controller
 						->where('jenis_transport', 'Pesawat')
 						->first();
 
-						$asal = $spt->kota_asal != null ? ucwords(strtolower($spt->kota_asal)) : ucwords(strtolower($spt->kec_asal));
-						$tujuan = $spt->kota_tujuan != null ? ucwords(strtolower($spt->kota_tujuan)) : ucwords(strtolower($spt->kec_tujuan));
+						$asal = ucwords(strtolower($spt->daerah_asal));
+						$tujuan = ucwords(strtolower($spt->daerah_tujuan));
 						$checkin = $inap->tgl_checkin ?? null;
 						$checkout = $inap->tgl_checkout ?? null;
 						$pesbrgkt_tgl = $pesawatBrgkt->tgl ?? null;
@@ -367,10 +460,10 @@ class SPTController extends Controller
 		->where('spt.id', $id)
 		->select(
 			'spt.*',
-			'ag.mak as anggaran_text'
+			'ag.kode_rekening as anggaran_text'
 		)->first();
 
-		$data->pegawai_id = SPTDetail::where('spt_id', $id)->get()->pluck('pegawai_id');
+		$data->pegawai_id = SPTDetail::where('spt_id', $id)->where('is_pelaksana', '0')->get()->pluck('pegawai_id');
 		$results['data'] = $data;
 
 		$results['state_code'] = 200;
@@ -432,12 +525,8 @@ class SPTController extends Controller
 					'dasar_pelaksana' => $inputs['dasar_pelaksana'],
 					'untuk' => $inputs['untuk'],
 					'transportasi' => $inputs['transportasi'],
-					'provinsi_asal' => $inputs['provinsi_asal'],
-					'kota_asal' => $inputs['kota_asal'],
-					'kec_asal' => $inputs['kec_asal'],
-					'provinsi_tujuan' => $inputs['provinsi_tujuan'],
-					'kota_tujuan' => $inputs['kota_tujuan'],
-					'kec_tujuan' => $inputs['kec_tujuan'],
+					'daerah_asal' => $inputs['daerah_asal'],
+					'daerah_tujuan' => $inputs['daerah_tujuan'],
 					'tgl_berangkat' => $inputs['tgl_berangkat'],
 					'tgl_kembali' => $inputs['tgl_kembali']
 				]);
@@ -445,6 +534,7 @@ class SPTController extends Controller
 				//Delete Missing Pegawai Id
 				$data = SPTDetail::where('spt_id', $id)
 				->whereNotIn('pegawai_id', $inputs['pegawai_id'])
+				->where('is_pelaksana', '0')
 				->delete();
 
 				//Insert new or skip

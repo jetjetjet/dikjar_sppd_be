@@ -13,6 +13,7 @@ class SPTDetail extends Model
 	protected $fillable = [
 		'spt_id',
 		'pegawai_id',
+		'is_pelaksana',
 		'sppd_file_id',
 		'created_by',
 		'updated_by',

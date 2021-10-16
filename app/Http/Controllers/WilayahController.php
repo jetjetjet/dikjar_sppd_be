@@ -33,12 +33,16 @@ class WilayahController extends Controller
   public function getKabupaten(Request $request)
 	{
 		$results = $this->responses;
-		$inputs = $request->all();
-
 		$cari = $request['q'] ?? '';
 
-		$results['data'] = Kabupaten::whereRaw('UPPER(name) LIKE UPPER(\'%'. $cari .'%\')')
-		->select('id', 'name')
+		$q = Kabupaten::whereRaw('UPPER(name) LIKE UPPER(\'%'. $cari .'%\')')
+		->whereNotIn('id', [1501]);
+
+		if (isset($request['provinsi_id'])) {
+			$q = $q->where('provinsi_id', $request['provinsi_id']);
+		}
+
+		$results['data'] = $q->select('id', 'name')
 		->orderBy('name')
 		->limit(10)
 		->get();
@@ -52,8 +56,6 @@ class WilayahController extends Controller
   public function getKecamatan(Request $request)
 	{
 		$results = $this->responses;
-		$inputs = $request->all();
-
 		$cari = $request['q'] ?? '';
 		$kota_id = 1501; // ID Kabupaten Kerinci
 

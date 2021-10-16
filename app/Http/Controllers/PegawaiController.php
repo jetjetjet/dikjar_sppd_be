@@ -15,7 +15,9 @@ class PegawaiController extends Controller
 	{
 		$results = $this->responses;
 
-		$results['data'] = Pegawai::all();
+		$results['data'] = Pegawai::join('jabatan as j', 'j.id', 'jabatan_id')
+		->select('pegawai.id', 'nip', 'full_name', 'j.name as jabatan')
+		->orderBy('pegawai.created_at')->get();
 		$results['state_code'] = 200;
 		$results['success'] = true;
 
@@ -32,22 +34,19 @@ class PegawaiController extends Controller
 				$q = $q->join('jabatan as j', 'j.id', 'pegawai.jabatan_id')
 				->where('j.is_parent', '1');
 			}
+
+			if($request->filter == 'spt'){
+				$q = $q->whereRaw("id not in ( select pegawai_id from spt_detail where deleted_at is null and finished_at is null )")
+					->where('pegawai_app', '1');
+			}
+
+			if($request->filter == 'spt_edit' && isset($request->id)){
+				$q = $q->whereRaw("id not in ( select pegawai_id from spt_detail where deleted_at is null and finished_at is null and spt_id not in ( ". $request->id ." ) )")
+					->where('pegawai_app', '1');
+			}
 		}
 
 		$results['data'] = $q->get();
-		$results['state_code'] = 200;
-		$results['success'] = true;
-		
-		return response()->json($results, $results['state_code']);
-	}
-
-	public function sptSearch(Request $request)
-	{
-		$results = $this->responses;
-		
-		$results['data'] = Pegawai::select('id as code', 'full_name as label')
-		->whereRaw("id not in ( select pegawai_id from spt_detail where deleted_at is null and finished_at is null )")
-		->get();
 		$results['state_code'] = 200;
 		$results['success'] = true;
 		
@@ -60,10 +59,9 @@ class PegawaiController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-			'nip' => 'required|unique:users,nip',
+			'nip' => 'required',
 			'email' => 'required',
 			'full_name' => 'required',
-			'jenis_kelamin' => 'required',
 			'jenis_kelamin' => 'required',
 			'phone' => 'max:15'
 		);
@@ -76,11 +74,9 @@ class PegawaiController extends Controller
     }
 		
 		try{
-			$defaultPassword = bcrypt('12345678');
-			$user = Pegawai::create([
+			$pegawai = Pegawai::create([
 				'nip' => $inputs['nip'],
 				'full_name' => $inputs['full_name'],
-				'password' => $defaultPassword,
 				'jabatan_id' => $inputs['jabatan_id'],
 				'email' => $inputs['email'],
 				'jenis_kelamin' => $inputs['jenis_kelamin'],
@@ -91,9 +87,9 @@ class PegawaiController extends Controller
 
 			//upload poto
 			$file = Utils::imageUpload($request, 'profile');
-			if($file != null) $user->path_foto = $file->path;
+			if($file != null) $pegawai->path_foto = $file->path;
 
-			array_push($results['messages'], 'Berhasil menambahkan user baru.');
+			array_push($results['messages'], 'Berhasil menambahkan pegawai baru.');
 
 			$results['success'] = true;
 			$results['state_code'] = 200;
@@ -107,9 +103,9 @@ class PegawaiController extends Controller
 	public function show($id)
 	{
 		$results = $this->responses;
-		$user = Pegawai::find($id);
+		$pegawai = Pegawai::find($id);
 
-		$results['data'] = $user;
+		$results['data'] = $pegawai;
 		$results['state_code'] = 200;
 		$results['success'] = true;
 
@@ -125,8 +121,7 @@ class PegawaiController extends Controller
 			'nip' => 'required',
 			'email' => 'required',
 			'full_name' => 'required',
-			'jenis_kelamin' => 'required',
-			// 'role' => 'required'
+			'jenis_kelamin' => 'required'
 		);
 
 		$validator = Validator::make($request->all(), $rules);
@@ -136,10 +131,8 @@ class PegawaiController extends Controller
       return response()->json($results, $results['state_code']);
     }
 		
-		$user = Pegawai::find($id);
-		$role = $inputs['role'] ?? null;
-		$user->syncRoles([$role]);
-		$user->update([
+		$pegawai = Pegawai::find($id);
+		$pegawai->update([
 			'nip' => $inputs['nip'],
 			'full_name' => $inputs['full_name'],
 			'email' => $inputs['email'],
@@ -149,11 +142,10 @@ class PegawaiController extends Controller
 			'phone' => $inputs['phone'] ?? null,
 			'tgl_lahir' => $inputs['tgl_lahir'] ?? null
 		]);
-		
 
 		$results['success'] = true;
 		$results['state_code'] = 200;
-		array_push($results['messages'], 'Berhasil ubah user.');
+		array_push($results['messages'], 'Berhasil ubah pegawai.');
 
 		return response()->json($results, $results['state_code']);
 	}
@@ -179,7 +171,7 @@ class PegawaiController extends Controller
 		
 			//upload poto
 			$file = Utils::imageUpload($inputs, 'profile');
-			$user = Pegawai::find($id)
+			$pegawai = Pegawai::find($id)
 			->update([
 				'path_foto' => $file->path
 			]);
@@ -206,9 +198,9 @@ class PegawaiController extends Controller
 			return response()->json($results, $results['state_code']);
 		}
 
-		$role = Pegawai::destroy($id);
+		$pegawai = Pegawai::destroy($id);
 
-		array_push($results['messages'], 'Berhasil menghapus user.');
+		array_push($results['messages'], 'Berhasil menghapus pegawai.');
 		$results['state_code'] = 200;
 		$results['success'] = true;
 

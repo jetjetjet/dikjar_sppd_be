@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BidangController;
 use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\PejabatTtdController;
+use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
@@ -61,6 +62,15 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::put('/jabatan/{id}', [JabatanController::class, 'update'])->middleware('can:jabatan-edit');
 	Route::delete('/jabatan/{id}', [JabatanController::class, 'destroy'])->middleware('can:jabatan-delete');
 	
+	Route::get('/pegawai-grid', [PegawaiController::class, 'grid'])->middleware('can:pegawai-view');
+	Route::get('/pegawai-search', [PegawaiController::class, 'search']);
+	Route::get('/pegawai/{id}', [PegawaiController::class, 'show'])->middleware('can:pegawai-view');
+	Route::post('/pegawai', [PegawaiController::class, 'store'])->middleware('can:pegawai-add');
+	Route::put('/pegawai/{id}', [PegawaiController::class, 'update'])->middleware('can:pegawai-edit');
+	Route::put('/pegawai/{id}/change-password', [PegawaiController::class, 'changePassword'])->middleware('can:pegawai-edit');
+	Route::put('/pegawai/{id}/change-photo', [PegawaiController::class, 'changePhoto'])->middleware('can:pegawai-edit');
+	Route::delete('/pegawai/{id}', [PegawaiController::class, 'destroy'])->middleware('can:pegawai-delete');
+	
 	Route::get('/pejabat-grid', [PejabatTtdController::class, 'grid'])->middleware('can:pejabat-view');
 	Route::get('/pejabat-search', [PejabatTtdController::class, 'search']);
 	Route::get('/pejabat/{id}', [PejabatTtdController::class, 'show'])->middleware('can:pejabat-view');
@@ -81,15 +91,15 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::put('/role/{id}', [RoleController::class, 'update'])->middleware('can:peran-edit');
 	Route::delete('/role/{id}',  [RoleController::class, 'destroy'])->middleware('can:peran-delete');
 
-	Route::get('/user-grid', [UserController::class, 'grid'])->middleware('can:pegawai-view');
+	Route::get('/user-grid', [UserController::class, 'grid'])->middleware('can:user-view');
 	Route::get('/user-search', [UserController::class, 'search']);
 	Route::get('/user-sptsearch', [UserController::class, 'sptSearch']);
-	Route::get('/user/{id}', [UserController::class, 'show'])->middleware('can:pegawai-view');
-	Route::post('/user', [UserController::class, 'store'])->middleware('can:pegawai-add');
-	Route::put('/user/{id}', [UserController::class, 'update'])->middleware('can:pegawai-edit');
-	Route::put('/user/{id}/change-password', [UserController::class, 'changePassword'])->middleware('can:pegawai-edit');
-	Route::put('/user/{id}/change-photo', [UserController::class, 'changePhoto'])->middleware('can:pegawai-edit');
-	Route::delete('/user/{id}', [UserController::class, 'destroy'])->middleware('can:pegawai-delete');
+	Route::get('/user/{id}', [UserController::class, 'show'])->middleware('can:user-view');
+	Route::post('/user', [UserController::class, 'store'])->middleware('can:user-add');
+	Route::put('/user/{id}', [UserController::class, 'update'])->middleware('can:user-edit');
+	Route::put('/user/{id}/change-password', [UserController::class, 'changePassword'])->middleware('can:user-edit');
+	Route::put('/user/{id}/change-photo', [UserController::class, 'changePhoto'])->middleware('can:user-edit');
+	Route::delete('/user/{id}', [UserController::class, 'destroy'])->middleware('can:user-delete');
 	
 	Route::get('/wilayah/provinsi', [WilayahController::class, 'getProvinsi']);
 	Route::get('/wilayah/kota', [WilayahController::class, 'getKabupaten']);
@@ -108,25 +118,26 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 
 	//SPPD
 	Route::get('/spt/{id}/sppd-grid', [SPPDController::class, 'grid']);
-	Route::get('/spt/{id}/sppd/{sptDetailId}/{userId}', [SPPDController::class, 'show']);
-	Route::get('/spt/lihat-sppd/{sptDetailId}/{userId}', [SPPDController::class, 'getSPPD']);
-	Route::post('/spt/{id}/cetak-sppd/{sptDetailId}/{userId}', [SPPDController::class, 'cetakSPPD'])->middleware('can:sppd-generate');
+	Route::get('/spt/{id}/sppd/{sptDetailId}/{pegawaiId}', [SPPDController::class, 'show']);
+	Route::get('/spt/lihat-sppd/{sptDetailId}/{pegawaiId}', [SPPDController::class, 'getSPPD']);
+	Route::post('/spt/{id}/cetak-sppd/{sptDetailId}/{pegawaiId}', [SPPDController::class, 'cetakSPPD'])->middleware('can:sppd-generate');
 
+	Route::get('/biaya/grid/{id}/{pegawaiId}', [BiayaController::class, 'grid']);
 	Route::post('/biaya', [BiayaController::class, 'store']);
 	Route::put('/biaya/{id}', [BiayaController::class, 'update']);
 
-	Route::get('/inap/{biayaId}/{userId}', [InapController::class, 'grid']);
+	Route::get('/inap/{biayaId}/{pegawaiId}', [InapController::class, 'grid']);
 	Route::post('/inap', [InapController::class, 'store']);
 	Route::put('/inap/{id}', [InapController::class, 'update']);
 	Route::put('/inap/{id}/checkout', [InapController::class, 'checkout']);
 	Route::put('/inap/{id}/upload-file', [InapController::class, 'uploadFile']);
-	Route::delete('/inap/{id}/{biayaId}/{userId}', [InapController::class, 'destroy']);
+	Route::delete('/inap/{id}/{biayaId}/{pegawaiId}', [InapController::class, 'destroy']);
 	
-	Route::get('/transport/{biayaId}/{userId}', [TransportController::class, 'grid']);
+	Route::get('/transport/{biayaId}/{pegawaiId}', [TransportController::class, 'grid']);
 	Route::post('/transport', [TransportController::class, 'store']);
 	Route::put('/transport/{id}', [TransportController::class, 'update']);
 	Route::put('/transport/{id}/upload-file', [TransportController::class, 'uploadFile']);
-	Route::delete('/transport/{id}/{biayaId}/{userId}', [TransportController::class, 'destroy']);
+	Route::delete('/transport/{id}/{biayaId}/{pegawaiId}', [TransportController::class, 'destroy']);
 
 
 	Route::get('/report/spt/selesai', [ReportController::class, 'reportByFinishedSPT'])->middleware('can:laporan-tahunan');
