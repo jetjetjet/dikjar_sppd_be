@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AnggaranController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BidangController;
+use App\Http\Controllers\JenisTransportController;
 use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\PejabatTtdController;
 use App\Http\Controllers\PegawaiController;
@@ -61,6 +62,13 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::post('/jabatan', [JabatanController::class, 'store'])->middleware('can:jabatan-add');
 	Route::put('/jabatan/{id}', [JabatanController::class, 'update'])->middleware('can:jabatan-edit');
 	Route::delete('/jabatan/{id}', [JabatanController::class, 'destroy'])->middleware('can:jabatan-delete');
+
+	Route::get('/jenis-transport-grid', [JenisTransportController::class, 'grid']);
+	Route::get('/jenis-transport-search', [JenisTransportController::class, 'search']);
+	Route::get('/jenis-transport/{id}', [JenisTransportController::class, 'show']);
+	Route::post('/jenis-transport', [JenisTransportController::class, 'store']);
+	Route::put('/jenis-transport/{id}', [JenisTransportController::class, 'update']);
+	Route::delete('/jenis-transport/{id}', [JenisTransportController::class, 'destroy']);
 	
 	Route::get('/pegawai-grid', [PegawaiController::class, 'grid'])->middleware('can:pegawai-view');
 	Route::get('/pegawai-search', [PegawaiController::class, 'search']);
