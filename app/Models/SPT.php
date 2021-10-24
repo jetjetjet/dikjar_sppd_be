@@ -28,6 +28,7 @@ class SPT extends Model
 		'daerah_tujuan',
 		'tgl_spt',
 		'tgl_berangkat',
+		'jumlah_hari',
 		'tgl_kembali',
 		'created_by',
 		'updated_by',

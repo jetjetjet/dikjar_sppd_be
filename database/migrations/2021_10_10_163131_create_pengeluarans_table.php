@@ -18,12 +18,13 @@ class CreatePengeluaransTable extends Migration
             $table->bigInteger('biaya_id');
             $table->bigInteger('pegawai_id');
             $table->date('tgl');
-            $table->string('jenis_pengeluaran');
+            $table->string('kategori');
             $table->string('catatan')->nullable();
-            $table->string('jenis_satuan');
+            $table->decimal('nominal',16,0);
+            $table->string('satuan');
             $table->integer('jml');
-            $table->integer('total_hari');
-            $table->decimal('total_biaya',16,0);
+            $table->integer('jml_hari')->nullable();
+            $table->decimal('total',16,0);
             $table->bigInteger('file_id')->nullable();
 
             $table->timestamps();

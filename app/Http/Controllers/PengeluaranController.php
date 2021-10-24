@@ -3,19 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Transport;
+use App\Models\Pengeluaran;
 use App\Models\Biaya;
 use DB;
 use Validator;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
-class TransportController extends Controller
+class PengeluaranController extends Controller
 {
 	public function show($id)
 	{
 		$results = $this->responses;
-		$results['data'] = Transport::find($id);
+		$results['data'] = Pengeluaran::find($id);
 		$results['state_code'] = 200;
 		$results['success'] = true;
 
@@ -30,12 +30,12 @@ class TransportController extends Controller
 		$rules = array(
 			'pegawai_id' 	=> 'required',
       'biaya_id' => 'required',
-      'jenis_transport' => 'required',
-      'perjalanan' => 'required',
-      'agen' => 'required',
-      'no_tiket' => 'required',
       'tgl' => 'required',
-      'total_bayar' => 'required'
+      'kategori' => 'required',
+      'nominal' => 'required',
+      'satuan' => 'required',
+      'jml' => 'required',
+      'total' => 'required'
 		);
 
 		$validator = Validator::make($inputs, $rules);
@@ -47,45 +47,36 @@ class TransportController extends Controller
 
 		try{
 			DB::transaction(function () use ($inputs, &$results) {
-				$transport = Transport::create([
-					'pegawai_id' => $inputs['pegawai_id'],
+				$pengeluaran = Pengeluaran::create([
 					'biaya_id' => $inputs['biaya_id'],
-					'jenis_transport' => $inputs['jenis_transport'],
-					'catatan' => $inputs['catatan'],
-					'perjalanan' => $inputs['perjalanan'],
-					'agen' => $inputs['agen'],
-					'no_tiket' => $inputs['no_tiket'],
-					'kode_booking' => $inputs['kode_booking'],
-					'no_penerbangan' => $inputs['no_penerbangan'],
+					'pegawai_id' => $inputs['pegawai_id'],
 					'tgl' => $inputs['tgl'],
-					'total_bayar' => $inputs['total_bayar']
+					'kategori' => $inputs['kategori'],
+					'catatan' => $inputs['catatan'],
+					'nominal' => $inputs['nominal'],
+					'satuan' => $inputs['satuan'],
+					'jml' => $inputs['jml'],
+					'jml_hari' => $inputs['jml_hari'] ?? null,
+					'total' => $inputs['total']
 				]);
 		
 				$biaya = Biaya::where('id', $inputs['biaya_id'])
 				->where('pegawai_id', $inputs['pegawai_id'])
 				->first();
 
-				$totalBiaya = $biaya->total_biaya + $inputs['total_bayar'];
-				if($inputs['jenis_transport'] == 'Pesawat') {
-					$biaya->update([
-						'total_biaya_pesawat' => ( $biaya->total_biaya_pesawat ?? 0 ) +  $inputs['total_bayar'],
-						'total_biaya' => $totalBiaya
-					]);
-				} else {
-					$biaya->update([
-						'total_biaya_travel' => ($biaya->total_biaya_travel ?? 0) + $inputs['total_bayar'],
-						'total_biaya' => $totalBiaya
-					]);
-				}
-		
+				$totalBiaya = $biaya->total_biaya + $inputs['total'];
+				$biaya->update([
+					'total_biaya_lainnya' => ( $biaya->total_biaya_lainnya ?? 0 ) +  $inputs['total'],
+					'total_biaya' => $totalBiaya
+				]);
 				$results['data'] = ['total' => $totalBiaya];
 			});
 		
-			array_push($results['messages'], 'Berhasil menambahkan Perjalanan.');
+			array_push($results['messages'], 'Berhasil menambahkan Pengeluaran.');
 			$results['success'] = true;
 			$results['state_code'] = 200;
 		} catch(\Exception $e) {
-			Log::channel('spderr')->info('transport_save_err: '. json_encode($e->getMessage()));
+			Log::channel('spderr')->info('pengeluaran_save: '. json_encode($e->getMessage()));
 			array_push($results['messages'], $e->getMessage());
 		}
 
@@ -100,12 +91,12 @@ class TransportController extends Controller
 		$rules = array(
 			'pegawai_id' 	=> 'required',
       'biaya_id' => 'required',
-      'jenis_transport' => 'required',
-      'perjalanan' => 'required',
-      'agen' => 'required',
-      'no_tiket' => 'required',
       'tgl' => 'required',
-      'total_bayar' => 'required'
+      'kategori' => 'required',
+      'nominal' => 'required',
+      'satuan' => 'required',
+      'jml' => 'required',
+      'total' => 'required'
 		);
 
 		$validator = Validator::make($inputs, $rules);
@@ -115,54 +106,45 @@ class TransportController extends Controller
       return response()->json($results, 200);
     }
 		
-		$transport = Transport::where('id',$id)
+		$pengeluaran = Pengeluaran::where('id',$id)
 		->where('pegawai_id', $inputs['pegawai_id'])
 		->where('biaya_id', $inputs['biaya_id'])
 		->first();
 
 		try{
-			DB::transaction(function () use ($inputs, $transport, &$results) {
+			DB::transaction(function () use ($inputs, $pengeluaran, &$results) {
 
-				$total_bayar = $transport->total_bayar - $inputs['total_bayar'];
-				$jenis_transport = $transport->jenis_transport;
+				$total_biaya = $pengeluaran->total - $inputs['total'];
 
 				$biaya = Biaya::where('id', $inputs['biaya_id'])
 				->where('pegawai_id', $inputs['pegawai_id'])
 				->first();
 
-				$transport->update([
-					'jenis_transport' => $inputs['jenis_transport'],
-					'perjalanan' => $inputs['perjalanan'],
-					'catatan' => $inputs['catatan'],
-					'agen' => $inputs['agen'],
-					'no_tiket' => $inputs['no_tiket'],
-					'kode_booking' => $inputs['kode_booking'],
-					'no_penerbangan' => $inputs['no_penerbangan'],
+				$pengeluaran->update([
 					'tgl' => $inputs['tgl'],
-					'total_bayar' => $inputs['total_bayar']
+					'kategori' => $inputs['kategori'],
+					'catatan' => $inputs['catatan'],
+					'nominal' => $inputs['nominal'],
+					'satuan' => $inputs['satuan'],
+					'jml' => $inputs['jml'],
+					'jml_hari' => $inputs['jml_hari'] ?? null,
+					'total' => $inputs['total']
 				]);
-				
-				$totalBiaya = $biaya->total_biaya - ($total_bayar);
-				if($jenis_transport == 'Pesawat') {
-					$biaya->update([
-						'total_biaya_pesawat' => $biaya->total_biaya_pesawat -  ($total_bayar),
-						'total_biaya' => $totalBiaya
-					]);
-				} else {
-					$biaya->update([
-						'total_biaya_travel' => $biaya->total_biaya_travel - ($total_bayar),
-						'total_biaya' => $totalBiaya
-					]);
-				}
+
+				$totalBiaya = $biaya->total_biaya - ($total_biaya);
+				$biaya->update([
+					'total_biaya_lainnya' => $biaya->total_biaya_lainnya - ($total_biaya),
+					'total_biaya' => $totalBiaya
+				]);
 				
 				$results['data'] = ['total' => $totalBiaya];
 			});
 
-			array_push($results['messages'], 'Berhasil memperbaharui transportasi.');
+			array_push($results['messages'], 'Berhasil memperbaharui Pengeluaran.');
 			$results['success'] = true;
 			$results['state_code'] = 200;
 		} catch(\Exception $e) {
-			Log::channel('spderr')->info('transport_save_err: '. json_encode($e->getMessage()));
+			Log::channel('spderr')->info('pengeluaran_update: '. json_encode($e->getMessage()));
 			array_push($results['messages'], $e->getMessage());
 		}
 
@@ -187,15 +169,15 @@ class TransportController extends Controller
       return response()->json($results, 200);
     }
 
-		$transport = Transport::where('id',$id)
+		$pengeluaran = Pengeluaran::where('id',$id)
 		->where('pegawai_id', $inputs['pegawai_id'])
 		->where('biaya_id', $inputs['biaya_id'])
 		->first();
 
-		$transport->update([
+		$pengeluaran->update([
 			'file_id' => $inputs['tgl_checkout']
 		]);
-    array_push($results['messages'], 'Berhasil memperbaharui data transportasi.');
+    array_push($results['messages'], 'Berhasil memperbaharui data Pengeluaran.');
 
     $results['success'] = true;
     $results['state_code'] = 200;
@@ -207,43 +189,35 @@ class TransportController extends Controller
 	{
 		$results = $this->responses;
 
-		$transport = Transport::where('id',$id)
+		$pengeluaran = Pengeluaran::where('id',$id)
 		->where('pegawai_id', $pegawaiId)
 		->where('biaya_id', $biayaId)
 		->first();
 		
 		try{
-			DB::transaction(function () use ($transport, $biayaId, $pegawaiId, &$results) {
-				$total_bayar = $transport->total_bayar;
-				$jenis_transport = $transport->jenis_transport;
+			DB::transaction(function () use ($pengeluaran, $biayaId, $pegawaiId, &$results) {
+				$total_bayar = $pengeluaran->total;
 		
 				$biaya = Biaya::where('id', $biayaId)
 				->where('pegawai_id', $pegawaiId)
 				->first();
-		
-				$totalBiaya = $biaya->total_biaya - $total_bayar;
-				if($jenis_transport == 'Pesawat') {
-					$biaya->update([
-						'total_biaya_pesawat' => $biaya->total_biaya_pesawat -  $total_bayar,
-						'total_biaya' => $totalBiaya
-					]);
-				} else {
-					$biaya->update([
-						'total_biaya_travel' => $biaya->total_biaya_travel - $total_bayar,
-						'total_biaya' => $totalBiaya
-					]);
-				}
 				
+				$totalBiaya = $biaya->total_biaya - $total_bayar;
+				$biaya->update([
+					'total_biaya_lainnya' => $biaya->total_biaya_lainnya - $total_bayar,
+					'total_biaya' => $totalBiaya
+				]);
 				$results['data'] = ['total' => $totalBiaya];
+
 				//delete
-				$transport->delete();
+				$pengeluaran->delete();
 			});
 			
-			array_push($results['messages'], 'Berhasil menghapus data transportasi.');
+			array_push($results['messages'], 'Berhasil menghapus data Pengeluaran.');
 			$results['success'] = true;
 			$results['state_code'] = 200;
 		} catch(\Exception $e) {
-			Log::channel('spderr')->info('transport_delete: '. json_encode($e->getMessage()));
+			Log::channel('spderr')->info('pengeluaran_delete: '. json_encode($e->getMessage()));
 			array_push($results['messages'], $e->getMessage());
 		}
 

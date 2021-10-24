@@ -33,6 +33,7 @@ class CreateSPTSTable extends Migration
             $table->string('daerah_tujuan')->nullable();
             $table->date('tgl_berangkat');
             $table->date('tgl_kembali');
+            $table->integer('jumlah_hari');
             $table->dateTime('spt_generated_at')->nullable();
             $table->bigInteger('spt_generated_by')->nullable();
             $table->dateTime('finished_at')->nullable();

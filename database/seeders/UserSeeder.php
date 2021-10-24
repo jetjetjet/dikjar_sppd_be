@@ -296,6 +296,7 @@ class UserSeeder extends Seeder
 			'full_name' => 'H. MURISON, S.Sos, S.Pd, M.Si',
 			'jenis_kelamin' => 'Laki-laki',
 			'email' => 'admin1@disdikkerinci.id',
+			'pegawai_app' => '1',
 			'created_at' => now()->toDateTimeString(),
 			'created_by' => 1
 		]);
@@ -312,6 +313,7 @@ class UserSeeder extends Seeder
 			'full_name' => 'ROMUI ELADI,S.Pd, MM',
 			'jenis_kelamin' => 'Laki-laki',
 			'email' => 'admin1@disdikkerinci.id',
+			'pegawai_app' => '1',
 			'created_at' => now()->toDateTimeString(),
 			'created_by' => 1
 		]);
@@ -328,6 +330,7 @@ class UserSeeder extends Seeder
 			'full_name' => 'YANTO DIUM, S.ST,Par, M.Si',
 			'jenis_kelamin' => 'Laki-laki',
 			'email' => 'admin1@disdikkerinci.id',
+			'pegawai_app' => '1',
 			'created_at' => now()->toDateTimeString(),
 			'created_by' => 1
 		]);
@@ -344,6 +347,7 @@ class UserSeeder extends Seeder
 			'full_name' => 'HAKIMI,S.Pd',
 			'jenis_kelamin' => 'Laki-laki',
 			'email' => 'admin1@disdikkerinci.id',
+			'pegawai_app' => '1',
 			'created_at' => now()->toDateTimeString(),
 			'created_by' => 1
 		]);
@@ -360,6 +364,7 @@ class UserSeeder extends Seeder
 			'full_name' => 'EKA WADIANTI,S.Pd',
 			'jenis_kelamin' => 'Perempuan',
 			'email' => 'admin1@disdikkerinci.id',
+			'pegawai_app' => '1',
 			'created_at' => now()->toDateTimeString(),
 			'created_by' => 1
 		]);
@@ -376,6 +381,7 @@ class UserSeeder extends Seeder
 			'full_name' => 'SILISMAN, S.Sos',
 			'jenis_kelamin' => 'Laki-laki',
 			'email' => 'admin1@disdikkerinci.id',
+			'pegawai_app' => '1',
 			'created_at' => now()->toDateTimeString(),
 			'created_by' => 1
 		]);

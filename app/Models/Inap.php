@@ -21,7 +21,7 @@ class Inap extends Model
 		'tgl_checkout',
 		'jml_hari',
 		'file_id',
-		'jml_bayar',
+		'total_bayar',
 		'created_by',
 		'updated_by',
 		'deleted_by',

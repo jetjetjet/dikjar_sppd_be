@@ -12,7 +12,7 @@ class Transport extends Model
 	protected $table = 'transport';
 	protected $fillable = [
 		'biaya_id',
-		'nip',
+		'pegawai_id',
 		'jenis_transport',
 		'catatan',
 		'perjalanan',
@@ -22,7 +22,7 @@ class Transport extends Model
 		'no_penerbangan',
 		'file_id',
 		'tgl',
-		'jml_bayar',
+		'total_bayar',
 		'created_by',
 		'updated_by',
 		'deleted_by'

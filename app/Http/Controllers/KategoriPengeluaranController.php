@@ -3,16 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\JenisTransport;
+use App\Models\KategoriPengeluaran;
 use DB;
 use Validator;
 
-class JenisTransportController extends Controller
+class KategoriPengeluaranController extends Controller
 {
-  public function grid(Request $request)
+	public function grid(Request $request)
 	{
 		$results = $this->responses;
-		$results['data'] = JenisTransport::all();
+		$results['data'] = KategoriPengeluaran::all();
 		$results['state_code'] = 200;
 		$results['success'] = true;
 
@@ -23,7 +23,7 @@ class JenisTransportController extends Controller
 	{
 		$results = $this->responses;
 		
-		$results['data'] = JenisTransport::all()->pluck('name');
+		$results['data'] = KategoriPengeluaran::all()->pluck('name');
 		$results['state_code'] = 200;
 		$results['success'] = true;
 		
@@ -46,11 +46,16 @@ class JenisTransportController extends Controller
       return response()->json($results, 200);
     }
 		
-    JenisTransport::create([
-      'name' => $inputs['name']
-    ]);
+		$upper = strtoupper($inputs['name']);
+    $kat = KategoriPengeluaran::whereRaw("upper(name) = '" . $upper . "'")->first();
+		
+		if($kat == null) {
+			KategoriPengeluaran::create([
+				'name' => $inputs['name']
+			]);
+		}
 
-    array_push($results['messages'], 'Berhasil menambahkan Jenis Transportasi baru.');
+    array_push($results['messages'], 'Berhasil menambahkan Kategori Transportasi baru.');
 
     $results['success'] = true;
     $results['state_code'] = 200;
@@ -61,7 +66,7 @@ class JenisTransportController extends Controller
 	public function show($id)
 	{
 		$results = $this->responses;
-		$results['data'] = JenisTransport::find($id);
+		$results['data'] = KategoriPengeluaran::find($id);
 
 		$results['state_code'] = 200;
 		$results['success'] = true;
@@ -85,12 +90,12 @@ class JenisTransportController extends Controller
       return response()->json($results, $results['state_code']);
     }
     
-		$JenisTransport = JenisTransport::find($id);
-    $JenisTransport->update([
+		$KategoriPengeluaran = KategoriPengeluaran::find($id);
+    $KategoriPengeluaran->update([
       'name' => $inputs['name']
     ]);
 
-    array_push($results['messages'], 'Berhasil mengubah Jenis Transportasi.');
+    array_push($results['messages'], 'Berhasil mengubah Kategori Transportasi.');
 
     $results['success'] = true;
     $results['state_code'] = 200;
@@ -101,9 +106,9 @@ class JenisTransportController extends Controller
 	public function destroy($id)
 	{
 		$results = $this->responses;
-		$role = JenisTransport::destroy($id);
+		$role = KategoriPengeluaran::destroy($id);
 
-		array_push($results['messages'], 'Berhasil menghapus Jenis Transportasi.');
+		array_push($results['messages'], 'Berhasil menghapus Kategori Transportasi.');
 		$results['state_code'] = 200;
 		$results['success'] = true;
 

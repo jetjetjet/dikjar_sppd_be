@@ -75,15 +75,9 @@ class SPTController extends Controller
 	
 	function mapSPT($db){
 		$ui = new \stdClass();
-		$brgkt = isset($db->tgl_berangkat) ? new Carbon($db->tgl_berangkat) : "";
-		$kembali = isset($db->tgl_kembali) ? new Carbon($db->tgl_kembali) : "";
-		$ui->jml_hari = "";
-
-		if (isset($db->tgl_berangkat) && isset($db->tgl_kembali)) {
-			$ui->jml_hari = $brgkt->diff($kembali)->days;
-		}
-		$ui->tgl_berangkat = isset($db->tgl_berangkat) ? $brgkt->isoFormat('D MMMM Y') : "";
-		$ui->tgl_kembali = isset($db->tgl_kembali) ? $kembali->isoFormat('D MMMM Y') : "";
+		$ui->jml_hari = isset($db->jumlah_hari) ? $db->jumlah_hari : "";
+		$ui->tgl_berangkat = isset($db->tgl_berangkat) ? (new Carbon($db->tgl_berangkat))->isoFormat('D MMMM Y') : "";
+		$ui->tgl_kembali = isset($db->tgl_kembali) ? (new Carbon($db->tgl_kembali))->isoFormat('D MMMM Y') : "";
 		$ui->tgl_spt = isset($db->tgl_spt) ? (new Carbon($db->tgl_spt))->isoFormat('D MMMM Y') : "";
 
 		$ui->daerah_asal = ucwords(strtolower($db->daerah_asal));
@@ -129,7 +123,6 @@ class SPTController extends Controller
 				// $jabatanKadin = Jabatan::find($kadin->jabatan_id)->first();
 	
 				$sptData = $this->mapSPT($spt);
-
 				try{
 					$userValue = array();
 					$templateSppdPath = base_path('public/storage/template/template_sppd.docx');
@@ -171,9 +164,15 @@ class SPTController extends Controller
 						$converter = new OfficeConverter($docPath);
 						//generates pdf file in same directory as test-file.docx
 						$converter->convertTo($newFile->newName.".pdf");
+						
+						$oldFile = $path . $newFile->dbPath . $newFile->newName . ".docx";
+						if(FaFile::exists($oldFile)) {
+							FaFile::delete($oldFile);
+						}
 
 						$newFile->newName = $newFile->newName.".pdf";
 						$file = Utils::saveFile($newFile);
+
 						// update
 						SPTDetail::where('id', $user->id)
 						->where('pegawai_id', $user->pegawai_id)
@@ -230,6 +229,11 @@ class SPTController extends Controller
           $converter = new OfficeConverter($docPath);
           //generates pdf file in same directory as test-file.docx
           $converter->convertTo($newFile->newName.".pdf");
+
+					$oldFile = $path . $newFile->dbPath . $newFile->newName . ".docx";
+					if(FaFile::exists($oldFile)) {
+						FaFile::delete($oldFile);
+					}
 
 					$newFile->newName = $newFile->newName.".pdf";
 
@@ -289,6 +293,10 @@ class SPTController extends Controller
 
 		try {
 			DB::transaction(function () use ($inputs) {
+				$brgkt = new Carbon($inputs['tgl_berangkat']);
+				$kembali = new Carbon($inputs['tgl_kembali']);
+				$jumlahHari = $brgkt->diff($kembali)->days;
+
 				$noMax = SPT::max('no_index') + 1 ?? 1;
 				$tahun = Carbon::now()->format('Y');
 				$noSpt = '090/'. str_pad($noMax, 3, '0', STR_PAD_LEFT) . '/SPPD/PDK/' . $tahun ;
@@ -307,6 +315,7 @@ class SPTController extends Controller
 					'daerah_tujuan' => $inputs['daerah_tujuan'],
 					'tgl_berangkat' => $inputs['tgl_berangkat'],
 					'tgl_kembali' => $inputs['tgl_kembali'],
+					'jumlah_hari' => $jumlahHari,
 					'tgl_spt' => $inputs['tgl_spt'],
 					'status' => 'DRAFT',
 					'periode' => date('Y')

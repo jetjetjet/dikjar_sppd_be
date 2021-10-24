@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateJenisTransportsTable extends Migration
+class CreateKategoriPengeluaransTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateJenisTransportsTable extends Migration
      */
     public function up()
     {
-        Schema::create('kategori_transport', function (Blueprint $table) {
+        Schema::create('kat_pengeluaran', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->timestamps();
@@ -29,6 +29,6 @@ class CreateJenisTransportsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('kategori_transport');
+        Schema::dropIfExists('kat_pengeluaran');
     }
 }

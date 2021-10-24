@@ -5,7 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AnggaranController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BidangController;
-use App\Http\Controllers\JenisTransportController;
+use App\Http\Controllers\KategoriTransportController;
+use App\Http\Controllers\KategoriPengeluaranController;
+use App\Http\Controllers\SatuanController;
 use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\PejabatTtdController;
 use App\Http\Controllers\PegawaiController;
@@ -17,6 +19,7 @@ use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\BiayaController;
 use App\Http\Controllers\InapController;
 use App\Http\Controllers\TransportController;
+use App\Http\Controllers\PengeluaranController;
 use App\Http\Controllers\SPTController;
 use App\Http\Controllers\SPPDController;
 
@@ -63,12 +66,26 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::put('/jabatan/{id}', [JabatanController::class, 'update'])->middleware('can:jabatan-edit');
 	Route::delete('/jabatan/{id}', [JabatanController::class, 'destroy'])->middleware('can:jabatan-delete');
 
-	Route::get('/jenis-transport-grid', [JenisTransportController::class, 'grid']);
-	Route::get('/jenis-transport-search', [JenisTransportController::class, 'search']);
-	Route::get('/jenis-transport/{id}', [JenisTransportController::class, 'show']);
-	Route::post('/jenis-transport', [JenisTransportController::class, 'store']);
-	Route::put('/jenis-transport/{id}', [JenisTransportController::class, 'update']);
-	Route::delete('/jenis-transport/{id}', [JenisTransportController::class, 'destroy']);
+	Route::get('/kategori-transport-grid', [KategoriTransportController::class, 'grid']);
+	Route::get('/kategori-transport-search', [KategoriTransportController::class, 'search']);
+	Route::get('/kategori-transport/{id}', [KategoriTransportController::class, 'show']);
+	Route::post('/kategori-transport', [KategoriTransportController::class, 'store']);
+	Route::put('/kategori-transport/{id}', [KategoriTransportController::class, 'update']);
+	Route::delete('/kategori-transport/{id}', [KategoriTransportController::class, 'destroy']);
+
+	Route::get('/kategori-pengeluaran-grid', [KategoriPengeluaranController::class, 'grid']);
+	Route::get('/kategori-pengeluaran-search', [KategoriPengeluaranController::class, 'search']);
+	Route::get('/kategori-pengeluaran/{id}', [KategoriPengeluaranController::class, 'show']);
+	Route::post('/kategori-pengeluaran', [KategoriPengeluaranController::class, 'store']);
+	Route::put('/kategori-pengeluaran/{id}', [KategoriPengeluaranController::class, 'update']);
+	Route::delete('/kategori-pengeluaran/{id}', [KategoriPengeluaranController::class, 'destroy']);
+	
+	Route::get('/satuan-grid', [SatuanController::class, 'grid']);
+	Route::get('/satuan-search', [SatuanController::class, 'search']);
+	Route::get('/satuan/{id}', [SatuanController::class, 'show']);
+	Route::post('/satuan', [SatuanController::class, 'store']);
+	Route::put('/satuann/{id}', [SatuanController::class, 'update']);
+	Route::delete('/satuan/{id}', [SatuanController::class, 'destroy']);
 	
 	Route::get('/pegawai-grid', [PegawaiController::class, 'grid'])->middleware('can:pegawai-view');
 	Route::get('/pegawai-search', [PegawaiController::class, 'search']);
@@ -128,27 +145,35 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::get('/spt/{id}/sppd-grid', [SPPDController::class, 'grid']);
 	Route::get('/spt/{id}/sppd/{sptDetailId}/{pegawaiId}', [SPPDController::class, 'show']);
 	Route::get('/spt/lihat-sppd/{sptDetailId}/{pegawaiId}', [SPPDController::class, 'getSPPD']);
-	Route::post('/spt/{id}/cetak-sppd/{sptDetailId}/{pegawaiId}', [SPPDController::class, 'cetakSPPD'])->middleware('can:sppd-generate');
 
 	Route::get('/biaya/grid/{id}/{pegawaiId}', [BiayaController::class, 'grid']);
 	Route::post('/biaya', [BiayaController::class, 'store']);
 	Route::put('/biaya/{id}', [BiayaController::class, 'update']);
 
 	Route::get('/inap/{biayaId}/{pegawaiId}', [InapController::class, 'grid']);
+	Route::get('/inap/{id}', [InapController::class, 'show']);
 	Route::post('/inap', [InapController::class, 'store']);
 	Route::put('/inap/{id}', [InapController::class, 'update']);
 	Route::put('/inap/{id}/checkout', [InapController::class, 'checkout']);
 	Route::put('/inap/{id}/upload-file', [InapController::class, 'uploadFile']);
 	Route::delete('/inap/{id}/{biayaId}/{pegawaiId}', [InapController::class, 'destroy']);
 	
-	Route::get('/transport/{biayaId}/{pegawaiId}', [TransportController::class, 'grid']);
+	Route::get('/transport/{id}', [TransportController::class, 'show']);
 	Route::post('/transport', [TransportController::class, 'store']);
 	Route::put('/transport/{id}', [TransportController::class, 'update']);
 	Route::put('/transport/{id}/upload-file', [TransportController::class, 'uploadFile']);
 	Route::delete('/transport/{id}/{biayaId}/{pegawaiId}', [TransportController::class, 'destroy']);
-
+	
+	Route::get('/pengeluaran/{id}', [PengeluaranController::class, 'show']);
+	Route::post('/pengeluaran', [PengeluaranController::class, 'store']);
+	Route::put('/pengeluaran/{id}', [PengeluaranController::class, 'update']);
+	Route::put('/pengeluaran/{id}/upload-file', [PengeluaranController::class, 'uploadFile']);
+	Route::delete('/pengeluaran/{id}/{biayaId}/{pegawaiId}', [PengeluaranController::class, 'destroy']);
 
 	Route::get('/report/spt/selesai', [ReportController::class, 'reportByFinishedSPT'])->middleware('can:laporan-tahunan');
 	Route::post('/report/spt/pegawai', [ReportController::class, 'reportByPegawai'])->middleware('can:laporan-pegawai');
 	
+	
+	Route::get('/spt/{id}/kwitansi', [SPPDController::class, 'cetakKwitansi']);
+	Route::get('/spt/{id}/biaya/{biayaId}/rampung/{pegawaiId}', [SPPDController::class, 'cetakRampung']);
 });
