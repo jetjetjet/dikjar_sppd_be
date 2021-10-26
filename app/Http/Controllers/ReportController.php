@@ -65,7 +65,7 @@ class ReportController extends Controller
 			$on->where('b.pegawai_id', $inputs['pegawai_id']);
 			$on->whereNull('b.deleted_at');
 		})
-		// ->join('jabatan as j', 'u.jabatan_id', 'j.id')
+		// ->join('jabatan as j', 'p.jabatan_id', 'j.id')
 		->where('p.id', $inputs['pegawai_id']);
 
 		if(isset($inputs['tgl_berangkat']) && isset($inputs['tgl_kembali'])){
@@ -87,13 +87,13 @@ class ReportController extends Controller
 
 		$results['data'] = $q->select(
 			'spt.id',
-			'u.full_name',
+			'p.full_name',
 			'spt.no_spt',
-			DB::raw("coalesce(kota_tujuan, kec_tujuan) as tujuan"),
-			DB::raw("coalesce(kota_asal, kec_asal) as asal"),
+			'daerah_asal as asal',
+			'daerah_tujuan as tujuan',
 			'tgl_berangkat',
 			'tgl_kembali',
-			DB::raw("to_char(b.jml_biaya, 'FM999,999,999,999') as jml_biaya"),
+			DB::raw("to_char(b.total_biaya, 'FM999,999,999,999') as jml_biaya"),
 			DB::raw("case when spt.status = 'DRAFT' then 'Draf'
 				when spt.status not in ('DRAFT') and spt.finished_at is null then 'Proses'
 				when spt.finished_at is not null then 'Selesai' else '' end as status")

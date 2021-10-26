@@ -15,26 +15,28 @@ class BiayaProcedure extends Migration
     {
         // $procedure = "DROP FUNCTION IF EXISTS biaya_grid;
         // CREATE FUNCTION biaya_grid( p_biaya_id integer, p_pegawai_id integer)
-        // RETURNS TABLE(reference_id bigint, modul text, tipe text, nama varchar, tanggal date, keterangan text, biaya numeric, remark varchar, created timestamp, file bigint)
+        // RETURNS TABLE(reference_id bigint, modul text, tipe text, nama varchar, tanggal date, keterangan text, biaya numeric, remark varchar, created timestamp, file text)
         // AS $$
         // BEGIN
         //     return query select * from 
         //     ( 
-        //       select id,
+        //       select p.id,
         //         'PENGELUARAN',
         //         'lainnya' as jenis, 
         //         kategori, 
         //         tgl as tanggal, jml || ' ' || satuan as jml, 
         //         total, 
         //         catatan, 
-        //         created_at,
-        //         file_id
+        //         p.created_at,
+        //         f.file_path ||'/' ||f.file_name 
         //       from pengeluaran p 
+        //       left join files as f
+        //         on f.id = p.file_id
         //       where deleted_at is null
         //       and biaya_id = p_biaya_id
         //       and pegawai_id = p_pegawai_id
         //       union all 
-        //       select id,
+        //       select i.id,
         //         'INAP',
         //         'Penginapan', 
         //         hotel, 
@@ -42,14 +44,16 @@ class BiayaProcedure extends Migration
         //         jml_hari || ' Hari', 
         //         total_bayar, 
         //         catatan, 
-        //         created_at,
-        //         file_id
+        //         i.created_at,
+        //         f.file_path ||'/' ||f.file_name 
         //       from inap i 
+        //       left join files as f
+        //         on f.id = i.file_id
         //       where deleted_at is null 
         //       and biaya_id = p_biaya_id
         //       and pegawai_id = p_pegawai_id
         //       union all 
-        //       select id,
+        //       select t.id,
         //         'TRANSPORT',
         //         jenis_transport, 
         //         agen, 
@@ -57,9 +61,11 @@ class BiayaProcedure extends Migration
         //         perjalanan, 
         //         total_bayar, 
         //         catatan, 
-        //         created_at,
-        //         file_id
-        //       from transport t 
+        //         t.created_at,
+        //         f.file_path ||'/' ||f.file_name 
+        //       from transport t
+        //       left join files as f
+        //         on f.id = t.file_id
         //       where deleted_at is null
         //       and biaya_id = p_biaya_id
         //       and pegawai_id = p_pegawai_id 

@@ -61,11 +61,11 @@ class PejabatTtdController extends Controller
       $results['messages'] = Array($validator->messages()->first());
       return response()->json($results, 200);
     }
-		$code = $inputs['autorisasi'] == 'Pejabat Pembuat Komitmen' ? 'PPK' : 'PTTD';
+		
     PejabatTtd::create([
       'pegawai_id' => $inputs['pegawai_id'],
       'autorisasi' => $inputs['autorisasi'],
-      'autorisasi_code' => $code,
+      'autorisasi_code' => $this->mapAutorisasi($inputs['autorisasi']),
       'is_active' => $inputs['is_active']
     ]);
 
@@ -169,5 +169,21 @@ class PejabatTtdController extends Controller
 		$results['success'] = true;
 
 		return response()->json($results, $results['state_code']);
+	}
+
+	private function mapAutorisasi($input)
+	{
+		$code = '';
+		switch($input){
+			case('Pejabat Pelaksana Teknis Kegiatan'):
+				$code = 'PPTK';
+				break;
+			case('Petugas Tanda Tangan'):
+				$code = 'PTTD';
+				break;
+			default:
+			$code = strtoupper($input);
+		}
+		return $code;
 	}
 }

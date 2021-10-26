@@ -11,60 +11,24 @@ use App\Helpers\Utils;
 
 class UserController extends Controller
 {
-	/**
-	 * Display a listing of the resource.
-	 *
-	 * @return \Illuminate\Http\Response
-	 */
 	public function grid(Request $request)
 	{
 		$results = $this->responses;
 
-		$results['data'] = User::all();
+		$results['data'] = User::join('pegawai as p', 'p.nip', 'users.nip')
+		->join('jabatan as j', 'j.id', 'p.jabatan_id')
+		->select(
+			'users.id',
+			'p.nip',
+			'full_name',
+			'j.name as jabatan'
+		)->get();
 		$results['state_code'] = 200;
 		$results['success'] = true;
 
 		return response()->json($results, $results['state_code']);
 	}
 
-	public function search(Request $request)
-	{
-		$results = $this->responses;
-		
-		$q = User::select('users.id as code', 'full_name as label');
-		if($request->filter){
-			if($request->filter == 'parent'){
-				$q = $q->join('jabatan as j', 'j.id', 'users.jabatan_id')
-				->where('j.is_parent', '1');
-			}
-		}
-
-		$results['data'] = $q->get();
-		$results['state_code'] = 200;
-		$results['success'] = true;
-		
-		return response()->json($results, $results['state_code']);
-	}
-
-	public function sptSearch(Request $request)
-	{
-		$results = $this->responses;
-		
-		$results['data'] = User::exclApp()->select('id as code', 'full_name as label')
-		->whereRaw("id not in ( select user_id from spt_detail where deleted_at is null and finished_at is null)")
-		->get();
-		$results['state_code'] = 200;
-		$results['success'] = true;
-		
-		return response()->json($results, $results['state_code']);
-	}
-
-	/**
-	 * Store a newly created resource in storage.
-	 *
-	 * @param  \Illuminate\Http\Request  $request
-	 * @return \Illuminate\Http\Response
-	 */
 	public function store(Request $request)
 	{
 		$results = $this->responses;
@@ -72,12 +36,8 @@ class UserController extends Controller
 		$inputs = $request->all();
 		$rules = array(
 			'nip' => 'required|unique:users,nip',
-			'email' => 'required',
-			'full_name' => 'required',
-			'jenis_kelamin' => 'required',
-			'jenis_kelamin' => 'required',
 			'role' => 'required',
-			'phone' => 'max:15'
+			'password' => 'required'
 		);
 
 		$validator = Validator::make($inputs, $rules);
@@ -91,22 +51,11 @@ class UserController extends Controller
 			$defaultPassword = bcrypt('12345678');
 			$user = User::create([
 				'nip' => $inputs['nip'],
-				'full_name' => $inputs['full_name'],
-				'password' => $defaultPassword,
-				'jabatan_id' => $inputs['jabatan_id'],
-				'email' => $inputs['email'],
-				'jenis_kelamin' => $inputs['jenis_kelamin'],
-				'address' => $inputs['address'] ?? null,
-				'phone' => $inputs['phone'] ?? null,
-				'ttl' => $inputs['ttl'] ?? null
+				'password' => bcrypt($inputs['password'])
 			]);
 
 			//asign role
 			$user->assignRole($inputs['role']);
-
-			//upload poto
-			$file = Utils::imageUpload($request, 'profile');
-			if($file != null) $user->path_foto = $file->path;
 
 			array_push($results['messages'], 'Berhasil menambahkan user baru.');
 
@@ -130,6 +79,7 @@ class UserController extends Controller
 		$results = $this->responses;
 		$user = User::find($id);
 		$user->role = $user->getRoleNames()[0] ?? null;
+		$user->full_name = $user->pegawai->full_name; 
 
 		$results['data'] = $user;
 		$results['state_code'] = 200;
@@ -152,10 +102,7 @@ class UserController extends Controller
 		$inputs = $request->all();
 		$rules = array(
 			'nip' => 'required',
-			'email' => 'required',
-			'full_name' => 'required',
-			'jenis_kelamin' => 'required',
-			// 'role' => 'required'
+			'role' => 'required'
 		);
 
 		$validator = Validator::make($request->all(), $rules);
@@ -168,21 +115,15 @@ class UserController extends Controller
 		$user = User::find($id);
 		$role = $inputs['role'] ?? null;
 		$user->syncRoles([$role]);
-		$user->update([
-			'nip' => $inputs['nip'],
-			'full_name' => $inputs['full_name'],
-			'email' => $inputs['email'],
-			'jenis_kelamin' => $inputs['jenis_kelamin'],
-			'jabatan_id' => $inputs['jabatan_id'],
-			'address' => $inputs['address'] ?? null,
-			'phone' => $inputs['phone'] ?? null,
-			'tgl_lahir' => $inputs['tgl_lahir'] ?? null
-		]);
+		if($inputs['password'] != null) {
+			$user->update([
+				'password' => bcrypt($inputs['password'])
+			]);
+		}
 		
-
 		$results['success'] = true;
 		$results['state_code'] = 200;
-		array_push($results['messages'], 'Berhasil ubah user.');
+		array_push($results['messages'], 'Berhasil ubah User.');
 
 		return response()->json($results, $results['state_code']);
 	}
@@ -213,47 +154,6 @@ class UserController extends Controller
 		$results['state_code'] = 200;
 
 		array_push($results['messages'], 'Berhasil ubah password.');
-
-		return response()->json($results, $results['state_code']);
-	}
-
-
-	public function changePhoto(Request $request, $id)
-	{
-		$results = $this->responses;
-
-		$inputs = $request->all();
-		$rules = array(
-			'file' => 'required|image|mimes:jpg,png,jpeg,gif,svg|max:2048'
-		);
-
-		$validator = Validator::make($request->all(), $rules);
-		// Validation fails?
-		if ($validator->fails()){
-      $results['messages'] = Array($validator->messages()->first());
-      return response()->json($results, $results['state_code']);
-    }
-
-		try{
-			DB::beginTransaction();
-		
-			//upload poto
-			$file = Utils::imageUpload($inputs, 'profile');
-			$user = User::find($id)
-			->update([
-				'path_foto' => $file->path
-			]);
-			DB::commit();
-
-			array_push($results['messages'], 'Berhasil ubah poto.');
-
-			$results['data'] = array('path_foto' => $file->path);
-			$results['success'] = true;
-			$results['state_code'] = 200;
-		}catch(\Exception $e){
-			array_push($results['messages'], $e->getMessage());
-			DB::rollBack();
-		}
 
 		return response()->json($results, $results['state_code']);
 	}

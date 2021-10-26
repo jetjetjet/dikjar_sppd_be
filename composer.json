@@ -18,6 +18,7 @@
         "phpoffice/phpword": "^0.18.2",
         "setasign/fpdi": "^2.3",
         "setasign/tfpdf": "1.31.*",
+        "simplesoftwareio/simple-qrcode": "~4",
         "spatie/laravel-permission": "^4.4"
     },
     "require-dev": {

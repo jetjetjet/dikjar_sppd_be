@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Pegawai;
+use App\Models\User;
 use DB;
 use Validator;
 
@@ -33,17 +34,18 @@ class PegawaiController extends Controller
 			if($request->filter == 'parent'){
 				$q = $q->join('jabatan as j', 'j.id', 'pegawai.jabatan_id')
 				->where('j.is_parent', '1');
-			}
-
-			if($request->filter == 'spt'){
+			} else if($request->filter == 'spt'){
 				$q = $q->whereRaw("id not in ( select pegawai_id from spt_detail where deleted_at is null and finished_at is null )")
 					->where('pegawai_app', '1');
-			}
-
-			if($request->filter == 'spt_edit' && isset($request->id)){
+			} else if($request->filter == 'spt_edit' && isset($request->id)){
 				$q = $q->whereRaw("id not in ( select pegawai_id from spt_detail where deleted_at is null and finished_at is null and spt_id not in ( ". $request->id ." ) )")
 					->where('pegawai_app', '1');
-			}
+			} else if($request->filter == 'user'){
+				$q = Pegawai::select('pegawai.nip as code', 'full_name as label')
+				->whereRaw("nip not in ( select nip from users )")->where('pegawai_app', '1');
+			} else if($request->filter == 'report' ){
+				$q = $q->where('pegawai_app', '1');
+			} 
 		}
 
 		$results['data'] = $q->get();
@@ -63,7 +65,8 @@ class PegawaiController extends Controller
 			'email' => 'required',
 			'full_name' => 'required',
 			'jenis_kelamin' => 'required',
-			'phone' => 'max:15'
+			'phone' => 'max:15',
+			'file' => 'mimes:jpeg,bmp,png,gif'
 		);
 
 		$validator = Validator::make($inputs, $rules);
@@ -74,6 +77,8 @@ class PegawaiController extends Controller
     }
 		
 		try{
+			DB::beginTransaction();
+
 			$pegawai = Pegawai::create([
 				'nip' => $inputs['nip'],
 				'full_name' => $inputs['full_name'],
@@ -82,18 +87,28 @@ class PegawaiController extends Controller
 				'jenis_kelamin' => $inputs['jenis_kelamin'],
 				'address' => $inputs['address'] ?? null,
 				'phone' => $inputs['phone'] ?? null,
-				'ttl' => $inputs['ttl'] ?? null
+				'tgl_lahir' => $inputs['tgl_lahir'] ?? null,
+				'pegawai_app' => '1'
 			]);
+
+			if($inputs['pegawai_app']) {
+				User::create([
+					'nip' => $inputs['nip'],
+					'password' => bcrypt('password')
+				]);
+			}
 
 			//upload poto
 			$file = Utils::imageUpload($request, 'profile');
 			if($file != null) $pegawai->path_foto = $file->path;
 
-			array_push($results['messages'], 'Berhasil menambahkan pegawai baru.');
+			DB::commit();
 
+			array_push($results['messages'], 'Berhasil menambahkan pegawai baru.');
 			$results['success'] = true;
 			$results['state_code'] = 200;
 		}catch(\Exception $e){
+			DB::rollBack();
 			array_push($results['messages'], $e->getMessage());
 		}
 

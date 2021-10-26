@@ -119,10 +119,10 @@ class SPPDController extends Controller
 		return response()->json($results, $results['state_code']);
   }
 
-	public function cetakRampung($id, $biayaId, $pegawaiId)
+	public function cetakRumming($id, $biayaId, $pegawaiId)
 	{
 		$results = $this->responses;
-		$templatePath = base_path('public/storage/template/template_rampung.docx');
+		$templatePath = base_path('public/storage/template/template_rumming.docx');
 		$checkFile = FaFile::exists($templatePath);
 		if($checkFile) {
 			$pegawai = Pegawai::join('jabatan as j', 'j.id', 'jabatan_id')
@@ -134,6 +134,11 @@ class SPPDController extends Controller
 			->join('pegawai as p', 'p.id', 'pt.pegawai_id')
 			->where('autorisasi', 'Bendahara')
 			->where('is_active', '1')
+			->select('nip', 'full_name')
+			->first();
+
+			$kadin = Pegawai::join('jabatan as j', 'j.id', 'jabatan_id')
+			->where('pegawai.id', 5)
 			->select('nip', 'full_name')
 			->first();
 
@@ -149,7 +154,7 @@ class SPPDController extends Controller
 			
 			$nameFile = "090_".$spt->no_index."_SPPD_PDK_2021_".$pegawai->nip;
 			
-			$oldFile = base_path('public/storage/rampung/'. $nameFile . '.pdf');
+			$oldFile = base_path('public/storage/rumming/'. $nameFile . '.pdf');
 			if(FaFile::exists($oldFile)) {
 				FaFile::delete($oldFile);
 			}
@@ -213,10 +218,12 @@ class SPPDController extends Controller
 				$template->setValue('nip_bendahara', $bendahara->nip);
 				$template->setValue('nama_penerima', $pegawai->full_name);
 				$template->setValue('nip_penerima', $pegawai->nip);
+				$template->setValue('nama_kadin', $kadin->full_name);
+				$template->setValue('nip_kadin', $kadin->nip);
 				$template->cloneRowAndSetValues('pengeluaran', $biayaTb);
 				
 				$path = base_path('/public');
-				$docPath = $path . '/storage/rampung/'. $nameFile . ".docx";
+				$docPath = $path . '/storage/rumming/'. $nameFile . ".docx";
 				$template->saveAs($docPath, TRUE);
 				
 				$converter = new OfficeConverter($docPath);
@@ -228,9 +235,9 @@ class SPPDController extends Controller
 
 				$results['success'] = true;
 				$results['state_code'] = 200;
-				$results['data'] = '/storage/rampung/'. $nameFile . ".pdf";
+				$results['data'] = '/storage/rumming/'. $nameFile . ".pdf";
 			} catch (\Exception $e) {
-				Log::channel('spderr')->info('sppd_rampung: '. json_encode($e->getMessage()));
+				Log::channel('spderr')->info('sppd_rumming: '. json_encode($e->getMessage()));
 				array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
 			}
 
@@ -280,6 +287,18 @@ class SPPDController extends Controller
 				->where('is_active', '1')
 				->select('nip', 'full_name')
 				->first();
+				
+				$ppk = DB::table('pejabat_ttd as pt')
+				->join('pegawai as p', 'p.id', 'pt.pegawai_id')
+				->where('autorisasi_code', 'PPTK')
+				->where('is_active', '1')
+				->select('nip', 'full_name')
+				->first();
+
+				$kadin = Pegawai::join('jabatan as j', 'j.id', 'jabatan_id')
+				->where('pegawai.id', 5)
+				->select('nip', 'full_name')
+				->first();
 
 				$totalBiaya = Biaya::where('spt_id', $id)->sum('total_biaya');
 				$terbilang = Utils::rupiahTeks($totalBiaya);
@@ -298,11 +317,11 @@ class SPPDController extends Controller
 				$template->setValue('no_spt', $spt->no_spt);
 				$template->setValue('tgl_spt', $tgl);
 
-				$template->setValue('pengguna_anggaran', $spt->nama_penyelenggara);
-				$template->setValue('nip_pengg_angg', $spt->nip_pengelenggara);
+				$template->setValue('nama_kadin', $kadin->full_name);
+				$template->setValue('nip_kadin', $kadin->nip);
 
-				// $template->setValue('nama_pptk', $pejabat->golongan);
-				// $template->setValue('nip_pptk', $pejabat->golongan);
+				$template->setValue('nama_pptk', $ppk->full_name);
+				$template->setValue('nip_pptk', $ppk->nip);
 				
 				$template->setValue('nama_penerima', $spt->nama_penyelenggara);
 				$template->setValue('nip_penerima', $spt->nip_pengelenggara);

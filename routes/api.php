@@ -155,19 +155,19 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::post('/inap', [InapController::class, 'store']);
 	Route::put('/inap/{id}', [InapController::class, 'update']);
 	Route::put('/inap/{id}/checkout', [InapController::class, 'checkout']);
-	Route::put('/inap/{id}/upload-file', [InapController::class, 'uploadFile']);
+	Route::put('/inap/{id}/upload', [InapController::class, 'uploadFile']);
 	Route::delete('/inap/{id}/{biayaId}/{pegawaiId}', [InapController::class, 'destroy']);
 	
 	Route::get('/transport/{id}', [TransportController::class, 'show']);
 	Route::post('/transport', [TransportController::class, 'store']);
 	Route::put('/transport/{id}', [TransportController::class, 'update']);
-	Route::put('/transport/{id}/upload-file', [TransportController::class, 'uploadFile']);
+	Route::put('/transport/{id}/upload', [TransportController::class, 'uploadFile']);
 	Route::delete('/transport/{id}/{biayaId}/{pegawaiId}', [TransportController::class, 'destroy']);
 	
 	Route::get('/pengeluaran/{id}', [PengeluaranController::class, 'show']);
 	Route::post('/pengeluaran', [PengeluaranController::class, 'store']);
 	Route::put('/pengeluaran/{id}', [PengeluaranController::class, 'update']);
-	Route::put('/pengeluaran/{id}/upload-file', [PengeluaranController::class, 'uploadFile']);
+	Route::put('/pengeluaran/{id}/upload', [PengeluaranController::class, 'uploadFile']);
 	Route::delete('/pengeluaran/{id}/{biayaId}/{pegawaiId}', [PengeluaranController::class, 'destroy']);
 
 	Route::get('/report/spt/selesai', [ReportController::class, 'reportByFinishedSPT'])->middleware('can:laporan-tahunan');
@@ -175,5 +175,5 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	
 	
 	Route::get('/spt/{id}/kwitansi', [SPPDController::class, 'cetakKwitansi']);
-	Route::get('/spt/{id}/biaya/{biayaId}/rampung/{pegawaiId}', [SPPDController::class, 'cetakRampung']);
+	Route::get('/spt/{id}/biaya/{biayaId}/rumming/{pegawaiId}', [SPPDController::class, 'cetakRumming']);
 });

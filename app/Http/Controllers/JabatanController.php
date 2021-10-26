@@ -23,10 +23,16 @@ class JabatanController extends Controller
 	{
 		$results = $this->responses;
 		
-		$results['data'] = Jabatan::select('id', 'name')
-		->whereNotIn('jabatan.id', [DB::raw("select jabatan_id from pegawai where deleted_at is null and jabatan_id is not null")])
-		->get();
+		$q = Jabatan::select('id', 'name');
+		if($request->filter){
+			if($request->filter == 'edit' && isset($request->id)){
+				$q = $q->whereRaw("jabatan.id not in ( select jabatan_id from pegawai where deleted_at is null and (jabatan_id is not null and jabatan_id not in (".$request->id.") ) )");
+			}
+		} else {
+			$q = $q->whereNotIn('jabatan.id', [DB::raw("select jabatan_id from pegawai where deleted_at is null and jabatan_id is not null")]);
+		}
 
+		$results['data'] = $q->get();
 		$results['state_code'] = 200;
 		$results['success'] = true;
 		

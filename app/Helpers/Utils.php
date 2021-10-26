@@ -40,8 +40,8 @@ class Utils
       $file =  $inputs['file'];
       
       // $file->path = storage_path('public/storage/images/') . $subFolder;
-      $file->dbPath = 'images/' . $subFolder;
-      $file->path = public_path('storage/images/') . $subFolder;
+      $file->dbPath = '/storage/images/' . $subFolder;
+      $file->path = 'storage/images/' . $subFolder;
       $file->newName = time()."_".$file->getClientOriginalName();
       $file->originalName = explode('.',$file->getClientOriginalName())[0];
       $file->ext = explode('.',$file->getClientOriginalName())[1];
@@ -54,7 +54,7 @@ class Utils
       
       $results = new \stdClass();
       $results->id = self::saveFile($file);
-      $results->path = $file->path;
+      $results->path = $file->path . "/" . $file->newName;
 
 
       // //buat folder tumbnail

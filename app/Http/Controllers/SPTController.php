@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\TemplateProcessor;
 use NcJoes\OfficeConverter\OfficeConverter;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class SPTController extends Controller
 {
@@ -75,6 +76,7 @@ class SPTController extends Controller
 	
 	function mapSPT($db){
 		$ui = new \stdClass();
+		$ui->id = isset($db->id) ? $db->id : "";
 		$ui->jml_hari = isset($db->jumlah_hari) ? $db->jumlah_hari : "";
 		$ui->tgl_berangkat = isset($db->tgl_berangkat) ? (new Carbon($db->tgl_berangkat))->isoFormat('D MMMM Y') : "";
 		$ui->tgl_kembali = isset($db->tgl_kembali) ? (new Carbon($db->tgl_kembali))->isoFormat('D MMMM Y') : "";
@@ -83,6 +85,8 @@ class SPTController extends Controller
 		$ui->daerah_asal = ucwords(strtolower($db->daerah_asal));
 		$ui->daerah_tujuan = ucwords(strtolower($db->daerah_tujuan));
 		$ui->no_spt = isset($db->no_spt) ? $db->no_spt : "";
+		$ui->periode = isset($db->periode) ? $db->periode : "";
+		$ui->no_index = isset($db->no_index) ? $db->no_index : "";
 		$ui->untuk = isset($db->untuk) ? $db->untuk : "";
 		$ui->transportasi = isset($db->transportasi) ? $db->transportasi : "";
 		$ui->dasar_pelaksana = isset($db->dasar_pelaksana) ? $db->dasar_pelaksana : "";
@@ -216,6 +220,18 @@ class SPTController extends Controller
 		
 					$template->cloneRowAndSetValues('n-o', $userValue);
 					
+					//generate QRCode
+					
+					$uuid = (string) Str::uuid();
+					$uuidSplit = explode('-', $uuid);
+					QrCode::format('png')->generate('https://disdikkerinci.id/spt/guest?key='. $uuidSplit[0] , base_path('public/storage/images/spt_qr.png'));
+					$template->setImageValue('QRCODE', base_path('public/storage/images/spt_qr.png'));
+					
+ 					$sptGuest = DB::table('spt_guest')->insert([
+						 'spt_id' => $sptData->id,
+						 'key' => $uuidSplit[0]
+					]);
+
 					$newFile = new \stdClass();
 					$newFile->dbPath ='/storage/spt/';
 					$newFile->ext = '.pdf';
@@ -237,14 +253,14 @@ class SPTController extends Controller
 
 					$newFile->newName = $newFile->newName.".pdf";
 
-					$file = Utils::saveFile($newFile);
-					// update
-					$spt->update([
-						'spt_file_id' => $file,
-						'spt_generated_at' => DB::raw("now()"),
-						'spt_generated_by' => auth('sanctum')->user()->pegawai->id,
-						'status' => 'SPTGENERATED'
-					]);
+					// $file = Utils::saveFile($newFile);
+					// // update
+					// $spt->update([
+					// 	'spt_file_id' => $file,
+					// 	'spt_generated_at' => DB::raw("now()"),
+					// 	'spt_generated_by' => auth('sanctum')->user()->pegawai->id,
+					// 	'status' => 'SPTGENERATED'
+					// ]);
 					
 					array_push($results['messages'], 'Berhasil membuat SPT.');
 					$results['success'] = true;

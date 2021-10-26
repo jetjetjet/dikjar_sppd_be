@@ -2,40 +2,25 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Laravel\Sanctum\HasApiTokens;
 use App\Traits\LogUser;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, LogUser, HasRoles, Notifiable;
-
+    use HasApiTokens, LogUser, HasRoles;
     protected $guard_name = 'sanctum';
+
     /**
      * The attributes that are mass assignable.
      *
      * @var string[]
      */
     protected $fillable = [
-        'username'
-        ,'nip'
-        ,'jabatan_id'
-        ,'position_id'
-        ,'email'
+        'nip'
         ,'password'
-        ,'full_name'
-        ,'tgl_lahir'
-        ,'ttd'
-        ,'jenis_kelamin'
-        ,'path_foto'
-        ,'password'
-        ,'phone'
-        ,'address'
-        ,'active'
         ,'created_by'
         ,'updated_by'
     ];
@@ -56,19 +41,11 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected $casts = [
-        'ttl' => 'datetime:Y-m-d',
-        'email_verified_at' => 'datetime',
-    ];
+    protected $casts = [];
 
     public function getPermissionAttribute()
     {
         return $this->getAllPermissions();
-    }
-
-    public function getPegawaiId()
-    {
-        return $this->attributes['pegawai_id'];
     }
 
     public function pegawai()

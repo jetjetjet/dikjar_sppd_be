@@ -10,6 +10,8 @@ use Validator;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
+use App\Helpers\Utils;
+
 class InapController extends Controller
 {
 	public function show($id)
@@ -158,9 +160,9 @@ class InapController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-			'pegawai_id' 	=> 'required',
-      'biaya_id' => 'required',
-      'file' => 'required'
+			// 'pegawai_id' 	=> 'required',
+      // 'biaya_id' => 'required',
+      'file' => 'required|mimes:jpeg,bmp,png,gif,pdf'
 		);
 
 		$validator = Validator::make($inputs, $rules);
@@ -171,14 +173,19 @@ class InapController extends Controller
     }
 
 		$inap = Inap::where('id',$id)
-		->where('pegawai_id', $inputs['pegawai_id'])
-		->where('biaya_id', $inputs['biaya_id'])
+		// ->where('pegawai_id', $inputs['pegawai_id'])
+		// ->where('biaya_id', $inputs['biaya_id'])
 		->first();
 
+		$file = Utils::imageUpload($request, 'struk');
+		$fileId = null;
+		if($file != null) $fileId= $file->id;
+
 		$inap->update([
-			'file_id' => $inputs['tgl_checkout']
+			'file_id' => $fileId
 		]);
-    array_push($results['messages'], 'Berhasil menyimpan data checkout.');
+
+    array_push($results['messages'], 'Berhasil upload struk penginapan.');
 
     $results['success'] = true;
     $results['state_code'] = 200;
