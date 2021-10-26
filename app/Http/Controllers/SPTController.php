@@ -253,14 +253,14 @@ class SPTController extends Controller
 
 					$newFile->newName = $newFile->newName.".pdf";
 
-					// $file = Utils::saveFile($newFile);
-					// // update
-					// $spt->update([
-					// 	'spt_file_id' => $file,
-					// 	'spt_generated_at' => DB::raw("now()"),
-					// 	'spt_generated_by' => auth('sanctum')->user()->pegawai->id,
-					// 	'status' => 'SPTGENERATED'
-					// ]);
+					$file = Utils::saveFile($newFile);
+					// update
+					$spt->update([
+						'spt_file_id' => $file,
+						'spt_generated_at' => DB::raw("now()"),
+						'spt_generated_by' => auth('sanctum')->user()->pegawai->id,
+						'status' => 'SPTGENERATED'
+					]);
 					
 					array_push($results['messages'], 'Berhasil membuat SPT.');
 					$results['success'] = true;
