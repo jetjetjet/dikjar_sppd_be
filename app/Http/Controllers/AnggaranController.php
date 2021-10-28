@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Anggaran;
+use App\Models\PejabatTtd;
 use DB;
 use Validator;
 
@@ -93,7 +94,8 @@ class AnggaranController extends Controller
 			'kode_rekening' => 'required',
 			'nama_rekening' => 'required',
       'uraian' => 'required',
-      'pagu' => 'required|numeric|min:4'
+      'pagu' => 'required|numeric|min:4',
+      'pejabat_pptk' => 'required|array|min:1'
 		);
 
 		$validator = Validator::make($inputs, $rules);
@@ -102,19 +104,39 @@ class AnggaranController extends Controller
       $results['messages'] = Array($validator->messages()->first());
       return response()->json($results, 200);
     }
-		
-    Anggaran::create([
-      'kode_rekening' => $inputs['kode_rekening'],
-      'nama_rekening' => $inputs['nama_rekening'],
-      'uraian' => $inputs['uraian'],
-      'pagu' => $inputs['pagu'],
-      'periode' => date('Y')
-    ]);
+
+		try {
+			DB::beginTransaction();
+
+			$anggaran = Anggaran::create([
+				'kode_rekening' => $inputs['kode_rekening'],
+				'nama_rekening' => $inputs['nama_rekening'],
+				'uraian' => $inputs['uraian'],
+				'pagu' => $inputs['pagu'],
+				'periode' => date('Y')
+			]);
+	
+			foreach($inputs['pejabat_pptk'] as $pejabat) {
+				PejabatTtd::create([
+					'anggaran_id' => $anggaran->id,
+					'pegawai_id' => $pejabat,
+					'autorisasi' => 'Pejabat Pelaksana Teknis Kegiatan',
+					'autorisasi_code' => 'PPTK',
+					'is_active' => '1'
+				]);
+			}
+
+			DB::commit();
+		} catch (\Exception $e) {
+			DB::rollBack();
+			Log::channel('spderr')->info('anggaran_save: '. json_encode($e->getMessage()));
+			array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
+		}
 
     array_push($results['messages'], 'Berhasil menambahkan Anggaran baru.');
 
     $results['success'] = true;
-    $results['state_code'] = 200;
+    $results['state_code'] = 201;
 
 		return response()->json($results, $results['state_code']);
 	}
@@ -122,7 +144,13 @@ class AnggaranController extends Controller
 	public function show($id)
 	{
 		$results = $this->responses;
-		$results['data'] = Anggaran::find($id);
+		$q = Anggaran::find($id);
+		$q->pejabat_pptk = PejabatTtd::where('anggaran_id', $id)
+		->where('autorisasi_code', 'PPTK')
+		->where('is_active', '1')
+		->get()->pluck('pegawai_id');
+
+		$results['data'] = $q;
 
 		$results['state_code'] = 200;
 		$results['success'] = true;
@@ -139,7 +167,8 @@ class AnggaranController extends Controller
 			'kode_rekening' => 'required',
 			'nama_rekening' => 'required',
       'uraian' => 'required',
-      'pagu' => 'required'
+      'pagu' => 'required',
+      'pejabat_pptk' => 'required|array|min:1'
 		);
 
 		$validator = Validator::make($request->all(), $rules);
@@ -149,13 +178,47 @@ class AnggaranController extends Controller
       return response()->json($results, $results['state_code']);
     }
     
-		$anggaran = Anggaran::find($id);
-    $anggaran->update([
-      'kode_rekening' => $inputs['kode_rekening'],
-      'nama_rekening' => $inputs['nama_rekening'],
-      'uraian' => $inputs['uraian'],
-      'pagu' => $inputs['pagu'],
-    ]);
+		try {
+			DB::beginTransaction();
+
+			$anggaran = Anggaran::find($id);
+			$anggaran->update([
+				'kode_rekening' => $inputs['kode_rekening'],
+				'nama_rekening' => $inputs['nama_rekening'],
+				'uraian' => $inputs['uraian'],
+				'pagu' => $inputs['pagu'],
+			]);
+
+			//delete missing pegawai
+			PejabatTtd::where('anggaran_id', $id)
+			->whereNotIn('pegawai_id', $inputs['pejabat_pptk'])
+			->delete();
+	
+			foreach($inputs['pejabat_pptk'] as $pejabat) {
+				$cek = PejabatTtd::where('is_active', '1')
+				->where('anggaran_id', $id)
+				->where('pegawai_id', $pejabat)
+				->first();
+
+				if($cek == null) {
+					PejabatTtd::create([
+						'anggaran_id' => $id,
+						'pegawai_id' => $pejabat,
+						'autorisasi' => 'Pejabat Pelaksana Teknis Kegiatan',
+						'autorisasi_code' => 'PPTK',
+						'is_active' => '1'
+					]);
+				}
+			}
+
+			DB::commit();
+		} catch (\Exception $e) {
+			DB::rollBack();
+			Log::channel('spderr')->info('anggaran_save: '. json_encode($e->getMessage()));
+			array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
+		}
+
+
 
     array_push($results['messages'], 'Berhasil mengubah Anggaran.');
 

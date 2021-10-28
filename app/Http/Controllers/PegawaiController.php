@@ -31,7 +31,9 @@ class PegawaiController extends Controller
 		
 		$q = Pegawai::select('pegawai.id as code', 'full_name as label');
 		if($request->filter){
-			if($request->filter == 'parent'){
+			if($request->filter == 'all'){
+				$q = $q->join('jabatan as j', 'j.id', 'pegawai.jabatan_id');
+			} else if($request->filter == 'parent'){
 				$q = $q->join('jabatan as j', 'j.id', 'pegawai.jabatan_id')
 				->where('j.is_parent', '1');
 			} else if($request->filter == 'spt'){

@@ -12,6 +12,7 @@ class PejabatTtd extends Model
 	protected $table = 'pejabat_ttd';
 	protected $fillable = [
 		'pegawai_id',
+		'anggaran_id',
 		'autorisasi',
 		'autorisasi_code',
 		'is_active',

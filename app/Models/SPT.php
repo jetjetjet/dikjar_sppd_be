@@ -18,6 +18,7 @@ class SPT extends Model
 		'anggaran_id',
 		'pelaksana_id',
 		'pttd_id',
+		'pptk_id',
 		'no_spt',
 		'dasar_pelaksana',
 		'untuk',
@@ -37,6 +38,8 @@ class SPT extends Model
 		'spt_generated_at',
 		'spt_generated_by',
 		'finished_at',
-		'finished_by'
+		'finished_by',
+		'proceed_at',
+		'proceed_by'
 	];
 }

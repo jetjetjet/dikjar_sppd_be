@@ -17,6 +17,7 @@ class CreatePejabatTtdsTable extends Migration
             $table->id();
             $table->timestamps();
             $table->bigInteger('pegawai_id')->unsigned();
+            $table->bigInteger('anggaran_id')->unsigned()->nullable();
             $table->string('autorisasi');
             $table->string('autorisasi_code');
             $table->boolean('is_active');

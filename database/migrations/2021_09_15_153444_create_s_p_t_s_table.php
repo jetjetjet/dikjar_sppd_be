@@ -22,6 +22,7 @@ class CreateSPTSTable extends Migration
             $table->bigInteger('anggaran_id');
             $table->bigInteger('pelaksana_id');
             $table->bigInteger('pttd_id');
+            $table->bigInteger('pptk_id');
             $table->date('tgl_spt');
             $table->integer('no_index');
             $table->string('no_spt');

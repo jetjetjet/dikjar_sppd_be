@@ -23,7 +23,6 @@ use NcJoes\OfficeConverter\OfficeConverter;
 
 class SPPDController extends Controller
 {
-  
 	public function grid(Request $request, $id)
 	{
 		$results = $this->responses;
@@ -40,7 +39,8 @@ class SPPDController extends Controller
 			'daerah_asal',
 			'daerah_tujuan',
 			'transportasi',
-			'finished_at'
+			'finished_at',
+			'proceed_at'
 		)->first();
 		
 		$child = [];
@@ -107,10 +107,10 @@ class SPPDController extends Controller
 			'daerah_tujuan',
 			'transportasi',
 			'finished_at',
-			DB::raw("( select full_name from pegawai where id = {$pegawaiId} and deleted_at is null ) as pegawai_text"),
-			DB::raw("( select id from biaya where spt_id = {$id} and pegawai_id = {$pegawaiId} and deleted_at is null ) as biaya_id"),
-			DB::raw("( select total_biaya from biaya where spt_id = {$id} and pegawai_id = {$pegawaiId} and deleted_at is null ) as total_biaya"),
-			DB::raw("(select sppd_file_id from spt_detail as sd where spt.id = spt_id and deleted_at is null and pegawai_id = {$pegawaiId} ) as sppd_file_id")
+			DB::raw("( select full_name from pegawai where id = {$pegawaiId} and deleted_at is null limit 1 ) as pegawai_text"),
+			DB::raw("( select id from biaya where spt_id = {$id} and pegawai_id = {$pegawaiId} and deleted_at is null limit 1 ) as biaya_id"),
+			DB::raw("( select total_biaya from biaya where spt_id = {$id} and pegawai_id = {$pegawaiId} and deleted_at is null limit 1 ) as total_biaya"),
+			DB::raw("( select sppd_file_id from spt_detail as sd where spt.id = spt_id and deleted_at is null and pegawai_id = {$pegawaiId} limit 1 ) as sppd_file_id")
 		)->first();
 		
 		$results['state_code'] = 200;
@@ -118,6 +118,79 @@ class SPPDController extends Controller
 
 		return response()->json($results, $results['state_code']);
   }
+
+	public function cetakSPPD($id, $pegawaiId)
+	{
+		$results = $this->responses;
+		try{
+			$templateSppdPath = base_path('public/storage/template/template_sppd.docx');
+			$sppdFile = FaFile::exists($templateSppdPath);
+			
+			if(!$sppdFile) {
+				throw new \Exception('Template SPPD tidak ditemukan');
+			}
+
+			$spt = SPT::find($id);
+			$sptData = $this->mapSPT($spt);
+			$user = SPTDetail::join('pegawai as p', 'p.id', 'spt_detail.pegawai_id')
+			->join('jabatan as j', 'j.id', 'p.jabatan_id')
+			->where('spt_id',$id)
+			->where('pegawai_id', $pegawaiId)
+			->select(
+				'full_name as nama_pegawai', 
+				'j.name as jabatan_pegawai', 
+				'j.golongan as golongan_pegawai',
+				'spt_detail.id',
+				'pegawai_id',
+				'nip as nip_pegawai')
+			->first();
+			
+			$tempSppd = new TemplateProcessor($templateSppdPath);
+
+			// $template->setValue('dasar_pelaksana', $spt->dasar_pelaksana);
+			$tempSppd->setValue('nama_pegawai', $user->nama_pegawai);
+			$tempSppd->setValue('jabatan_pegawai', $user->jabatan_pegawai);
+			$tempSppd->setValue('golongan_pegawai', $user->golongan_pegawai);
+			$tempSppd->setValue('untuk', $sptData->untuk);
+			$tempSppd->setValue('transportasi', $sptData->transportasi);
+			$tempSppd->setValue('jml_hari', $sptData->jml_hari . " Hari");
+			$tempSppd->setValue('daerah_asal', $sptData->daerah_asal);
+			$tempSppd->setValue('daerah_tujuan', $sptData->daerah_tujuan);
+			$tempSppd->setValue('tgl_berangkat', $sptData->tgl_berangkat);
+			$tempSppd->setValue('tgl_kembali', $sptData->tgl_kembali);
+			// $template->setValue('tgl_berangkat_plus', $brgktPlus->isoFormat('D MMMM Y'));
+			// $template->setValue('tgl_kembali_minus', $kembaliMinus->isoFormat('D MMMM Y'));
+			$tempSppd->setValue('tgl_sppd', $sptData->tgl_spt);
+			$tempSppd->setValue('no_spt', $sptData->no_spt);
+
+			$newFile = new \stdClass();
+			$newFile->dbPath ='/storage/spt/';
+			$newFile->ext = '.pdf';
+			$newFile->originalName = "SPPD_" . $user->nama_pegawai;
+			$newFile->newName = time()."_".$newFile->originalName;
+
+			$path = base_path('/public');
+			$tempSppd->saveAs($path . $newFile->dbPath . $newFile->newName . ".docx", TRUE);
+			//Convert kwe PDF
+			$docPath = $path . $newFile->dbPath . $newFile->newName . ".docx";
+			$converter = new OfficeConverter($docPath);
+			//generates pdf file in same directory as test-file.docx
+			$converter->convertTo($newFile->newName.".pdf");
+			
+			$oldFile = $path . $newFile->dbPath . $newFile->newName . ".docx";
+			if(FaFile::exists($oldFile)) {
+				FaFile::delete($oldFile);
+			}
+
+			$newFile->newName = $newFile->newName.".pdf";
+			$results['data'] = $newFile->dbPath . $newFile->newName;
+		} catch (\Exception $e) {
+			Log::channel('spderr')->info('sppd_cetak: '. json_encode($e->getMessage()));
+			array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
+		}
+		
+		return response()->json($results, $results['state_code']);
+	}
 
 	public function cetakRumming($id, $biayaId, $pegawaiId)
 	{
@@ -269,7 +342,8 @@ class SPPDController extends Controller
 				'no_spt',
 				'p.full_name as nama_penyelenggara',
 				'p.nip as nip_pengelenggara',
-				'no_index'
+				'no_index',
+				'pptk_id'
 			)->first();
 
 			$nameFile = "090_".$spt->index."_SPPD_PDK_2021";
@@ -288,10 +362,8 @@ class SPPDController extends Controller
 				->select('nip', 'full_name')
 				->first();
 				
-				$ppk = DB::table('pejabat_ttd as pt')
-				->join('pegawai as p', 'p.id', 'pt.pegawai_id')
-				->where('autorisasi_code', 'PPTK')
-				->where('is_active', '1')
+				$ppk = DB::table('pegawai as p')
+				->where('id', $spt->pptk_id)
 				->select('nip', 'full_name')
 				->first();
 
@@ -367,6 +439,26 @@ class SPPDController extends Controller
 		$ui->total = isset($db->harga) && isset($db->qty) ? number_format($db->harga * $db->qty) : null;
 		$ui->totalRaw = isset($db->harga) && isset($db->qty) ? $db->harga * $db->qty : null;
 		$ui->cttn = isset($db->catatan) ? $db->catatan : null;
+
+		return $ui;
+	}
+
+	function mapSPT($db){
+		$ui = new \stdClass();
+		$ui->id = isset($db->id) ? $db->id : "";
+		$ui->jml_hari = isset($db->jumlah_hari) ? $db->jumlah_hari : "";
+		$ui->tgl_berangkat = isset($db->tgl_berangkat) ? (new Carbon($db->tgl_berangkat))->isoFormat('D MMMM Y') : "";
+		$ui->tgl_kembali = isset($db->tgl_kembali) ? (new Carbon($db->tgl_kembali))->isoFormat('D MMMM Y') : "";
+		$ui->tgl_spt = isset($db->tgl_spt) ? (new Carbon($db->tgl_spt))->isoFormat('D MMMM Y') : "";
+
+		$ui->daerah_asal = ucwords(strtolower($db->daerah_asal));
+		$ui->daerah_tujuan = ucwords(strtolower($db->daerah_tujuan));
+		$ui->no_spt = isset($db->no_spt) ? $db->no_spt : "";
+		$ui->periode = isset($db->periode) ? $db->periode : "";
+		$ui->no_index = isset($db->no_index) ? $db->no_index : "";
+		$ui->untuk = isset($db->untuk) ? $db->untuk : "";
+		$ui->transportasi = isset($db->transportasi) ? $db->transportasi : "";
+		$ui->dasar_pelaksana = isset($db->dasar_pelaksana) ? $db->dasar_pelaksana : "";
 
 		return $ui;
 	}

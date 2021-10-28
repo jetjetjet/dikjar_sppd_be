@@ -32,10 +32,15 @@ class PejabatTtdController extends Controller
 	{
 		$results = $this->responses;
 		if($request->has('filter')){
-			$results['data'] = PejabatTtd::join('pegawai as p', 'p.id', 'pegawai_id')
+			$q = PejabatTtd::join('pegawai as p', 'p.id', 'pegawai_id')
 			->where('is_active', '1')
-			->where('autorisasi_code', $request->filter)
-			->select('p.id as id', 'full_name as label')->get();
+			->where('autorisasi_code', $request->filter);
+
+			if(isset($request->anggaran)) {
+				$q = $q->where('anggaran_id', $request->anggaran);
+			}
+
+			$results['data'] = $q->select('p.id as id', 'full_name as label')->get();
 
 			$results['state_code'] = 200;
 			$results['success'] = true;
@@ -59,12 +64,23 @@ class PejabatTtdController extends Controller
 		// Validation fails?
 		if ($validator->fails()){
       $results['messages'] = Array($validator->messages()->first());
-      return response()->json($results, 200);
+      return response()->json($results, 406);
     }
+
+		$validasiPejabat = PejabatTtd::where('pegawai_id', $inputs['pegawai_id'])
+		->where('autorisasi', $inputs['autorisasi'])
+		->where('is_active', '1')
+		->first();
+
+		if($validasiPejabat != null) {
+      $results['messages'] = Array('Pejabat sudah ada pada sistem.');
+      return response()->json($results, 409);
+		}
 		
     PejabatTtd::create([
       'pegawai_id' => $inputs['pegawai_id'],
       'autorisasi' => $inputs['autorisasi'],
+      'anggaran_id' => $inputs['anggaran_id'],
       'autorisasi_code' => $this->mapAutorisasi($inputs['autorisasi']),
       'is_active' => $inputs['is_active']
     ]);
@@ -72,7 +88,7 @@ class PejabatTtdController extends Controller
     array_push($results['messages'], 'Berhasil menambahkan data baru.');
 
     $results['success'] = true;
-    $results['state_code'] = 200;
+    $results['state_code'] = 201;
 
 		return response()->json($results, $results['state_code']);
 	}
@@ -88,7 +104,8 @@ class PejabatTtdController extends Controller
 			'nip',
 			'autorisasi',
 			DB::raw("case when is_active is true then 'Aktif' else 'Tidak Aktif' end as status_aktif"),
-			'is_active'
+			'is_active',
+			'anggaran_id'
 		)->first();
 
 		$results['state_code'] = 200;
@@ -100,7 +117,6 @@ class PejabatTtdController extends Controller
 	public function update(Request $request, $id)
 	{
 		$results = $this->responses;
-
 		$inputs = $request->all();
 		$rules = array(
 			'pegawai_id' => 'required',
@@ -115,14 +131,13 @@ class PejabatTtdController extends Controller
     }
     
 		$PejabatTtd = PejabatTtd::find($id);
-
-		$code = $inputs['autorisasi'] == 'Pejabat Pembuat Komitmen' ? 'PPK' : 'PTTD';
-    $PejabatTtd->update([
-      'pegawai_id' => $inputs['pegawai_id'],
-      'autorisasi' => $inputs['autorisasi'],
-      'autorisasi_code' => $code
-    ]);
-
+		$PejabatTtd->update([
+			'pegawai_id' => $inputs['pegawai_id'],
+			'autorisasi' => $inputs['autorisasi'],
+			'anggaran_id' => $inputs['anggaran_id'],
+			'autorisasi_code' => $this->mapAutorisasi($inputs['autorisasi']),
+		]);
+		
     array_push($results['messages'], 'Berhasil mengubah data.');
 
     $results['success'] = true;

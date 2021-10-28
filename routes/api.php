@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AnggaranController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BidangController;
@@ -50,6 +51,10 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::post('/anggaran', [AnggaranController::class, 'store'])->middleware('can:anggaran-add');
 	Route::put('/anggaran/{id}', [AnggaranController::class, 'update'])->middleware('can:anggaran-edit');
 	Route::delete('/anggaran/{id}', [AnggaranController::class, 'destroy'])->middleware('can:anggaran-delete');
+
+	
+	Route::get('/dashboard-anggaran', [DashboardController::class, 'anggaran']);
+	Route::get('/dashboard-pegawai', [DashboardController::class, 'pegawaiDinas']);
 
 	// Route::get('/bidang-grid', [BidangController::class, 'grid']);
 	// Route::get('/bidang-search', [BidangController::class, 'search']);
@@ -134,15 +139,17 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	//SPT
 	Route::get('/spt-grid', [SPTController::class, 'grid'])->middleware('can:spt-view');
 	Route::get('/spt/{id}', [SPTController::class, 'show'])->middleware('can:spt-view');
-	Route::get('/spt/{id}/lihat-spt', [SPTController::class, 'getSPT'])->middleware('can:spt-view');
+	Route::get('/spt/{id}/lihat', [SPTController::class, 'getSPT'])->middleware('can:spt-view');
+	Route::get('/spt/{id}/cetak', [SPTController::class, 'cetakSPT'])->middleware('can:spt-generate');
 	Route::post('/spt', [SPTController::class, 'store'])->middleware('can:spt-add');
-	Route::post('/spt/{id}/cetak-spt', [SPTController::class, 'cetakSPT'])->middleware('can:spt-generate');
-	Route::post('/spt/{id}/selesai', [SPTController::class, 'finish'])->middleware('can:spt-finish');
 	Route::put('/spt/{id}', [SPTController::class, 'update'])->middleware('can:spt-edit');
+	Route::patch('/spt/{id}/selesai', [SPTController::class, 'finish'])->middleware('can:spt-finish');
+	Route::patch('/spt/{id}/proses', [SPTController::class, 'proceed'])->middleware('can:spt-edit');
 	Route::delete('/spt/{id}', [SPTController::class, 'destroy'])->middleware('can:spt-delete');
 
 	//SPPD
 	Route::get('/spt/{id}/sppd-grid', [SPPDController::class, 'grid']);
+	Route::get('/spt/{id}/cetak-sppd/{pegawaiId}', [SPPDController::class, 'cetakSPPD']);
 	Route::get('/spt/{id}/sppd/{sptDetailId}/{pegawaiId}', [SPPDController::class, 'show']);
 	Route::get('/spt/lihat-sppd/{sptDetailId}/{pegawaiId}', [SPPDController::class, 'getSPPD']);
 
