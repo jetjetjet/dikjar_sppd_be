@@ -95,7 +95,8 @@ class AnggaranController extends Controller
 			'nama_rekening' => 'required',
       'uraian' => 'required',
       'pagu' => 'required|numeric|min:4',
-      'pejabat_pptk' => 'required|array|min:1'
+      'pejabat_pptk' => 'required',
+			'bendahara' => 'required'
 		);
 
 		$validator = Validator::make($inputs, $rules);
@@ -115,16 +116,25 @@ class AnggaranController extends Controller
 				'pagu' => $inputs['pagu'],
 				'periode' => date('Y')
 			]);
-	
-			foreach($inputs['pejabat_pptk'] as $pejabat) {
-				PejabatTtd::create([
+
+			$pejabat = [
+				[
 					'anggaran_id' => $anggaran->id,
-					'pegawai_id' => $pejabat,
+					'pegawai_id' => $inputs['pejabat_pptk'],
 					'autorisasi' => 'Pejabat Pelaksana Teknis Kegiatan',
 					'autorisasi_code' => 'PPTK',
 					'is_active' => '1'
-				]);
-			}
+				],
+				[
+					'anggaran_id' => $anggaran->id,
+					'pegawai_id' => $inputs['bendahara'],
+					'autorisasi' => 'Bendahara',
+					'autorisasi_code' => 'BENDAHARA',
+					'is_active' => '1'
+				]
+			];
+
+			PejabatTtd::insert($pejabat);
 
 			DB::commit();
 		} catch (\Exception $e) {
@@ -144,11 +154,18 @@ class AnggaranController extends Controller
 	public function show($id)
 	{
 		$results = $this->responses;
-		$q = Anggaran::find($id);
-		$q->pejabat_pptk = PejabatTtd::where('anggaran_id', $id)
-		->where('autorisasi_code', 'PPTK')
-		->where('is_active', '1')
-		->get()->pluck('pegawai_id');
+		$q = Anggaran::join('pejabat_ttd as pt', function ($q){
+			$q->on('anggaran.id', 'pt.anggaran_id');
+			$q->where('pt.autorisasi_code', 'PPTK');
+		})
+		->join('pejabat_ttd as be', function ($q){
+			$q->on('anggaran.id', 'be.anggaran_id');
+			$q->where('be.autorisasi_code', 'BENDAHARA');
+		})
+		->select('anggaran.*',
+		'pt.pegawai_id as pejabat_pptk',
+		'be.pegawai_id as bendahara')
+		->first();
 
 		$results['data'] = $q;
 
@@ -168,7 +185,8 @@ class AnggaranController extends Controller
 			'nama_rekening' => 'required',
       'uraian' => 'required',
       'pagu' => 'required',
-      'pejabat_pptk' => 'required|array|min:1'
+      'pejabat_pptk' => 'required',
+			'bendahara' => 'required'
 		);
 
 		$validator = Validator::make($request->all(), $rules);
@@ -191,24 +209,37 @@ class AnggaranController extends Controller
 
 			//delete missing pegawai
 			PejabatTtd::where('anggaran_id', $id)
-			->whereNotIn('pegawai_id', $inputs['pejabat_pptk'])
+			->whereNotIn('pegawai_id', [$inputs['pejabat_pptk'], $inputs['bendahara']])
 			->delete();
-	
-			foreach($inputs['pejabat_pptk'] as $pejabat) {
-				$cek = PejabatTtd::where('is_active', '1')
-				->where('anggaran_id', $id)
-				->where('pegawai_id', $pejabat)
-				->first();
 
-				if($cek == null) {
-					PejabatTtd::create([
-						'anggaran_id' => $id,
-						'pegawai_id' => $pejabat,
-						'autorisasi' => 'Pejabat Pelaksana Teknis Kegiatan',
-						'autorisasi_code' => 'PPTK',
-						'is_active' => '1'
-					]);
-				}
+			$cekPptk = PejabatTtd::where('is_active', '1')
+			->where('anggaran_id', $id)
+			->where('pegawai_id', $inputs['pejabat_pptk'])
+			->first();
+
+			if($cekPptk == null) {
+				PejabatTtd::create([
+					'anggaran_id' => $id,
+					'pegawai_id' => $inputs['pejabat_pptk'],
+					'autorisasi' => 'Pejabat Pelaksana Teknis Kegiatan',
+					'autorisasi_code' => 'PPTK',
+					'is_active' => '1'
+				]);
+			}
+
+			$cekBendahara = PejabatTtd::where('is_active', '1')
+			->where('anggaran_id', $id)
+			->where('pegawai_id', $inputs['bendahara'])
+			->first();
+	
+			if($cekBendahara == null) {
+				PejabatTtd::create([
+					'anggaran_id' => $id,
+					'pegawai_id' => $inputs['bendahara'],
+					'autorisasi' => 'Bendahara',
+					'autorisasi_code' => 'BENDAHARA',
+					'is_active' => '1'
+				]);
 			}
 
 			DB::commit();

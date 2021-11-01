@@ -23,6 +23,7 @@ class CreateSPTSTable extends Migration
             $table->bigInteger('pelaksana_id');
             $table->bigInteger('pttd_id');
             $table->bigInteger('pptk_id');
+            $table->bigInteger('bendahara_id');
             $table->date('tgl_spt');
             $table->integer('no_index');
             $table->string('no_spt');
@@ -37,6 +38,8 @@ class CreateSPTSTable extends Migration
             $table->integer('jumlah_hari');
             $table->dateTime('spt_generated_at')->nullable();
             $table->bigInteger('spt_generated_by')->nullable();
+            $table->dateTime('proceed_at')->nullable();
+            $table->bigInteger('proceed_by')->nullable();
             $table->dateTime('finished_at')->nullable();
             $table->bigInteger('finished_by')->nullable();
 

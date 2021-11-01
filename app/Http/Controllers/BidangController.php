@@ -88,6 +88,7 @@ class BidangController extends Controller
       $results['messages'] = Array($validator->messages()->first());
       return response()->json($results, $results['state_code']);
     }
+
     
 		$Bidang = Bidang::find($id);
     $Bidang->update([

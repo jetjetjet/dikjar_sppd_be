@@ -19,6 +19,7 @@ class SPT extends Model
 		'pelaksana_id',
 		'pttd_id',
 		'pptk_id',
+		'bendahara_id',
 		'no_spt',
 		'dasar_pelaksana',
 		'untuk',

@@ -13,11 +13,15 @@ class PejabatTtdController extends Controller
 	{
 		$results = $this->responses;
 		$results['data'] = PejabatTtd::join('pegawai as p', 'p.id', 'pegawai_id')
+		->leftJoin('anggaran as a', 'a.id', 'anggaran_id')
 		->select(
 			'pejabat_ttd.id as id',
 			'nip',
 			'full_name',
-			'autorisasi',
+			DB::raw("case when autorisasi_code = 'BENDAHARA' then 'Bendahara ' || a.nama_rekening 
+				when autorisasi_code = 'PPTK' then 'PPTK ' || a.nama_rekening 
+				else autorisasi end as autorisasi
+			"),
 			DB::raw("case when is_active is true then 'Aktif' else 'Tidak Aktif' end as status_aktif"),
 			'is_active'
 		)->get();
@@ -103,6 +107,7 @@ class PejabatTtdController extends Controller
 			'pegawai_id',
 			'nip',
 			'autorisasi',
+			'autorisasi_code',
 			DB::raw("case when is_active is true then 'Aktif' else 'Tidak Aktif' end as status_aktif"),
 			'is_active',
 			'anggaran_id'

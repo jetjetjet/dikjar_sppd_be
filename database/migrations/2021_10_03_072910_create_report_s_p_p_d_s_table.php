@@ -39,7 +39,7 @@ class CreateReportSPPDSTable extends Migration
             $table->decimal('uang_total', 16,0)->nullable();
             
             $table->string('inap_hotel')->nullable();
-            $table->integer('inap_room')->nullable();
+            $table->string('inap_room')->nullable();
             $table->date('inap_checkin')->nullable();
             $table->date('inap_checkout')->nullable();
             $table->integer('inap_jml_hari')->nullable();

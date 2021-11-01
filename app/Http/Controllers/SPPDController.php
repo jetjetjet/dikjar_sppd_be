@@ -343,7 +343,8 @@ class SPPDController extends Controller
 				'p.full_name as nama_penyelenggara',
 				'p.nip as nip_pengelenggara',
 				'no_index',
-				'pptk_id'
+				'pptk_id',
+				'bendahara_id'
 			)->first();
 
 			$nameFile = "090_".$spt->index."_SPPD_PDK_2021";
@@ -355,10 +356,8 @@ class SPPDController extends Controller
 			}
 
 			try{
-				$bendahara = DB::table('pejabat_ttd as pt')
-				->join('pegawai as p', 'p.id', 'pt.pegawai_id')
-				->where('autorisasi', 'Bendahara')
-				->where('is_active', '1')
+				$bendahara = DB::table('pegawai as p')
+				->where('id', $spt->bendahara_id)
 				->select('nip', 'full_name')
 				->first();
 				
