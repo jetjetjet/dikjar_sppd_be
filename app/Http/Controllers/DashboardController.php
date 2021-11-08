@@ -17,8 +17,8 @@ class DashboardController extends Controller
 			->whereNull('sd.deleted_at');
 		})->join('pegawai as p', 'p.id', 'sd.pegawai_id')
 		->join('jabatan as j', 'j.id', 'p.jabatan_id')
-		->whereNull('spt.finished_at')
-		->whereNull('sd.finished_at')
+		->whereNull('spt.settled_at')
+		->whereNull('sd.settled_at')
 		->select(
 			'full_name',
 			'j.name as jabatan',
@@ -44,7 +44,7 @@ class DashboardController extends Controller
 		->join('biaya as b', 'b.spt_id', 's.id')
 		->whereNull('b.deleted_at')
 		->whereNull('s.deleted_at')
-		->whereNotNull('s.finished_at')
+		->whereNotNull('s.settled_at')
 		->groupBy('s.anggaran_id')
 		->select('s.anggaran_id', DB::raw("sum(b.total_biaya) as realisasi"));
 

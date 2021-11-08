@@ -54,7 +54,7 @@ class Utils
       
       $results = new \stdClass();
       $results->id = self::saveFile($file);
-      $results->path = $file->path . "/" . $file->newName;
+      $results->path = $file->dbPath . "/" . $file->newName;
 
 
       // //buat folder tumbnail

@@ -36,12 +36,13 @@ class CreateSPTSTable extends Migration
             $table->date('tgl_berangkat');
             $table->date('tgl_kembali');
             $table->integer('jumlah_hari');
-            $table->dateTime('spt_generated_at')->nullable();
-            $table->bigInteger('spt_generated_by')->nullable();
             $table->dateTime('proceed_at')->nullable();
             $table->bigInteger('proceed_by')->nullable();
-            $table->dateTime('finished_at')->nullable();
-            $table->bigInteger('finished_by')->nullable();
+            $table->dateTime('completed_at')->nullable();
+            $table->bigInteger('completed_by')->nullable();
+            $table->dateTime('settled_at')->nullable();
+            $table->bigInteger('settled_by')->nullable();
+            $table->unsignedBigInteger('kwitansi_file_id')->nullable();
 
             $table->timestamps();
             $table->softDeletes();

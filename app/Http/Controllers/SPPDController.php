@@ -39,8 +39,11 @@ class SPPDController extends Controller
 			'daerah_asal',
 			'daerah_tujuan',
 			'transportasi',
-			'finished_at',
-			'proceed_at'
+			'settled_at',
+			'proceed_at',
+			'completed_at',
+			DB::raw("case when to_char(tgl_kembali, 'YYYY-MM-DD') <= to_char(now(), 'YYYY-MM-DD') and completed_at is null and proceed_at is not null then 1 else 0 end as can_finish"),
+			DB::raw("case when settled_at is null and completed_at is not null then 1 else 0 end as can_generate")
 		)->first();
 		
 		$child = [];
@@ -94,9 +97,10 @@ class SPPDController extends Controller
 
 		$user = $request->user();
 		$isAdmin = $user->tokenCan('is_admin') ? 1 : 0;
-		$loginid = $user->id;
+		$loginId = $user->pegawai->id;
 
-		$results['data'] = SPT::where('id', $id)
+		$results['data'] = SPT::join('spt_detail as sd', 'sd.spt_id', 'spt.id')
+		->where('sd.id', $sptDetailId)
 		->select(
 			'no_spt',
 			'tgl_berangkat',
@@ -106,11 +110,13 @@ class SPPDController extends Controller
 			'daerah_asal',
 			'daerah_tujuan',
 			'transportasi',
-			'finished_at',
+			'spt.settled_at',
 			DB::raw("( select full_name from pegawai where id = {$pegawaiId} and deleted_at is null limit 1 ) as pegawai_text"),
 			DB::raw("( select id from biaya where spt_id = {$id} and pegawai_id = {$pegawaiId} and deleted_at is null limit 1 ) as biaya_id"),
 			DB::raw("( select total_biaya from biaya where spt_id = {$id} and pegawai_id = {$pegawaiId} and deleted_at is null limit 1 ) as total_biaya"),
-			DB::raw("( select sppd_file_id from spt_detail as sd where spt.id = spt_id and deleted_at is null and pegawai_id = {$pegawaiId} limit 1 ) as sppd_file_id")
+			DB::raw("( select sppd_file_id from spt_detail as sd where spt.id = spt_id and deleted_at is null and pegawai_id = {$pegawaiId} limit 1 ) as sppd_file_id"),
+			DB::raw(" case when pegawai_id = {$loginId} or {$isAdmin} = 1 then 1 else 0 end as can_kwitansi"),
+			
 		)->first();
 		
 		$results['state_code'] = 200;
@@ -119,75 +125,18 @@ class SPPDController extends Controller
 		return response()->json($results, $results['state_code']);
   }
 
-	public function cetakSPPD($id, $pegawaiId)
+	public function cetakSPPD($id)
 	{
 		$results = $this->responses;
-		try{
-			$templateSppdPath = base_path('public/storage/template/template_sppd.docx');
-			$sppdFile = FaFile::exists($templateSppdPath);
-			
-			if(!$sppdFile) {
-				throw new \Exception('Template SPPD tidak ditemukan');
-			}
-
-			$spt = SPT::find($id);
-			$sptData = $this->mapSPT($spt);
-			$user = SPTDetail::join('pegawai as p', 'p.id', 'spt_detail.pegawai_id')
-			->join('jabatan as j', 'j.id', 'p.jabatan_id')
-			->where('spt_id',$id)
-			->where('pegawai_id', $pegawaiId)
-			->select(
-				'full_name as nama_pegawai', 
-				'j.name as jabatan_pegawai', 
-				'j.golongan as golongan_pegawai',
-				'spt_detail.id',
-				'pegawai_id',
-				'nip as nip_pegawai')
-			->first();
-			
-			$tempSppd = new TemplateProcessor($templateSppdPath);
-
-			// $template->setValue('dasar_pelaksana', $spt->dasar_pelaksana);
-			$tempSppd->setValue('nama_pegawai', $user->nama_pegawai);
-			$tempSppd->setValue('jabatan_pegawai', $user->jabatan_pegawai);
-			$tempSppd->setValue('golongan_pegawai', $user->golongan_pegawai);
-			$tempSppd->setValue('untuk', $sptData->untuk);
-			$tempSppd->setValue('transportasi', $sptData->transportasi);
-			$tempSppd->setValue('jml_hari', $sptData->jml_hari . " Hari");
-			$tempSppd->setValue('daerah_asal', $sptData->daerah_asal);
-			$tempSppd->setValue('daerah_tujuan', $sptData->daerah_tujuan);
-			$tempSppd->setValue('tgl_berangkat', $sptData->tgl_berangkat);
-			$tempSppd->setValue('tgl_kembali', $sptData->tgl_kembali);
-			// $template->setValue('tgl_berangkat_plus', $brgktPlus->isoFormat('D MMMM Y'));
-			// $template->setValue('tgl_kembali_minus', $kembaliMinus->isoFormat('D MMMM Y'));
-			$tempSppd->setValue('tgl_sppd', $sptData->tgl_spt);
-			$tempSppd->setValue('no_spt', $sptData->no_spt);
-
-			$newFile = new \stdClass();
-			$newFile->dbPath ='/storage/spt/';
-			$newFile->ext = '.pdf';
-			$newFile->originalName = "SPPD_" . $user->nama_pegawai;
-			$newFile->newName = time()."_".$newFile->originalName;
-
-			$path = base_path('/public');
-			$tempSppd->saveAs($path . $newFile->dbPath . $newFile->newName . ".docx", TRUE);
-			//Convert kwe PDF
-			$docPath = $path . $newFile->dbPath . $newFile->newName . ".docx";
-			$converter = new OfficeConverter($docPath);
-			//generates pdf file in same directory as test-file.docx
-			$converter->convertTo($newFile->newName.".pdf");
-			
-			$oldFile = $path . $newFile->dbPath . $newFile->newName . ".docx";
-			if(FaFile::exists($oldFile)) {
-				FaFile::delete($oldFile);
-			}
-
-			$newFile->newName = $newFile->newName.".pdf";
-			$results['data'] = $newFile->dbPath . $newFile->newName;
-		} catch (\Exception $e) {
-			Log::channel('spderr')->info('sppd_cetak: '. json_encode($e->getMessage()));
-			array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
+		
+		$sppd = SPTDetail::find($id);
+		if($sppd->sppd_file_id != null) {
+			$file = DB::table('files')->where('id', $sppd->sppd_file_id)->first();
+			$results['data'] = $file->file_path . $file->file_name;
+			$results['success'] = true;
+			$results['state_code'] = 200;
 		}
+		return response()->json($results, $results['state_code']);
 		
 		return response()->json($results, $results['state_code']);
 	}
@@ -195,127 +144,149 @@ class SPPDController extends Controller
 	public function cetakRumming($id, $biayaId, $pegawaiId)
 	{
 		$results = $this->responses;
-		$templatePath = base_path('public/storage/template/template_rumming.docx');
-		$checkFile = FaFile::exists($templatePath);
-		if($checkFile) {
-			$pegawai = Pegawai::join('jabatan as j', 'j.id', 'jabatan_id')
-			->where('pegawai.id', $pegawaiId)
-			->select('nip', 'full_name')
-			->first();
-			
-			$bendahara = DB::table('pejabat_ttd as pt')
-			->join('pegawai as p', 'p.id', 'pt.pegawai_id')
-			->where('autorisasi', 'Bendahara')
-			->where('is_active', '1')
-			->select('nip', 'full_name')
-			->first();
+		$sptDetail = SPTDetail::where('spt_id', $id)->where('pegawai_id', $pegawaiId)->first();
+		if($sptDetail->rumming_file_id == null) {
+			$templatePath = base_path('public/storage/template/template_rumming.docx');
+			$checkFile = FaFile::exists($templatePath);
+			if($checkFile) {
+				$pegawai = Pegawai::join('jabatan as j', 'j.id', 'jabatan_id')
+				->where('pegawai.id', $pegawaiId)
+				->select('nip', 'full_name')
+				->first();
+				
+				$bendahara = DB::table('pejabat_ttd as pt')
+				->join('pegawai as p', 'p.id', 'pt.pegawai_id')
+				->where('autorisasi', 'Bendahara')
+				->where('is_active', '1')
+				->select('nip', 'full_name')
+				->first();
+	
+				$kadin = Pegawai::join('jabatan as j', 'j.id', 'jabatan_id')
+				->where('pegawai.id', 5)
+				->select('nip', 'full_name')
+				->first();
+	
+				$spt = SPT::join('anggaran as a', 'a.id', 'anggaran_id')
+				->where('spt.id', $id)
+				->select(
+					'tgl_spt',
+					'no_spt',
+					'jumlah_hari',
+					'daerah_tujuan',
+					'no_index'
+				)->first();
+				
+				$nameFile = "090_".$spt->no_index."_SPPD_PDK_2021_".$pegawai->nip;
+	
+				try {
+					$biayaTb = array();
+					$pengeluaran = Pengeluaran::where('biaya_id', $biayaId)
+					->where('pegawai_id', $pegawaiId)
+					->groupBy('kategori')
+					->select(
+						'kategori as pengeluaran',
+						DB::raw("sum(jml) as qty"),
+						DB::raw("sum(nominal) as harga"),
+						DB::raw("string_agg(catatan, ', ') as catatan")
+					)->get();
+					
+					if(count($pengeluaran) > 0) {
+							foreach($pengeluaran as $p) {
+								array_push($biayaTb, $this->mapBiaya($p));
+							}
+					}
+		
+					$transport = Transport::where('biaya_id', $biayaId)
+					->where('pegawai_id', $pegawaiId)
+					->groupBy('jenis_transport')
+					->select(
+						'jenis_transport as pengeluaran',
+						DB::raw("sum(1) as qty"),
+						DB::raw("sum(total_bayar) as harga"),
+						DB::raw("string_agg(catatan, ', ') as catatan")
+					)->get();
+					if(count($transport) > 0) {
+						foreach($transport as $t) {
+							array_push($biayaTb, $this->mapBiaya($t));
+						}
+					}
+		
+					$inap = Inap::where('biaya_id', $biayaId)
+					->where('pegawai_id', $pegawaiId)
+					->select(
+						DB::raw("'Penginapan ' || hotel as pengeluaran"),
+						'jml_hari as qty',
+						'harga',
+						'catatan'
+					)->get();
 
-			$kadin = Pegawai::join('jabatan as j', 'j.id', 'jabatan_id')
-			->where('pegawai.id', 5)
-			->select('nip', 'full_name')
-			->first();
+					if(count($inap) > 0) {
+						foreach($inap as $i) {
+							array_push($biayaTb, $this->mapBiaya($i));
+						}
+					}
+	
+					$grandTotal = array_sum(array_map(function ($val){ return $val->totalRaw; },$biayaTb));
+					$terbilang = Utils::rupiahTeks($grandTotal);
+					$tgl = (new Carbon($spt->tgl_spt))->isoFormat('D MMMM Y');
+		
+					$template = new TemplateProcessor($templatePath);
+					
+					$template->setValue('jumlah', number_format($grandTotal));
+					$template->setValue('terbilang', $terbilang);
+					$template->setValue('no_spt', $spt->no_spt);
+					$template->setValue('tgl', $tgl);
+					$template->setValue('jml_hari', $spt->jumlah_hari);
+					$template->setValue('daerah_tujuan', ucwords(strtolower($spt->daerah_tujuan)));
+					$template->setValue('nama_bendahara', $bendahara->full_name);
+					$template->setValue('nip_bendahara', $bendahara->nip);
+					$template->setValue('nama_penerima', $pegawai->full_name);
+					$template->setValue('nip_penerima', $pegawai->nip);
+					$template->setValue('nama_kadin', $kadin->full_name);
+					$template->setValue('nip_kadin', $kadin->nip);
+					$template->cloneRowAndSetValues('pengeluaran', $biayaTb);
+					
+					$newFile = new \stdClass();
+					$newFile->dbPath ='/storage/rumming/';
+					$newFile->ext = '.pdf';
+					$newFile->originalName = "rumming_" . $nameFile;
+					$newFile->newName = $newFile->originalName;
 
-			$spt = SPT::join('anggaran as a', 'a.id', 'anggaran_id')
-			->where('spt.id', $id)
-			->select(
-				'tgl_spt',
-				'no_spt',
-				'jumlah_hari',
-				'daerah_tujuan',
-				'no_index'
-			)->first();
-			
-			$nameFile = "090_".$spt->no_index."_SPPD_PDK_2021_".$pegawai->nip;
-			
-			$oldFile = base_path('public/storage/rumming/'. $nameFile . '.pdf');
-			if(FaFile::exists($oldFile)) {
-				FaFile::delete($oldFile);
+					$path = base_path('/public');
+					$docPath = $path . $newFile->dbPath. $newFile->originalName . ".docx";
+					$template->saveAs($docPath, TRUE);
+					
+					$converter = new OfficeConverter($docPath);
+					//generates pdf file in same directory as test-file.docx
+					$converter->convertTo($newFile->originalName .".pdf");
+					if(FaFile::exists($docPath)) {
+						FaFile::delete($docPath);
+					}
+					
+					//upload to table
+					$file = Utils::saveFile($newFile);
+
+					$loginId = auth('sanctum')->user()->pegawai->id;
+					$sptDetail->update([
+						'rumming_file_id' => $file
+					]);
+	
+					$results['success'] = true;
+					$results['state_code'] = 200;
+					$results['data'] = $newFile->dbPath . $newFile->originalName . ".pdf";
+				} catch (\Exception $e) {
+					Log::channel('spderr')->info('sppd_rumming: '. json_encode($e->getMessage()));
+					array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
+				}
+	
+			} else {
+				array_push($results['messages'], 'Kesalahan! Template tidak ditemukan.');
 			}
-
-			try {
-				$biayaTb = array();
-				$pengeluaran = Pengeluaran::where('biaya_id', $biayaId)
-				->where('pegawai_id', $pegawaiId)
-				->groupBy('kategori')
-				->select(
-					'kategori as pengeluaran',
-					DB::raw("sum(jml) as qty"),
-					DB::raw("sum(nominal) as harga"),
-					DB::raw("string_agg(catatan, ', ') as catatan")
-				)->get();
-				
-				foreach($pengeluaran as $p) {
-					array_push($biayaTb, $this->mapBiaya($p));
-				}
-	
-				$transport = Transport::where('biaya_id', $biayaId)
-				->where('pegawai_id', $pegawaiId)
-				->groupBy('jenis_transport')
-				->select(
-					'jenis_transport as pengeluaran',
-					DB::raw("sum(1) as qty"),
-					DB::raw("sum(total_bayar) as harga"),
-					DB::raw("string_agg(catatan, ', ') as catatan")
-				)->get();
-				
-				foreach($transport as $t) {
-					array_push($biayaTb, $this->mapBiaya($t));
-				}
-	
-				$inap = Inap::where('biaya_id', $biayaId)
-				->where('pegawai_id', $pegawaiId)
-				->select(
-					DB::raw("'Penginapan ' || hotel as pengeluaran"),
-					'jml_hari as qty',
-					'harga',
-					'catatan'
-				)->get();
-				
-				foreach($inap as $i) {
-					array_push($biayaTb, $this->mapBiaya($i));
-				}
-
-				$grandTotal = array_sum(array_map(function ($val){ return $val->totalRaw; },$biayaTb));
-				$terbilang = Utils::rupiahTeks($grandTotal);
-				$tgl = (new Carbon($spt->tgl_spt))->isoFormat('D MMMM Y');
-	
-				$template = new TemplateProcessor($templatePath);
-				
-				$template->setValue('jumlah', number_format($grandTotal));
-				$template->setValue('terbilang', $terbilang);
-				$template->setValue('no_spt', $spt->no_spt);
-				$template->setValue('tgl', $tgl);
-				$template->setValue('jml_hari', $spt->jumlah_hari);
-				$template->setValue('daerah_tujuan', ucwords(strtolower($spt->daerah_tujuan)));
-				$template->setValue('nama_bendahara', $bendahara->full_name);
-				$template->setValue('nip_bendahara', $bendahara->nip);
-				$template->setValue('nama_penerima', $pegawai->full_name);
-				$template->setValue('nip_penerima', $pegawai->nip);
-				$template->setValue('nama_kadin', $kadin->full_name);
-				$template->setValue('nip_kadin', $kadin->nip);
-				$template->cloneRowAndSetValues('pengeluaran', $biayaTb);
-				
-				$path = base_path('/public');
-				$docPath = $path . '/storage/rumming/'. $nameFile . ".docx";
-				$template->saveAs($docPath, TRUE);
-				
-				$converter = new OfficeConverter($docPath);
-				//generates pdf file in same directory as test-file.docx
-				$converter->convertTo($nameFile.".pdf");
-				if(FaFile::exists($docPath)) {
-					FaFile::delete($docPath);
-				}
-
-				$results['success'] = true;
-				$results['state_code'] = 200;
-				$results['data'] = '/storage/rumming/'. $nameFile . ".pdf";
-			} catch (\Exception $e) {
-				Log::channel('spderr')->info('sppd_rumming: '. json_encode($e->getMessage()));
-				array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
-			}
-
 		} else {
-			array_push($results['messages'], 'Kesalahan! Template tidak ditemukan.');
+			$file = DB::table('files')->where('id', $sptDetail->rumming_file_id)->first();
+			$results['data'] = $file->file_path . $file->file_name . ".pdf";
+			$results['success'] = true;
+			$results['state_code'] = 200;
 		}
 
 		return response()->json($results, $results['state_code']);
@@ -324,106 +295,117 @@ class SPPDController extends Controller
 	public function cetakKwitansi($id)
 	{
 		$results = $this->responses;
-		// $spt = SPT::find($id);
-
-		$templatePath = base_path('public/storage/template/template_kwitansi.docx');
-		$checkFile = FaFile::exists($templatePath);
-		if($checkFile) {
-			$spt = SPT::join('anggaran as a', 'a.id', 'anggaran_id')
-			->join('pegawai as p', 'p.id', 'spt.pelaksana_id')
-			->where('spt.id', $id)
-			->select(
-				'kode_rekening',
-				'nama_rekening',
-				'spt.periode',
-				'dasar_pelaksana',
-				'untuk',
-				'tgl_spt',
-				'no_spt',
-				'p.full_name as nama_penyelenggara',
-				'p.nip as nip_pengelenggara',
-				'no_index',
-				'pptk_id',
-				'bendahara_id'
-			)->first();
-
-			$nameFile = "090_".$spt->index."_SPPD_PDK_2021";
-			$totalBiaya = Biaya::where('spt_id', $id)->sum('total_biaya');
-			
-			$oldFile = base_path('public/storage/kwitansi/kwitansi_'. $nameFile . '.pdf');
-			if(FaFile::exists($oldFile)) {
-				FaFile::delete($oldFile);
-			}
-
-			try{
-				$bendahara = DB::table('pegawai as p')
-				->where('id', $spt->bendahara_id)
-				->select('nip', 'full_name')
-				->first();
-				
-				$ppk = DB::table('pegawai as p')
-				->where('id', $spt->pptk_id)
-				->select('nip', 'full_name')
-				->first();
-
-				$kadin = Pegawai::join('jabatan as j', 'j.id', 'jabatan_id')
-				->where('pegawai.id', 5)
-				->select('nip', 'full_name')
-				->first();
-
+		$updateSpt = SPT::find($id);
+		if($updateSpt->kwitansi_file_id == null) {
+			$templatePath = base_path('public/storage/template/template_kwitansi.docx');
+			$checkFile = FaFile::exists($templatePath);
+			if($checkFile) {
+				$spt = SPT::join('anggaran as a', 'a.id', 'anggaran_id')
+				->join('pegawai as p', 'p.id', 'spt.pelaksana_id')
+				->where('spt.id', $id)
+				->select(
+					'kode_rekening',
+					'nama_rekening',
+					'spt.periode',
+					'dasar_pelaksana',
+					'untuk',
+					'tgl_spt',
+					'no_spt',
+					'p.full_name as nama_penyelenggara',
+					'p.nip as nip_pengelenggara',
+					'no_index',
+					'pptk_id',
+					'bendahara_id'
+				)->first();
+	
+				$nameFile = "090_".$spt->index."_SPPD_PDK_2021";
 				$totalBiaya = Biaya::where('spt_id', $id)->sum('total_biaya');
-				$terbilang = Utils::rupiahTeks($totalBiaya);
-				$tgl = (new Carbon($spt->tgl_spt))->isoFormat('D MMMM Y');
 				
-				$template = new TemplateProcessor($templatePath);
+				try{
+					$bendahara = DB::table('pegawai as p')
+					->where('id', $spt->bendahara_id)
+					->select('nip', 'full_name')
+					->first();
+					
+					$ppk = DB::table('pegawai as p')
+					->where('id', $spt->pptk_id)
+					->select('nip', 'full_name')
+					->first();
+	
+					$kadin = Pegawai::join('jabatan as j', 'j.id', 'jabatan_id')
+					->where('pegawai.id', 5)
+					->select('nip', 'full_name')
+					->first();
+	
+					$totalBiaya = Biaya::where('spt_id', $id)->sum('total_biaya');
+					$terbilang = Utils::rupiahTeks($totalBiaya);
+					$tgl = (new Carbon($spt->tgl_spt))->isoFormat('D MMMM Y');
+					
+					$template = new TemplateProcessor($templatePath);
+	
+					$template->setValue('tahun_anggaran', $spt->periode);
+					$template->setValue('kode_rekening', $spt->kode_rekening);
+					$template->setValue('nama_rekening', $spt->nama_rekening);
+					$template->setValue('nama_bendahara', $bendahara->full_name);
+					$template->setValue('nip_bendahara', $bendahara->nip);
+					$template->setValue('total_biaya', number_format($totalBiaya));
+					$template->setValue('terbilang', $terbilang);
+					$template->setValue('maksud', $spt->dasar_pelaksana);
+					$template->setValue('no_spt', $spt->no_spt);
+					$template->setValue('tgl_spt', $tgl);
+	
+					$template->setValue('nama_kadin', $kadin->full_name);
+					$template->setValue('nip_kadin', $kadin->nip);
+	
+					$template->setValue('nama_pptk', $ppk->full_name);
+					$template->setValue('nip_pptk', $ppk->nip);
+					
+					$template->setValue('nama_penerima', $spt->nama_penyelenggara);
+					$template->setValue('nip_penerima', $spt->nip_pengelenggara);
+					
+					$newFile = new \stdClass();
+					$newFile->dbPath ='/storage/kwitansi/';
+					$newFile->ext = '.pdf';
+					$newFile->originalName = "kwitansi_" . $nameFile;
+					$newFile->newName = $newFile->originalName;
+					
+					$path = base_path('/public');
+					$template->saveAs($path . $newFile->dbPath . $newFile->newName . ".docx", TRUE);
+					
+					$docPath = $path . $newFile->dbPath . $newFile->newName . ".docx";
+					$converter = new OfficeConverter($docPath);
+					$converter->convertTo($newFile->newName.".pdf");
+	
+					if(FaFile::exists($path . $newFile->dbPath . $newFile->newName . ".docx")) {
+						FaFile::delete($path . $newFile->dbPath . $newFile->newName . ".docx");
+					}
 
-				$template->setValue('tahun_anggaran', $spt->periode);
-				$template->setValue('kode_rekening', $spt->kode_rekening);
-				$template->setValue('nama_rekening', $spt->nama_rekening);
-				$template->setValue('nama_bendahara', $bendahara->full_name);
-				$template->setValue('nip_bendahara', $bendahara->nip);
-				$template->setValue('total_biaya', number_format($totalBiaya));
-				$template->setValue('terbilang', $terbilang);
-				$template->setValue('maksud', $spt->dasar_pelaksana);
-				$template->setValue('no_spt', $spt->no_spt);
-				$template->setValue('tgl_spt', $tgl);
+					//upload to table
+					$file = Utils::saveFile($newFile);
 
-				$template->setValue('nama_kadin', $kadin->full_name);
-				$template->setValue('nip_kadin', $kadin->nip);
-
-				$template->setValue('nama_pptk', $ppk->full_name);
-				$template->setValue('nip_pptk', $ppk->nip);
-				
-				$template->setValue('nama_penerima', $spt->nama_penyelenggara);
-				$template->setValue('nip_penerima', $spt->nip_pengelenggara);
-				
-				$newFile = new \stdClass();
-				$newFile->dbPath ='/storage/kwitansi/';
-				$newFile->ext = '.pdf';
-				$newFile->originalName = "kwitansi_" . $nameFile;
-				$newFile->newName = $newFile->originalName;
-				
-				$path = base_path('/public');
-				$template->saveAs($path . $newFile->dbPath . $newFile->newName . ".docx", TRUE);
-				
-				$docPath = $path . $newFile->dbPath . $newFile->newName . ".docx";
-				$converter = new OfficeConverter($docPath);
-				$converter->convertTo($newFile->newName.".pdf");
-
-				if(FaFile::exists($path . $newFile->dbPath . $newFile->newName . ".docx")) {
-					FaFile::delete($path . $newFile->dbPath . $newFile->newName . ".docx");
+					$loginId = auth('sanctum')->user()->pegawai->id;
+					$updateSpt->update([
+						'settled_at' => DB::raw("now()"),
+						'settled_by' => $loginId,
+						'kwitansi_file_id' => $file
+					]);
+					
+					$results['success'] = true;
+					$results['state_code'] = 200;
+					$results['data'] = $newFile->dbPath . $newFile->newName . ".pdf";
+				} catch (\Exception $e) {
+					Log::channel('spderr')->info('spt_cetak_err: '. json_encode($e->getMessage()));
+					array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
 				}
-				
-				$results['success'] = true;
-				$results['state_code'] = 200;
-				$results['data'] = $newFile->dbPath . $newFile->newName . ".pdf";
-			} catch (\Exception $e) {
-				Log::channel('spderr')->info('spt_cetak_err: '. json_encode($e->getMessage()));
-				array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
+	
+			} else {
+				array_push($results['messages'], 'Template SPT tidak ditemukan.');
 			}
-
 		} else {
-			array_push($results['messages'], 'Template SPT tidak ditemukan.');
+			$file = DB::table('files')->where('id', $updateSpt->kwitansi_file_id)->first();
+			$results['data'] = $file->file_path . $file->file_name. ".pdf";
+			$results['success'] = true;
+			$results['state_code'] = 200;
 		}
 		
 		return response()->json($results, $results['state_code']);

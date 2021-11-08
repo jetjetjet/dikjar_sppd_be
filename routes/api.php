@@ -112,7 +112,7 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::get('/profile/{id}', [ProfileController::class, 'show']);
 	Route::put('/profile/{id}', [ProfileController::class, 'update']);
 	Route::put('/profile/{id}/change-password', [ProfileController::class, 'changePassword']);
-	Route::put('/profile/{id}/change-photo', [ProfileController::class, 'updateProfilePhoto']);
+	Route::put('/profile/{id}/change-photo', [ProfileController::class, 'changePhoto']);
 
 	Route::get('/role-grid', [RoleController::class, 'grid'])->middleware('can:peran-view');
 	Route::get('/role-permissions', [RoleController::class, 'getPermission']);
@@ -144,12 +144,12 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::post('/spt', [SPTController::class, 'store'])->middleware('can:spt-add');
 	Route::put('/spt/{id}', [SPTController::class, 'update'])->middleware('can:spt-edit');
 	Route::patch('/spt/{id}/selesai', [SPTController::class, 'finish'])->middleware('can:spt-finish');
-	Route::patch('/spt/{id}/proses', [SPTController::class, 'proceed'])->middleware('can:spt-edit');
+	Route::patch('/spt/{id}/proses', [SPTController::class, 'proses'])->middleware('can:spt-edit');
 	Route::delete('/spt/{id}', [SPTController::class, 'destroy'])->middleware('can:spt-delete');
 
 	//SPPD
 	Route::get('/spt/{id}/sppd-grid', [SPPDController::class, 'grid']);
-	Route::get('/spt/{id}/cetak-sppd/{pegawaiId}', [SPPDController::class, 'cetakSPPD']);
+	Route::get('/spt/cetak-sppd/{id}', [SPPDController::class, 'cetakSPPD']);
 	Route::get('/spt/{id}/sppd/{sptDetailId}/{pegawaiId}', [SPPDController::class, 'show']);
 	Route::get('/spt/lihat-sppd/{sptDetailId}/{pegawaiId}', [SPPDController::class, 'getSPPD']);
 

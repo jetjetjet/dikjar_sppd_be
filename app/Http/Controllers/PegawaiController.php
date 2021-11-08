@@ -37,10 +37,10 @@ class PegawaiController extends Controller
 				$q = $q->join('jabatan as j', 'j.id', 'pegawai.jabatan_id')
 				->where('j.is_parent', '1');
 			} else if($request->filter == 'spt'){
-				$q = $q->whereRaw("id not in ( select pegawai_id from spt_detail where deleted_at is null and finished_at is null )")
+				$q = $q->whereRaw("id not in ( select pegawai_id from spt_detail where deleted_at is null and settled_at is null )")
 					->where('pegawai_app', '1');
 			} else if($request->filter == 'spt_edit' && isset($request->id)){
-				$q = $q->whereRaw("id not in ( select pegawai_id from spt_detail where deleted_at is null and finished_at is null and spt_id not in ( ". $request->id ." ) )")
+				$q = $q->whereRaw("id not in ( select pegawai_id from spt_detail where deleted_at is null and settled_at is null and spt_id not in ( ". $request->id ." ) )")
 					->where('pegawai_app', '1');
 			} else if($request->filter == 'user'){
 				$q = Pegawai::select('pegawai.nip as code', 'full_name as label')
@@ -121,6 +121,7 @@ class PegawaiController extends Controller
 	{
 		$results = $this->responses;
 		$pegawai = Pegawai::find($id);
+		$pegawai->path_foto = $pegawai->path_foto != null ? $pegawai->path_foto : '/storage/profile/user.png';
 
 		$results['data'] = $pegawai;
 		$results['state_code'] = 200;

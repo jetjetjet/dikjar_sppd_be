@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
+use App\Models\Pegawai;
 use DB;
 use Validator;
 
@@ -15,12 +15,12 @@ class ProfileController extends Controller
 	{
 		$results = $this->responses;
 
-		if($id != auth('sanctum')->user()->id){
+		if($id != auth('sanctum')->user()->pegawai->id){
 			array_push($results['messages'], 'Tidak dapet mengubah user!');
       return response()->json($results, $results['state_code']);
 		}
 
-		$user = User::find($id);
+		$user = Pegawai::find($id);
 		$user->role = $user->getRoleNames()[0] ?? null;
 
 		$results['data'] = $user;
@@ -34,7 +34,7 @@ class ProfileController extends Controller
 	{
 		$results = $this->responses;
 
-		if($id != auth('sanctum')->user()->id){
+		if($id != auth('sanctum')->user()->pegawai->id){
 			array_push($results['messages'], 'Tidak dapet mengubah user!');
       return response()->json($results, $results['state_code']);
 		}
@@ -53,7 +53,7 @@ class ProfileController extends Controller
       return response()->json($results, $results['state_code']);
     }
 		
-		$user = User::find($id)
+		$user = Pegawai::find($id)
 			->update([
 				'full_name' => $inputs['full_name'],
 				'email' => $inputs['email'],
@@ -74,7 +74,7 @@ class ProfileController extends Controller
 	{
 		$results = $this->responses;
 
-		if($id != auth('sanctum')->user()->id){
+		if($id != auth('sanctum')->user()->pegawai->id){
 			array_push($results['messages'], 'Tidak dapet mengubah user!');
       return response()->json($results, $results['state_code']);
 		}
@@ -92,7 +92,7 @@ class ProfileController extends Controller
     }
 
 		
-		$user = User::find($id)
+		$user = Pegawai::find($id)
 			->update([
 				'password' => bcrypt($inputs['password'])
 			]);
@@ -110,7 +110,7 @@ class ProfileController extends Controller
 	{
 		$results = $this->responses;
 
-		if($id != auth('sanctum')->user()->id){
+		if($id != auth('sanctum')->user()->pegawai->id){
 			array_push($results['messages'], 'Tidak dapet mengubah user!');
       return response()->json($results, $results['state_code']);
 		}
@@ -132,7 +132,7 @@ class ProfileController extends Controller
 		
 			//upload poto
 			$file = Utils::imageUpload($inputs, 'profile');
-			$user = User::find($id)
+			$user = Pegawai::find($id)
 			->update([
 				'path_foto' => $file->path
 			]);

@@ -19,7 +19,7 @@ class AnggaranController extends Controller
 		->join('biaya as b', 'b.spt_id', 's.id')
 		->whereNull('b.deleted_at')
 		->whereNull('s.deleted_at')
-		->whereNotNull('s.finished_at')
+		->whereNotNull('s.settled_at')
 		->groupBy('s.anggaran_id')
 		->select('s.anggaran_id', DB::raw("sum(b.total_biaya) as realisasi"));
 
@@ -51,7 +51,7 @@ class AnggaranController extends Controller
 		->join('biaya as b', 'b.spt_id', 's.id')
 		->whereNull('b.deleted_at')
 		->whereNull('s.deleted_at')
-		->whereNotNull('s.finished_at')
+		->whereNotNull('s.settled_at')
 		->groupBy('s.anggaran_id')
 		->select('s.anggaran_id', DB::raw("sum(b.total_biaya) as realisasi"));
 
@@ -264,13 +264,14 @@ class AnggaranController extends Controller
 		$results = $this->responses;
 
     //Validasi
-		$sptCount = DB::table('spt')->whereNull('deleted_at')->where('anggaran_id', $id)->whereNotNull('finished_at')->count();
+		$sptCount = DB::table('spt')->whereNull('deleted_at')->where('anggaran_id', $id)->whereNotNull('settled_at')->count();
 		if($sptCount > 0) {
 			array_push($results['messages'], 'Tidak dapat menghapus anggaran yang sedang berjalan!');
 			return response()->json($results, $results['state_code']);
 		}
 
 		$role = Anggaran::destroy($id);
+		$pejabat = PejabatTtd::where('anggaran_id', $id)->delete();
 
 		array_push($results['messages'], 'Berhasil menghapus anggaran.');
 		$results['state_code'] = 200;

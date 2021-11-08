@@ -37,15 +37,17 @@ class AuthController extends Controller
 		$cek = $user->hasRole('SUPER ADMIN') ? array_push($perm, 'is_admin') : false ;
 		$token = $user->createToken($request->nip, $perm);
 
+		$pathFoto = $user->path_foto != null ? $user->path_foto : '/storage/profile/user.png';
 		$data = Array( "token" => $token->plainTextToken,
 			"pegawai_id" => $user->pegawai->id,
 			"email" => $user->pegawai->email,
 			"full_name" => $user->pegawai->full_name,
 			"nip" => $user->pegawai->nip,
-			"address" => $user->pegawai->address,
-			"phone" => $user->pegawai->phone,
-			"jenis_kelamin" => $user->pegawai->jenis_kelamin,
-			"ttl" => $user->pegawai->ttl,
+			// "address" => $user->pegawai->address,
+			// "phone" => $user->pegawai->phone,
+			// "jenisKelamin" => $user->pegawai->jenis_kelamin,
+			// "ttl" => $user->pegawai->ttl,
+			"path_foto" => $pathFoto,
 			"perms" => $perm
 		);
 		$results['success'] = true;

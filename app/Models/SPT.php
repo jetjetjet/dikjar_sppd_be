@@ -36,11 +36,12 @@ class SPT extends Model
 		'updated_by',
 		'deleted_at',
 		'deleted_by',
-		'spt_generated_at',
-		'spt_generated_by',
-		'finished_at',
-		'finished_by',
+		'completed_at',
+		'completed_by',
 		'proceed_at',
-		'proceed_by'
+		'proceed_by',
+		'settled_at',
+		'settled_by',
+		'kwitansi_file_id'
 	];
 }

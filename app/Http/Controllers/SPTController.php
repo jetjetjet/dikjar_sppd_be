@@ -48,7 +48,8 @@ class SPTController extends Controller
 			DB::raw("string_agg(p.full_name, '_') as name")
 		);
 		if (!$isAdmin) {
-			$pegawai = $pegawai->where('p.id', $request->user()->getPegawaiId())->orWhere('pttd_id', $request->user()->getPegawaiId());
+			$pegawaiId = auth('sanctum')->user()->pegawai->id;
+			$pegawai = $pegawai->where('p.id', $pegawaiId)->orWhere('pttd_id', $pegawaiId);
 		}
 
 		$q = SPT::joinSub($pegawai, 'u', function ($join) {
@@ -61,7 +62,7 @@ class SPTController extends Controller
 			'daerah_tujuan',
 			'untuk',
 			DB::raw("case when spt_file_id is not null then true else false end as spt_file"),
-			'finished_at',
+			'settled_at',
 			'proceed_at',
 			'u.name',
 			DB::raw($canGenerate . " as can_generate")
@@ -75,7 +76,8 @@ class SPTController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 	
-	function mapSPT($db){
+	function mapSPT($db)
+	{
 		$ui = new \stdClass();
 		$ui->id = isset($db->id) ? $db->id : "";
 		$ui->jml_hari = isset($db->jumlah_hari) ? $db->jumlah_hari : "";
@@ -95,7 +97,253 @@ class SPTController extends Controller
 		return $ui;
 	}
 
+	public function proses($id)
+	{
+		$results = $this->responses;
+		$spt = SPT::find($id);
+
+		if($spt->proceed_at == null) {
+			$templatePath = base_path('public/storage/template/template_spt.docx');
+			if($spt->pttd_id == 2 || $spt->pttd_id == 3) {
+				$templatePath = base_path('public/storage/template/template_spt_bupati.docx');
+			} else if ($spt->pttd_id == 4) {
+				$templatePath = base_path('public/storage/template/template_spt_sekda.docx');
+			} else {
+				$templatePath = base_path('public/storage/template/template_spt.docx');
+			}
+
+			$checkFile = FaFile::exists($templatePath);
+			if ($checkFile){
+				$pejabat = Pegawai::join('jabatan as j', 'j.id', 'jabatan_id')
+				->where('pegawai.id', $spt->pttd_id)
+				->select(
+					'full_name',
+					'nip',
+					'j.name as jabatan',
+					'golongan'
+				)->first();
+
+				$users = SPTDetail::join('pegawai as p', 'p.id', 'spt_detail.pegawai_id')
+				->join('jabatan as j', 'j.id', 'p.jabatan_id')
+				->where('spt_id',$id)
+				->select(
+					DB::raw("ROW_NUMBER() OVER (ORDER BY spt_detail.id) AS index_no"), 
+					'full_name as nama_pegawai', 
+					'j.name as jabatan_pegawai', 
+					'j.golongan as golongan_pegawai',
+					'spt_detail.id',
+					'pegawai_id',
+					'nip as nip_pegawai')
+				->get();
+				
+				$sptData = $this->mapSPT($spt);
+				try {
+					$userValue = array();
+					$templateSppdPath = base_path('public/storage/template/template_sppd.docx');
+					$sppdFile = FaFile::exists($templateSppdPath);
+					
+					if(!$sppdFile) {
+						throw new \Exception('Template SPPD tidak ditemukan');
+					}
+
+					foreach($users as $user){
+						$tempSppd = new TemplateProcessor($templateSppdPath);
+
+						// $template->setValue('dasar_pelaksana', $spt->dasar_pelaksana);
+						$tempSppd->setValue('nama_pegawai', $user->nama_pegawai);
+						$tempSppd->setValue('jabatan_pegawai', $user->jabatan_pegawai);
+						$tempSppd->setValue('golongan_pegawai', $user->golongan_pegawai);
+						$tempSppd->setValue('untuk', $sptData->untuk);
+						$tempSppd->setValue('transportasi', $sptData->transportasi);
+						$tempSppd->setValue('jml_hari', $sptData->jml_hari . " Hari");
+						$tempSppd->setValue('daerah_asal', $sptData->daerah_asal);
+						$tempSppd->setValue('daerah_tujuan', $sptData->daerah_tujuan);
+						$tempSppd->setValue('tgl_berangkat', $sptData->tgl_berangkat);
+						$tempSppd->setValue('tgl_kembali', $sptData->tgl_kembali);
+						// $template->setValue('tgl_berangkat_plus', $brgktPlus->isoFormat('D MMMM Y'));
+						// $template->setValue('tgl_kembali_minus', $kembaliMinus->isoFormat('D MMMM Y'));
+						$tempSppd->setValue('tgl_sppd', $sptData->tgl_spt);
+						$tempSppd->setValue('no_spt', $sptData->no_spt);
+
+						$newFile = new \stdClass();
+						$newFile->dbPath ='/storage/spt/';
+						$newFile->ext = '.pdf';
+						$newFile->originalName = "SPPD_" . $user->nip_pegawai;
+						$newFile->newName = time()."_".$newFile->originalName;
+
+						$path = base_path('/public');
+						$tempSppd->saveAs($path . $newFile->dbPath . $newFile->newName . ".docx", TRUE);
+						//Convert kwe PDF
+						$docPath = $path . $newFile->dbPath . $newFile->newName . ".docx";
+						$converter = new OfficeConverter($docPath);
+						//generates pdf file in same directory as test-file.docx
+						$converter->convertTo($newFile->newName.".pdf");
+						
+						$oldFile = $path . $newFile->dbPath . $newFile->newName . ".docx";
+						if(FaFile::exists($oldFile)) {
+							FaFile::delete($oldFile);
+						}
+
+						$newFile->newName = $newFile->newName.".pdf";
+
+						//upload to table
+						$file = Utils::saveFile($newFile);
+
+						// update table spt
+						SPTDetail::where('spt_id', $id)
+						->where('pegawai_id', $user->pegawai_id)
+						->update([
+							'sppd_file_id' => $file,
+							'sppd_generated_at' => DB::raw("now()"),
+							'sppd_generated_by' => auth('sanctum')->user()->pegawai->id,
+						]);
+
+						//create biaya awal
+						Biaya::create([
+							'spt_id' => $id,
+							'pegawai_id' => $user->pegawai_id,
+							'total_biaya_lainnya' => 0,
+							'total_biaya_inap' => 0,
+							'total_biaya_travel' => 0,
+							'total_biaya' => 0,
+						]);
+					}
+
+					// Temp Template
+					$template = new TemplateProcessor($templatePath);
+
+					$template->setValue('dasar_pelaksana', $sptData->dasar_pelaksana);
+					$template->setValue('untuk', $sptData->untuk);
+					$template->setValue('nama_pejabat', $pejabat->full_name);
+					$template->setValue('nip_pejabat', $pejabat->nip);
+					$template->setValue('jabatan_pejabat', strtoupper($pejabat->jabatan));
+					$template->setValue('golongan_pejabat', $pejabat->golongan);
+					$template->setValue('tgl_kembali', $sptData->tgl_kembali);
+					$template->setValue('tgl_berangkat', $sptData->tgl_berangkat);
+					$template->setValue('daerah_tujuan', $sptData->daerah_tujuan);
+					$template->setValue('tgl_spt', $sptData->tgl_spt);
+
+					if ($spt->pttd_id > 4) {
+						$users = SPTDetail::join('pegawai as p', 'p.id', 'spt_detail.pegawai_id')
+						->join('jabatan as j', 'j.id', 'p.jabatan_id')
+						->where('spt_id',$id)
+						->select(
+							DB::raw("ROW_NUMBER() OVER (ORDER BY spt_detail.id) AS index_no"), 
+							'full_name as nama_pegawai', 
+							'j.name as jabatan_pegawai', 
+							'j.golongan as golongan_pegawai',
+							'spt_detail.id',
+							'pegawai_id',
+							'nip as nip_pegawai')
+						->get();
+
+						$userValue = array();
+						foreach($users as $user){
+							$temp = array(
+								'n-o' => $user->index_no,
+								'nama_pegawai' => $user->nama_pegawai,
+								'jabatan_pegawai' => $user->jabatan_pegawai,
+								'nip_pegawai' => $user->nip_pegawai
+							);
+							array_push($userValue, $temp);
+						}
+
+						$template->setValue('nomor_surat', $sptData->no_spt);
+						$template->cloneRowAndSetValues('n-o', $userValue);
+
+						//generate QRCode
+						$uuid = (string) Str::uuid();
+						$uuidSplit = explode('-', $uuid);
+						QrCode::format('png')->generate('https://disdikkerinci.id/spt/guest?key='. $uuidSplit[0] , base_path('public/storage/images/spt_qr.png'));
+						$template->setImageValue('QRCODE', base_path('public/storage/images/spt_qr.png'));
+						
+						$sptGuest = DB::table('spt_guest')->insert([
+								'spt_id' => $sptData->id,
+								'key' => $uuidSplit[0]
+						]);
+					} else {
+						$user = SPTDetail::join('pegawai as p', 'p.id', 'spt_detail.pegawai_id')
+						->join('jabatan as j', 'j.id', 'p.jabatan_id')
+						->where('spt_id',$id)
+						->where('pegawai_id', $spt->pelaksana_id)
+						->select(
+							'full_name as nama_pegawai', 
+							'j.name as jabatan_pegawai', 
+							'j.golongan as golongan_pegawai',
+							'spt_detail.id',
+							'pegawai_id',
+							'nip as nip_pegawai')
+						->first();
+
+						$template->setValue('nama_pegawai', $user->nama_pegawai);
+						$template->setValue('golongan_pegawai', $user->golongan_pegawai);
+						$template->setValue('nip_pegawai', $user->nip_pegawai);
+					}
+					$newFile = new \stdClass();
+					$newFile->dbPath ='/storage/spt/';
+					$newFile->ext = '.pdf';
+					$newFile->originalName = "SPT_Generated";
+					$newFile->newName = time()."_".$newFile->originalName;
+
+					$path = base_path('/public');
+					$template->saveAs($path . $newFile->dbPath . $newFile->newName . ".docx", TRUE);
+					//Convert kwe PDF
+					$docPath = $path . $newFile->dbPath . $newFile->newName . ".docx";
+					$converter = new OfficeConverter($docPath);
+					//generates pdf file in same directory as test-file.docx
+					$converter->convertTo($newFile->newName.".pdf");
+
+					$oldFile = $path . $newFile->dbPath . $newFile->newName . ".docx";
+					if(FaFile::exists($oldFile)) {
+						FaFile::delete($oldFile);
+					}
+
+					//rename filename
+					$newFile->newName = $newFile->newName.".pdf";
+					
+					//save to table
+					$file = Utils::saveFile($newFile);
+					// update
+					$loginId = auth('sanctum')->user()->pegawai->id;
+					$spt->update([
+						'proceed_at' => DB::raw("now()"),
+						'proceed_by' => $loginId,
+						'spt_file_id' => $file,
+						'spt_generated_at' => DB::raw("now()"),
+						'spt_generated_by' => $loginId,
+						'status' => 'PROCEED'
+					]);
+
+					$results['data'] = $newFile->dbPath . $newFile->newName;
+					array_push($results['messages'], 'Berhasil memproses SPT.');
+					$results['success'] = true;
+					$results['state_code'] = 200;
+				}  catch (\Exception $e) {
+					Log::channel('spderr')->info('spt_proses: '. json_encode($e->getMessage()));
+					array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
+				}
+
+			}
+
+		}
+		
+		return response()->json($results, $results['state_code']);
+	}
+
 	public function cetakSpt($id)
+	{
+		$results = $this->responses;
+		$spt = SPT::find($id);
+		if($spt->spt_file_id != null) {
+			$file = DB::table('files')->where('id', $spt->spt_file_id)->first();
+			$results['data'] = $file->file_path . $file->file_name;
+			$results['success'] = true;
+			$results['state_code'] = 200;
+		}
+		return response()->json($results, $results['state_code']);
+	}
+
+	public function cetakSPT1($id)
 	{
 		$results = $this->responses;
 		$spt = SPT::find($id);
@@ -227,190 +475,6 @@ class SPTController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
-	public function cetakSPT1($id)
-	{
-		$results = $this->responses;
-		$spt = SPT::find($id);
-		
-		if($spt->status == 'DRAFT'){
-			$templatePath = base_path('public/storage/template/template_spt.docx');
-			if($spt->pttd_id == 2 || $spt->pttd_id == 3) {
-				$templatePath = base_path('public/storage/template/template_spt_bupati.docx');
-			} else if ($spt->pttd_id == 4) {
-				$templatePath = base_path('public/storage/template/template_spt_sekda.docx');
-			} else {
-				$templatePath = base_path('public/storage/template/template_spt.docx');
-			}
-
-			$checkFile = FaFile::exists($templatePath);
-			if($checkFile){
-				$pejabat = Pegawai::join('jabatan as j', 'j.id', 'jabatan_id')
-				->where('pegawai.id', $spt->pttd_id)
-				->select(
-					'full_name',
-					'nip',
-					'j.name as jabatan',
-					'golongan'
-				)->first();
-
-
-				$users = SPTDetail::join('pegawai as p', 'p.id', 'spt_detail.pegawai_id')
-				->join('jabatan as j', 'j.id', 'p.jabatan_id')
-				->where('spt_id',$id)
-				->select(
-					DB::raw("ROW_NUMBER() OVER (ORDER BY spt_detail.id) AS index_no"), 
-					'full_name as nama_pegawai', 
-					'j.name as jabatan_pegawai', 
-					'j.golongan as golongan_pegawai',
-					'spt_detail.id',
-					'pegawai_id',
-					'nip as nip_pegawai')
-				->get();
-	
-				// $jabatanKadin = Jabatan::find($kadin->jabatan_id)->first();
-	
-				$sptData = $this->mapSPT($spt);
-				try{
-					$userValue = array();
-					$templateSppdPath = base_path('public/storage/template/template_sppd.docx');
-					$sppdFile = FaFile::exists($templateSppdPath);
-					
-					if(!$sppdFile) {
-						throw new \Exception('Template SPPD tidak ditemukan');
-					}
-
-					foreach($users as $user){
-						$tempSppd = new TemplateProcessor($templateSppdPath);
-							
-						// $template->setValue('dasar_pelaksana', $spt->dasar_pelaksana);
-						$tempSppd->setValue('nama_pegawai', $user->nama_pegawai);
-						$tempSppd->setValue('jabatan_pegawai', $user->jabatan_pegawai);
-						$tempSppd->setValue('golongan_pegawai', $user->golongan_pegawai);
-						$tempSppd->setValue('untuk', $sptData->untuk);
-						$tempSppd->setValue('transportasi', $sptData->transportasi);
-						$tempSppd->setValue('jml_hari', $sptData->jml_hari . " Hari");
-						$tempSppd->setValue('daerah_asal', $sptData->daerah_asal);
-						$tempSppd->setValue('daerah_tujuan', $sptData->daerah_tujuan);
-						$tempSppd->setValue('tgl_berangkat', $sptData->tgl_berangkat);
-						$tempSppd->setValue('tgl_kembali', $sptData->tgl_kembali);
-						// $template->setValue('tgl_berangkat_plus', $brgktPlus->isoFormat('D MMMM Y'));
-						// $template->setValue('tgl_kembali_minus', $kembaliMinus->isoFormat('D MMMM Y'));
-						$tempSppd->setValue('tgl_sppd', $sptData->tgl_spt);
-						$tempSppd->setValue('no_spt', $sptData->no_spt);
-						
-						$newFile = new \stdClass();
-						$newFile->dbPath ='/storage/spt/';
-						$newFile->ext = '.pdf';
-						$newFile->originalName = "SPPD_" . $user->nama_pegawai;
-						$newFile->newName = time()."_".$newFile->originalName;
-
-						$path = base_path('/public');
-						$tempSppd->saveAs($path . $newFile->dbPath . $newFile->newName . ".docx", TRUE);
-						//Convert kwe PDF
-						$docPath = $path . $newFile->dbPath . $newFile->newName . ".docx";
-						$converter = new OfficeConverter($docPath);
-						//generates pdf file in same directory as test-file.docx
-						$converter->convertTo($newFile->newName.".pdf");
-						
-						$oldFile = $path . $newFile->dbPath . $newFile->newName . ".docx";
-						if(FaFile::exists($oldFile)) {
-							FaFile::delete($oldFile);
-						}
-
-						$newFile->newName = $newFile->newName.".pdf";
-						$file = Utils::saveFile($newFile);
-
-						// update
-						SPTDetail::where('id', $user->id)
-						->where('pegawai_id', $user->pegawai_id)
-						->update([
-							'sppd_file_id' => $file,
-							'sppd_generated_at' => DB::raw("now()"),
-							'sppd_generated_by' => auth('sanctum')->user()->pegawai->id,
-						]);
-
-						//create biaya awal
-						Biaya::create([
-							'spt_id' => $id,
-							'pegawai_id' => $user->pegawai_id,
-							'total_biaya_lainnya' => 0,
-							'total_biaya_inap' => 0,
-							'total_biaya_travel' => 0,
-							'total_biaya' => 0,
-						]);
-
-					}
-
-
-
-
-					$template->setValue('tgl_berangkat', $sptData->tgl_berangkat);
-					$template->setValue('nomor_surat', $sptData->no_spt);
-					$template->setValue('tgl_kembali', $sptData->tgl_kembali);
-					$template->setValue('tgl_spt', $sptData->tgl_spt);
-		
-					$template->cloneRowAndSetValues('n-o', $userValue);
-					
-					//generate QRCode
-					
-					$uuid = (string) Str::uuid();
-					$uuidSplit = explode('-', $uuid);
-					QrCode::format('png')->generate('https://disdikkerinci.id/spt/guest?key='. $uuidSplit[0] , base_path('public/storage/images/spt_qr.png'));
-					$template->setImageValue('QRCODE', base_path('public/storage/images/spt_qr.png'));
-					
- 					$sptGuest = DB::table('spt_guest')->insert([
-						 'spt_id' => $sptData->id,
-						 'key' => $uuidSplit[0]
-					]);
-
-					$newFile = new \stdClass();
-					$newFile->dbPath ='/storage/spt/';
-					$newFile->ext = '.pdf';
-					$newFile->originalName = "SPT_Generated";
-					$newFile->newName = time()."_".$newFile->originalName;
-
-					$path = base_path('/public');
-					$template->saveAs($path . $newFile->dbPath . $newFile->newName . ".docx", TRUE);
-					//Convert kwe PDF
-					$docPath = $path . $newFile->dbPath . $newFile->newName . ".docx";
-          $converter = new OfficeConverter($docPath);
-          //generates pdf file in same directory as test-file.docx
-          $converter->convertTo($newFile->newName.".pdf");
-
-					$oldFile = $path . $newFile->dbPath . $newFile->newName . ".docx";
-					if(FaFile::exists($oldFile)) {
-						FaFile::delete($oldFile);
-					}
-
-					$newFile->newName = $newFile->newName.".pdf";
-
-					$file = Utils::saveFile($newFile);
-					// update
-					$spt->update([
-						'spt_file_id' => $file,
-						'spt_generated_at' => DB::raw("now()"),
-						'spt_generated_by' => auth('sanctum')->user()->pegawai->id,
-						'status' => 'SPTGENERATED'
-					]);
-					
-					array_push($results['messages'], 'Berhasil membuat SPT.');
-					$results['success'] = true;
-					$results['state_code'] = 200;
-				} catch (\Exception $e) {
-					Log::channel('spderr')->info('spt_cetak_err: '. json_encode($e->getMessage()));
-					array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
-				}
-	
-			} else {
-				array_push($results['messages'], 'Template SPT tidak ditemukan.');
-			}
-		} else {
-			array_push($results['messages'], 'Berkas dan Nomor SPT sudah pernah dibuat.');
-		}
-		
-		return response()->json($results, $results['state_code']);
-	}
-
 	public function store(Request $request)
 	{
 		$results = $this->responses;
@@ -466,7 +530,7 @@ class SPTController extends Controller
 					'daerah_tujuan' => $inputs['daerah_tujuan'],
 					'tgl_berangkat' => $inputs['tgl_berangkat'],
 					'tgl_kembali' => $inputs['tgl_kembali'],
-					'jumlah_hari' => $jumlahHari,
+					'jumlah_hari' => $jumlahHari + 1,
 					'tgl_spt' => $inputs['tgl_spt'],
 					'status' => 'DRAFT',
 					'periode' => date('Y')
@@ -498,52 +562,34 @@ class SPTController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
-	public function proceed($id)
+	public function finish($id)
 	{
 		$results = $this->responses;
+		$finish = array(
+			'completed_at' => DB::raw("now()"),
+			'completed_by' => auth('sanctum')->user()->pegawai->id
+		);
 
-		try{
-			DB::transaction(function () use ($id) {
-				$spt = SPT::where('id', $id)->whereNull('proceed_at')->first();
-				$loginId = auth('sanctum')->user()->pegawai->id;
-				$spt->update([
-					'proceed_at' => DB::raw("now()"),
-					'proceed_by' => $loginId
-				]);
-	
-				$users = SPTDetail::where('spt_id', $id)->select('pegawai_id')->get();
-	
-				foreach($users as $user) {
-					Biaya::create([
-						'spt_id' => $id,
-						'pegawai_id' => $user->pegawai_id,
-						'total_biaya_lainnya' => 0,
-						'total_biaya_inap' => 0,
-						'total_biaya_travel' => 0,
-						'total_biaya' => 0,
-					]);
-				}
-			});
-		}catch(\Exception $e) {
-			Log::channel('spderr')->info('spt_proses: '. json_encode($e->getMessage()));
-			array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
-		}
-		array_push($results['messages'], 'Perjalanan Dinas berhasil diproses.');
+		$spt = SPT::where('id', $id)->first();
+		$spt->update($finish);
+		// SPTDetail::where('spt_id', $id)->update($finish);
+
+		array_push($results['messages'], 'Perjalanan Dinas berhasil diselesaikan.');
 		$results['state_code'] = 200;
 		$results['success'] = true;
-		
+
 		return response()->json($results, $results['state_code']);
 	}
 
-	public function finish($id)
+	public function finish1($id)
 	{
 		$results = $this->responses;
 		try {
 			DB::transaction(function () use ($id, &$results) {
 				$loginId = auth('sanctum')->user()->pegawai->id;
 				$finish = array(
-					'finished_at' => DB::raw("now()"),
-					'finished_by' => $loginId
+					'settled_at' => DB::raw("now()"),
+					'settled_by' => $loginId
 				);
 				$spt = SPT::where('id', $id)->first();
 				$sppd = SPTDetail::where('spt_id', $id)->get();
@@ -656,6 +702,40 @@ class SPTController extends Controller
 		
 		return response()->json($results, $results['state_code']);
 	}
+
+	// public function sptHeader(Request $request, $id, $sptDetailId, $pegawaiId)
+  // {
+	// 	$results = $this->responses;
+
+	// 	$user = $request->user();
+	// 	$isAdmin = $user->tokenCan('is_admin') ? 1 : 0;
+	// 	$loginid = $user->id;
+
+	// 	$results['data'] = SPT::where('id', $id)
+	// 	->select(
+	// 		'no_spt',
+	// 		'tgl_berangkat',
+	// 		'tgl_kembali',
+	// 		DB::raw("to_char(tgl_berangkat, 'DD-MM-YYYY') as tglb_text"),
+	// 		DB::raw("to_char(tgl_kembali, 'DD-MM-YYYY') as tglk_text"),
+	// 		'daerah_asal',
+	// 		'daerah_tujuan',
+	// 		'transportasi',
+	// 		'settled_at',
+	// 		DB::raw("( select full_name from pegawai where id = {$pegawaiId} and deleted_at is null limit 1 ) as pegawai_text"),
+	// 		DB::raw("( select id from biaya where spt_id = {$id} and pegawai_id = {$pegawaiId} and deleted_at is null limit 1 ) as biaya_id"),
+	// 		DB::raw("( select total_biaya from biaya where spt_id = {$id} and pegawai_id = {$pegawaiId} and deleted_at is null limit 1 ) as total_biaya"),
+	// 		DB::raw("( select sppd_file_id from spt_detail as sd where spt.id = spt_id and deleted_at is null and pegawai_id = {$pegawaiId} limit 1 ) as sppd_file_id"),
+			
+	// 		DB::raw("case when tgl_kembali::date <= now()::date and completed_at is null and proceed_at is not null then 1 else 0 end as can_finish"),
+	// 		DB::raw("case when settled_at is null and completed_at is not null then 1 else 0 end as can_generate")
+	// 	)->first();
+		
+	// 	$results['state_code'] = 200;
+	// 	$results['success'] = true;
+
+	// 	return response()->json($results, $results['state_code']);
+  // }
 
 	public function show($id)
 	{

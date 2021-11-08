@@ -15,12 +15,13 @@ class SPTDetail extends Model
 		'pegawai_id',
 		'is_pelaksana',
 		'sppd_file_id',
+		'rumming_file_id',
 		'created_by',
 		'updated_by',
 		'deleted_by',
 		'sppd_generated_at',
 		'sppd_generated_by',
-		'finished_at',
-		'finished_by'
+		'settled_at',
+		'settled_by'
 	];
 }
