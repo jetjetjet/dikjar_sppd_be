@@ -68,12 +68,6 @@ class UserController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
-	/**
-	 * Display the specified resource.
-	 *
-	 * @param  int  $id
-	 * @return \Illuminate\Http\Response
-	 */
 	public function show($id)
 	{
 		$results = $this->responses;
@@ -88,13 +82,6 @@ class UserController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
-	/**
-	 * Update the specified resource in storage.
-	 *
-	 * @param  \Illuminate\Http\Request  $request
-	 * @param  int  $id
-	 * @return \Illuminate\Http\Response
-	 */
 	public function update(Request $request, $id)
 	{
 		$results = $this->responses;
@@ -115,7 +102,7 @@ class UserController extends Controller
 		$user = User::find($id);
 		$role = $inputs['role'] ?? null;
 		$user->syncRoles([$role]);
-		if($inputs['password'] != null) {
+		if(isset($inputs['password'])) {
 			$user->update([
 				'password' => bcrypt($inputs['password'])
 			]);
@@ -143,7 +130,6 @@ class UserController extends Controller
       $results['messages'] = Array($validator->messages()->first());
       return response()->json($results, $results['state_code']);
     }
-
 		
 		$user = User::find($id)
 			->update([

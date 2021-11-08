@@ -89,7 +89,7 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::get('/satuan-search', [SatuanController::class, 'search']);
 	Route::get('/satuan/{id}', [SatuanController::class, 'show']);
 	Route::post('/satuan', [SatuanController::class, 'store']);
-	Route::put('/satuann/{id}', [SatuanController::class, 'update']);
+	Route::put('/satuan/{id}', [SatuanController::class, 'update']);
 	Route::delete('/satuan/{id}', [SatuanController::class, 'destroy']);
 	
 	Route::get('/pegawai-grid', [PegawaiController::class, 'grid'])->middleware('can:pegawai-view');

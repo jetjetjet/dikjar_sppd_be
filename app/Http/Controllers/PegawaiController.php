@@ -62,13 +62,14 @@ class PegawaiController extends Controller
 		$results = $this->responses;
 
 		$inputs = $request->all();
+		$inputs['file'] = $inputs['file'] != 'null' ? $inputs['file'] : null;
 		$rules = array(
 			'nip' => 'required',
 			'email' => 'required',
 			'full_name' => 'required',
 			'jenis_kelamin' => 'required',
 			'phone' => 'max:15',
-			'file' => 'mimes:jpeg,bmp,png,gif'
+			// 'file' => 'mimes:jpeg,bmp,png,gif'
 		);
 
 		$validator = Validator::make($inputs, $rules);
