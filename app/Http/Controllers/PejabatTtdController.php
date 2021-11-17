@@ -14,6 +14,7 @@ class PejabatTtdController extends Controller
 		$results = $this->responses;
 		$results['data'] = PejabatTtd::join('pegawai as p', 'p.id', 'pegawai_id')
 		->leftJoin('anggaran as a', 'a.id', 'anggaran_id')
+		->orderBy('pejabat_ttd.created_at', 'DESC')
 		->select(
 			'pejabat_ttd.id as id',
 			'nip',

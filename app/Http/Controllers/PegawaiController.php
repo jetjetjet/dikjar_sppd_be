@@ -64,7 +64,7 @@ class PegawaiController extends Controller
 		$inputs = $request->all();
 		$inputs['file'] = $inputs['file'] != 'null' ? $inputs['file'] : null;
 		$rules = array(
-			'nip' => 'required',
+			'nip' => 'required|unique:pegawai,nip',
 			'email' => 'required',
 			'full_name' => 'required',
 			'jenis_kelamin' => 'required',
@@ -90,7 +90,7 @@ class PegawaiController extends Controller
 				'jenis_kelamin' => $inputs['jenis_kelamin'],
 				'address' => $inputs['address'] ?? null,
 				'phone' => $inputs['phone'] ?? null,
-				'tgl_lahir' => $inputs['tgl_lahir'] ?? null,
+				'tgl_lahir' => json_decode($inputs['tgl_lahir']) ?? null,
 				'pegawai_app' => '1'
 			]);
 

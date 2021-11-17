@@ -94,7 +94,7 @@ class AnggaranController extends Controller
 			'kode_rekening' => 'required',
 			'nama_rekening' => 'required',
       'uraian' => 'required',
-      'pagu' => 'required|numeric|min:4',
+      'pagu' => 'required|numeric|min:1000000|max:999999999999',
       'pejabat_pptk' => 'required',
 			'bendahara' => 'required'
 		);
@@ -162,6 +162,7 @@ class AnggaranController extends Controller
 			$q->on('anggaran.id', 'be.anggaran_id');
 			$q->where('be.autorisasi_code', 'BENDAHARA');
 		})
+		->where('anggaran.id', $id)
 		->select('anggaran.*',
 		'pt.pegawai_id as pejabat_pptk',
 		'be.pegawai_id as bendahara')
@@ -184,7 +185,7 @@ class AnggaranController extends Controller
 			'kode_rekening' => 'required',
 			'nama_rekening' => 'required',
       'uraian' => 'required',
-      'pagu' => 'required',
+      'pagu' => 'required|numeric|min:1000000|max:999999999999',
       'pejabat_pptk' => 'required',
 			'bendahara' => 'required'
 		);
@@ -248,8 +249,6 @@ class AnggaranController extends Controller
 			Log::channel('spderr')->info('anggaran_save: '. json_encode($e->getMessage()));
 			array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
 		}
-
-
 
     array_push($results['messages'], 'Berhasil mengubah Anggaran.');
 

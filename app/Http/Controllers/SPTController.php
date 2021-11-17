@@ -66,7 +66,7 @@ class SPTController extends Controller
 			'proceed_at',
 			'u.name',
 			DB::raw($canGenerate . " as can_generate")
-		);
+		)->orderBy('tgl_spt', 'DESC');
 
 		$results['data'] = $q->get();
 

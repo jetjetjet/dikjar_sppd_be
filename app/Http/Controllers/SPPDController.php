@@ -64,7 +64,8 @@ class SPPDController extends Controller
 				'nip',
 				DB::raw("coalesce(total_biaya,0) as total_biaya"),
 				DB::raw("case when 1 = {$isAdmin} or p.id = {$loginid} then true else false end as can_edit")
-			)->get();
+			)->orderBy('full_name')
+			->get();
 		}
 
 		$results['data']  = array( 'header' => $header, 'child' => $child);
