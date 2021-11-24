@@ -263,22 +263,7 @@ class SPTController extends Controller
 								'key' => $uuidSplit[0]
 						]);
 					} else {
-						$user = SPTDetail::join('pegawai as p', 'p.id', 'spt_detail.pegawai_id')
-						->where('spt_id',$id)
-						->where('pegawai_id', $spt->pelaksana_id)
-						->select(
-							'full_name as nama_pegawai', 
-							'jabatan as jabatan_pegawai', 
-							'golongan as golongan_pegawai',
-							'spt_detail.id',
-							'pegawai_id',
-							'nip as nip_pegawai')
-						->first();
-
-						$template->setValue('nama_pegawai', $user->nama_pegawai);
-						$template->setValue('golongan_pegawai', $user->golongan_pegawai);
-						$template->setValue('jabatan_pegawai', $user->jabatan_pegawai);
-						$template->setValue('nip_pegawai', $user->nip_pegawai);
+						$template->cloneRowAndSetValues('nama_pegawai', $tempUserValue);
 					}
 					$newFile = new \stdClass();
 					$newFile->dbPath ='/storage/spt/';
