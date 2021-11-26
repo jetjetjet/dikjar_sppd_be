@@ -22,6 +22,6 @@ class SPTDetail extends Model
 		'sppd_generated_at',
 		'sppd_generated_by',
 		'settled_at',
-		'settled_by'
+		'settled_by',
 	];
 }

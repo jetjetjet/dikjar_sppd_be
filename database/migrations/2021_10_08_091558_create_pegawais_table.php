@@ -16,10 +16,9 @@ class CreatePegawaisTable extends Migration
         Schema::create('pegawai', function (Blueprint $table) {
             $table->id();
             $table->string('nip')->unique();
-            $table->foreignId('jabatan_id')->nullable();
-            $table->boolean('pegawai_app')->nullable();
-            // $table->string('nip',20);
-            // $table->string('username',50);
+            $table->string('jabatan');
+            $table->string('pangkat')->nullable();
+            $table->string('golongan')->nullable();
             $table->string('email')->nullable();
             $table->string('full_name', 100)->nullable();
             $table->string('path_foto')->nullable();
@@ -27,6 +26,7 @@ class CreatePegawaisTable extends Migration
             $table->string('jenis_kelamin');
             $table->string('phone', 15)->nullable();
             $table->string('address', 400)->nullable();
+            $table->boolean('pegawai_app')->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->bigInteger('created_by');

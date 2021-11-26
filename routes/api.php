@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AnggaranController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\BidangController;
+use App\Http\Controllers\UnitKerjaController;
 use App\Http\Controllers\KategoriTransportController;
 use App\Http\Controllers\KategoriPengeluaranController;
 use App\Http\Controllers\SatuanController;
@@ -56,12 +56,12 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::get('/dashboard-anggaran', [DashboardController::class, 'anggaran']);
 	Route::get('/dashboard-pegawai', [DashboardController::class, 'pegawaiDinas']);
 
-	// Route::get('/bidang-grid', [BidangController::class, 'grid']);
-	// Route::get('/bidang-search', [BidangController::class, 'search']);
-	// Route::get('/bidang/{id}', [BidangController::class, 'show']);
-	// Route::post('/bidang', [BidangController::class, 'store']);
-	// Route::put('/bidang/{id}', [BidangController::class, 'update']);
-	// Route::delete('/bidang/{id}', [BidangController::class, 'destroy']);
+	Route::get('/unit-kerja-grid', [UnitKerjaController::class, 'grid']);
+	Route::get('/unit-kerja-search', [UnitKerjaController::class, 'search']);
+	Route::get('/unit-kerja/{id}', [UnitKerjaController::class, 'show']);
+	Route::post('/unit-kerja', [UnitKerjaController::class, 'store']);
+	Route::put('/unit-kerja/{id}', [UnitKerjaController::class, 'update']);
+	Route::delete('/unit-kerja/{id}', [UnitKerjaController::class, 'destroy']);
 
 	Route::get('/jabatan-grid', [JabatanController::class, 'grid'])->middleware('can:jabatan-view');
 	Route::get('/jabatan-search', [JabatanController::class, 'search']);

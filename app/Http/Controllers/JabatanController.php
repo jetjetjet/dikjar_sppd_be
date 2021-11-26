@@ -12,7 +12,7 @@ class JabatanController extends Controller
   public function grid(Request $request)
 	{
 		$results = $this->responses;
-		$results['data'] = Jabatan::all();
+		$results['data'] = Jabatan::orderBy('created_at', 'DESC')->get();
 		$results['state_code'] = 200;
 		$results['success'] = true;
 
@@ -26,10 +26,11 @@ class JabatanController extends Controller
 		$q = Jabatan::select('id', 'name');
 		if($request->filter){
 			if($request->filter == 'edit' && isset($request->id)){
-				$q = $q->whereRaw("jabatan.id not in ( select jabatan_id from pegawai where deleted_at is null and (jabatan_id is not null and jabatan_id not in (".$request->id.") ) )");
+				// $q = $q->whereRaw("jabatan.id not in ( select jabatan_id from pegawai where deleted_at is null and (jabatan_id is not null and jabatan_id not in (".$request->id.") ) )");
+				$q = $q->whereRaw(`SELECT jabatan_id FROM pegawai p JOIN jabatan j ON j.id = p.jabatan_id WHERE p.deleted_at IS NULL AND p.jabatan IS NOT NULL AND is_parent = '1' and jabatan_id not in({$request->id})`);
 			}
 		} else {
-			$q = $q->whereNotIn('jabatan.id', [DB::raw("select jabatan_id from pegawai where deleted_at is null and jabatan_id is not null")]);
+			$q = $q->whereNotIn('jabatan.id', [DB::raw(`SELECT jabatan_id FROM pegawai p JOIN jabatan j ON j.id = p.jabatan_id WHERE p.deleted_at IS NULL AND p.jabatan IS NOT NULL AND is_parent = '1'`)]);
 		}
 
 		$results['data'] = $q->get();
@@ -69,9 +70,7 @@ class JabatanController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-      'name' => 'required',
-      'golongan' => 'required',
-      'is_parent' => 'required'
+      'name' => 'required'
 		);
 
 		$validator = Validator::make($inputs, $rules);
@@ -84,7 +83,6 @@ class JabatanController extends Controller
     Jabatan::create([
       // 'bidang_id' => $inputs['bidang_id'],
       'name' => $inputs['name'],
-      'golongan' => $inputs['golongan'],
       'remark' => $inputs['remark'],
       'is_parent' => $inputs['is_parent'],
       'parent_id' => $inputs['parent_id']
@@ -104,9 +102,7 @@ class JabatanController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-      'name' => 'required',
-      'golongan' => 'required',
-      'is_parent' => 'required'
+      'name' => 'required'
 		);
 
 		$validator = Validator::make($request->all(), $rules);
@@ -120,7 +116,6 @@ class JabatanController extends Controller
     $Jabatan->update([
       // 'bidang_id' => $inputs['bidang_id'],
       'name' => $inputs['name'],
-      'golongan' => $inputs['golongan'],
       'remark' => $inputs['remark'],
       'is_parent' => $inputs['is_parent'],
       'parent_id' => $inputs['parent_id']

@@ -150,8 +150,7 @@ class SPPDController extends Controller
 			$templatePath = base_path('public/storage/template/template_rumming.docx');
 			$checkFile = FaFile::exists($templatePath);
 			if($checkFile) {
-				$pegawai = Pegawai::join('jabatan as j', 'j.id', 'jabatan_id')
-				->where('pegawai.id', $pegawaiId)
+				$pegawai = Pegawai::where('id', $pegawaiId)
 				->select('nip', 'full_name')
 				->first();
 				
@@ -162,8 +161,7 @@ class SPPDController extends Controller
 				->select('nip', 'full_name')
 				->first();
 	
-				$kadin = Pegawai::join('jabatan as j', 'j.id', 'jabatan_id')
-				->where('pegawai.id', 5)
+				$kadin = Pegawai::where('pegawai.id', 5)
 				->select('nip', 'full_name')
 				->first();
 	
@@ -333,8 +331,7 @@ class SPPDController extends Controller
 					->select('nip', 'full_name')
 					->first();
 	
-					$kadin = Pegawai::join('jabatan as j', 'j.id', 'jabatan_id')
-					->where('pegawai.id', 5)
+					$kadin = Pegawai::where('pegawai.id', 5)
 					->select('nip', 'full_name')
 					->first();
 	
@@ -389,6 +386,12 @@ class SPPDController extends Controller
 						'settled_at' => DB::raw("now()"),
 						'settled_by' => $loginId,
 						'kwitansi_file_id' => $file
+					]);
+
+					$updateSPPD = SPTDetail::where('spt_id', $id)
+					->update([
+						'settled_at' => now()->toDateTimeString(),
+						'settled_by' => $loginId
 					]);
 					
 					$results['success'] = true;

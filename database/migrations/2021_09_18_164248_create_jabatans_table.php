@@ -16,8 +16,8 @@ class CreateJabatansTable extends Migration
         Schema::create('jabatan', function (Blueprint $table) {
             $table->id();
             // $table->bigInteger('bidang_id')->nullable();
+            // $table->foreignId('unit_kerja_id')->nullable();
             $table->string('name');
-            $table->string('golongan');
             $table->string('remark')->nullable();
             $table->boolean('is_parent');
             $table->bigInteger('parent_id')->nullable();

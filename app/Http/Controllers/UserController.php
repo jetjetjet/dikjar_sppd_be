@@ -17,6 +17,7 @@ class UserController extends Controller
 
 		$results['data'] = User::join('pegawai as p', 'p.nip', 'users.nip')
 		->join('jabatan as j', 'j.id', 'p.jabatan_id')
+		->orderBy('pegawai.created_at', 'DESC')
 		->select(
 			'users.id',
 			'p.nip',

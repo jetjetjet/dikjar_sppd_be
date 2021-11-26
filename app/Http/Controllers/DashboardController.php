@@ -16,12 +16,11 @@ class DashboardController extends Controller
 			$query->on('sd.spt_id', 'spt.id')
 			->whereNull('sd.deleted_at');
 		})->join('pegawai as p', 'p.id', 'sd.pegawai_id')
-		->join('jabatan as j', 'j.id', 'p.jabatan_id')
 		->whereNull('spt.settled_at')
 		->whereNull('sd.settled_at')
 		->select(
 			'full_name',
-			'j.name as jabatan',
+			'jabatan',
 			'daerah_tujuan',
 			DB::raw("coalesce(path_foto, '/storage/profile/user.png') as path_foto"),
 			DB::raw("to_char(tgl_berangkat, 'DD/MM/YYYY') as tgl_berangkat"),

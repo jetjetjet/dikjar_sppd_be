@@ -19,6 +19,7 @@ class CreateSPTSTable extends Migration
             // $table->bigInteger('bidang_id')->nullable();
             $table->integer('periode');
             $table->string('jenis_dinas');
+            $table->bigInteger('unit_kerja_id')->nullable();
             $table->bigInteger('anggaran_id');
             $table->bigInteger('pelaksana_id');
             $table->bigInteger('pttd_id');

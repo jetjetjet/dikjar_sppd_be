@@ -65,7 +65,6 @@ class ReportController extends Controller
 			$on->where('b.pegawai_id', $inputs['pegawai_id']);
 			$on->whereNull('b.deleted_at');
 		})
-		// ->join('jabatan as j', 'p.jabatan_id', 'j.id')
 		->where('p.id', $inputs['pegawai_id']);
 
 		if(isset($inputs['tgl_berangkat']) && isset($inputs['tgl_kembali'])){

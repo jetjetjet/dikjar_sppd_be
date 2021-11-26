@@ -16,8 +16,7 @@ class PegawaiController extends Controller
 	{
 		$results = $this->responses;
 
-		$results['data'] = Pegawai::join('jabatan as j', 'j.id', 'jabatan_id')
-		->select('pegawai.id', 'nip', 'full_name', 'j.name as jabatan')
+		$results['data'] = Pegawai::select('pegawai.id', 'nip', 'full_name', 'golongan', 'pangkat', 'jabatan')
 		->orderBy('pegawai.created_at')->get();
 		$results['state_code'] = 200;
 		$results['success'] = true;
@@ -32,10 +31,7 @@ class PegawaiController extends Controller
 		$q = Pegawai::select('pegawai.id as code', 'full_name as label');
 		if($request->filter){
 			if($request->filter == 'all'){
-				$q = $q->join('jabatan as j', 'j.id', 'pegawai.jabatan_id');
-			} else if($request->filter == 'parent'){
-				$q = $q->join('jabatan as j', 'j.id', 'pegawai.jabatan_id')
-				->where('j.is_parent', '1');
+				//
 			} else if($request->filter == 'spt'){
 				$q = $q->whereRaw("id not in ( select pegawai_id from spt_detail where deleted_at is null and settled_at is null )")
 					->where('pegawai_app', '1');
@@ -67,6 +63,9 @@ class PegawaiController extends Controller
 			'nip' => 'required|unique:pegawai,nip',
 			'email' => 'required',
 			'full_name' => 'required',
+			'jabatan' => 'required',
+			'pangkat' => 'required',
+			'golongan' => 'required',
 			'jenis_kelamin' => 'required',
 			'phone' => 'max:15',
 			// 'file' => 'mimes:jpeg,bmp,png,gif'
@@ -85,7 +84,9 @@ class PegawaiController extends Controller
 			$pegawai = Pegawai::create([
 				'nip' => $inputs['nip'],
 				'full_name' => $inputs['full_name'],
-				'jabatan_id' => $inputs['jabatan_id'],
+				'jabatan' => $inputs['jabatan'],
+				'pangkat' => $inputs['pangkat'],
+				'golongan' => $inputs['golongan'],
 				'email' => $inputs['email'],
 				'jenis_kelamin' => $inputs['jenis_kelamin'],
 				'address' => $inputs['address'] ?? null,
@@ -138,6 +139,9 @@ class PegawaiController extends Controller
 		$inputs = $request->all();
 		$rules = array(
 			'nip' => 'required',
+			'golongan' => 'required',
+			'pangkat' => 'required',
+			'jabatan' => 'required',
 			'email' => 'required',
 			'full_name' => 'required',
 			'jenis_kelamin' => 'required'
@@ -154,9 +158,11 @@ class PegawaiController extends Controller
 		$pegawai->update([
 			'nip' => $inputs['nip'],
 			'full_name' => $inputs['full_name'],
+			'pangkat' => $inputs['pangkat'],
+			'golongan' => $inputs['golongan'],
 			'email' => $inputs['email'],
 			'jenis_kelamin' => $inputs['jenis_kelamin'],
-			'jabatan_id' => $inputs['jabatan_id'],
+			'jabatand' => $inputs['jabatan'],
 			'address' => $inputs['address'] ?? null,
 			'phone' => $inputs['phone'] ?? null,
 			'tgl_lahir' => $inputs['tgl_lahir'] ?? null

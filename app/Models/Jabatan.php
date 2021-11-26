@@ -13,7 +13,6 @@ class Jabatan extends Model
 		//'bidang_id',
     'name',
     'remark',
-    'golongan',
 		'role_name',
 		'is_parent',
 		'parent_id',

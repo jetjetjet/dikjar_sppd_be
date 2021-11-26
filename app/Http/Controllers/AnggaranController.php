@@ -26,7 +26,8 @@ class AnggaranController extends Controller
 		$results['data'] = Anggaran::where('periode', date('Y'))
 		->leftJoinSub($realisasi, 'r', function ($join) {
 			$join->on('anggaran.id', '=', 'r.anggaran_id');
-		})->select(
+		})->orderBy('anggaran.created_at', 'DESC')
+		->select(
 			'anggaran.id',
 			'kode_rekening',
 			'nama_rekening',
