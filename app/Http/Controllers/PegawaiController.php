@@ -162,7 +162,7 @@ class PegawaiController extends Controller
 			'golongan' => $inputs['golongan'],
 			'email' => $inputs['email'],
 			'jenis_kelamin' => $inputs['jenis_kelamin'],
-			'jabatand' => $inputs['jabatan'],
+			'jabatan' => $inputs['jabatan'],
 			'address' => $inputs['address'] ?? null,
 			'phone' => $inputs['phone'] ?? null,
 			'tgl_lahir' => $inputs['tgl_lahir'] ?? null
