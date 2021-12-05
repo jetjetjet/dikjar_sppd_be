@@ -139,7 +139,7 @@ class SPTController extends Controller
 					DB::raw("ROW_NUMBER() OVER (ORDER BY spt_detail.id) AS index_no"), 
 					'full_name as nama_pegawai', 
 					'jabatan as jabatan_pegawai', 
-					DB::raw("pangkat || ' / ' || golongan as golongan_pegawai"),
+					DB::raw("pangkat || ' ' || golongan as golongan_pegawai"),
 					'spt_detail.id',
 					'pegawai_id',
 					'nip as nip_pegawai')
@@ -165,7 +165,7 @@ class SPTController extends Controller
 						// $template->setValue('dasar_pelaksana', $spt->dasar_pelaksana);
 						$tempSppd->setValue('nama_pegawai', $user->nama_pegawai);
 						$tempSppd->setValue('jabatan_pegawai', $user->jabatan_pegawai);
-						$tempSppd->setValue('golongan_pegawai', $user->golongan_pegawai);
+						$tempSppd->setValue('golongan_pegawai', str_replace("- -","-", $user->golongan_pegawai));
 						$tempSppd->setValue('untuk', $sptData->untuk);
 						$tempSppd->setValue('transportasi', $sptData->transportasi);
 						$tempSppd->setValue('jml_hari', $sptData->jml_hari . " Hari");
