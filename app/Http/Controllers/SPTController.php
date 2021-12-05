@@ -155,6 +155,9 @@ class SPTController extends Controller
 						throw new \Exception('Template SPPD tidak ditemukan');
 					}
 
+					//Begin Transaction
+					DB::beginTransaction();
+
 					$tempUserValue = array();
 					foreach($users as $user){
 						$tempSppd = new TemplateProcessor($templateSppdPath);
@@ -300,17 +303,18 @@ class SPTController extends Controller
 						'status' => 'PROCEED'
 					]);
 
+					//commit to DB
+					DB::commit();
 					$results['data'] = $newFile->dbPath . $newFile->newName;
 					array_push($results['messages'], 'Berhasil memproses SPT.');
 					$results['success'] = true;
 					$results['state_code'] = 200;
-				}  catch (\Exception $e) {
+				} catch (\Exception $e) {
+					DB::rollBack();
 					Log::channel('spderr')->info('spt_proses: '. json_encode($e->getMessage()));
 					array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
 				}
-
 			}
-
 		}
 		
 		return response()->json($results, $results['state_code']);
