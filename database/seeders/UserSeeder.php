@@ -701,7 +701,7 @@ class UserSeeder extends Seeder
 
 	$staffPaudPnf = [
 		[
-			'jabatan' => 'Staf Bidang PAUD & PNF',
+			'jabatan' => 'Staf Bidang PAUD dan PNF',
 			'pangkat' => '-',
 			'golongan' => '-',
 			'nip' => '910120120002',
@@ -713,7 +713,7 @@ class UserSeeder extends Seeder
 			'created_by' => 1
 		],
 		[
-			'jabatan' => 'Staf Bidang PAUD & PNF',
+			'jabatan' => 'Staf Bidang PAUD dan PNF',
 			'pangkat' => '-',
 			'golongan' => '-',
 			'nip' => '9101201200251',
@@ -725,7 +725,7 @@ class UserSeeder extends Seeder
 			'created_by' => 1
 		],
 		[
-			'jabatan' => 'Staf Bidang PAUD & PNF',
+			'jabatan' => 'Staf Bidang PAUD dan PNF',
 			'pangkat' => '-',
 			'golongan' => '-',
 			'nip' => '910120140013',
@@ -737,7 +737,7 @@ class UserSeeder extends Seeder
 			'created_by' => 1
 		],
 		[
-			'jabatan' => 'Staf Bidang PAUD & PNF',
+			'jabatan' => 'Staf Bidang PAUD dan PNF',
 			'pangkat' => '-',
 			'golongan' => '-',
 			'nip' => '910120140001',
@@ -749,7 +749,7 @@ class UserSeeder extends Seeder
 			'created_by' => 1
 		],
 		[
-			'jabatan' => 'Staf Bidang PAUD & PNF',
+			'jabatan' => 'Staf Bidang PAUD dan PNF',
 			'pangkat' => '-',
 			'golongan' => '-',
 			'nip' => '910120160002', 
@@ -761,7 +761,7 @@ class UserSeeder extends Seeder
 			'created_by' => 1
 		],
 		[
-			'jabatan' => 'Staf Bidang PAUD & PNF',
+			'jabatan' => 'Staf Bidang PAUD dan PNF',
 			'pangkat' => '-',
 			'golongan' => '-',
 			'nip' => '910120160007',
@@ -773,7 +773,7 @@ class UserSeeder extends Seeder
 			'created_by' => 1
 		],
 		[
-			'jabatan' => 'Staf Bidang PAUD & PNF',
+			'jabatan' => 'Staf Bidang PAUD dan PNF',
 			'pangkat' => '-',
 			'golongan' => '-',
 			'nip' => '910120190004',
@@ -785,7 +785,7 @@ class UserSeeder extends Seeder
 			'created_by' => 1
 		],
 		[
-			'jabatan' => 'Staf Bidang PAUD & PNF',
+			'jabatan' => 'Staf Bidang PAUD dan PNF',
 			'pangkat' => '-',
 			'golongan' => '-',
 			'nip' => '910120171003',
@@ -797,7 +797,7 @@ class UserSeeder extends Seeder
 			'created_by' => 1
 		],
 		[
-			'jabatan' => 'Staf Bidang PAUD & PNF',
+			'jabatan' => 'Staf Bidang PAUD dan PNF',
 			'pangkat' => '-',
 			'golongan' => '-',
 			'nip' => '910120200003',
@@ -809,7 +809,7 @@ class UserSeeder extends Seeder
 			'created_by' => 1
 		],
 		[
-			'jabatan' => 'Staf Bidang PAUD & PNF',
+			'jabatan' => 'Staf Bidang PAUD dan PNF',
 			'pangkat' => '-',
 			'golongan' => '-',
 			'nip' => '910120200013',
@@ -821,7 +821,7 @@ class UserSeeder extends Seeder
 			'created_by' => 1
 		],
 		[
-			'jabatan' => 'Staf Bidang PAUD & PNF',
+			'jabatan' => 'Staf Bidang PAUD dan PNF',
 			'pangkat' => '-',
 			'golongan' => '-',
 			'nip' => '910120210002',
