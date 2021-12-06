@@ -19,7 +19,7 @@ class User extends Authenticatable
      * @var string[]
      */
     protected $fillable = [
-        'nip'
+        'email'
         ,'password'
         ,'created_by'
         ,'updated_by'
@@ -50,6 +50,6 @@ class User extends Authenticatable
 
     public function pegawai()
     {
-        return $this->belongsTo(Pegawai::class, 'nip', 'nip');
+        return $this->belongsTo(Pegawai::class, 'email', 'email');
     }
 }

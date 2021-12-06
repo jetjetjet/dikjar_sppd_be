@@ -13,7 +13,7 @@ class AuthController extends Controller
     $results = $this->responses;
 
 		$rules = array(
-			'nip' => 'required',
+			'email' => 'required',
 			'password' => 'required'
 		);
 
@@ -24,18 +24,17 @@ class AuthController extends Controller
       return response()->json($results, $results['state_code']);
     }
 		
-    // $user = User::where('nip', $request->nip)->firstOrFail();
 		$ingat = $request->remember ? true : false;
-		$masuk = $request->only('nip', 'password');
+		$masuk = $request->only('email', 'password');
 		if (!Auth::attempt($masuk, $ingat)){
-			array_push($results['messages'], 'Username atau Passworsd Salah');
+			array_push($results['messages'], 'Email atau Passworsd Salah');
 			return response()->json($results, $results['state_code']);
 		};
 		
     $user = Auth::user();
 		$perm = $user->getAllPermissions()->pluck('name')->toArray();
 		$cek = $user->hasRole('Super Admin') ? array_push($perm, 'is_admin') : false ;
-		$token = $user->createToken($request->nip, $perm);
+		$token = $user->createToken($request->email, $perm);
 
 		$pathFoto = $user->path_foto != null ? $user->path_foto : '/storage/profile/user.png';
 		$data = Array( "token" => $token->plainTextToken,

@@ -258,7 +258,7 @@ class SPTController extends Controller
 						//generate QRCode
 						$uuid = (string) Str::uuid();
 						$uuidSplit = explode('-', $uuid);
-						QrCode::format('png')->generate('https://disdikkerinci.id/spt/guest?key='. $uuidSplit[0] , base_path('public/storage/images/spt_qr.png'));
+						QrCode::format('png')->generate('https://sppd.disdikkerinci.id/spt/guest?key='. $uuidSplit[0] , base_path('public/storage/images/spt_qr.png'));
 						$template->setImageValue('QRCODE', base_path('public/storage/images/spt_qr.png'));
 						
 						$sptGuest = DB::table('spt_guest')->insert([

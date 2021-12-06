@@ -39,8 +39,8 @@ class PegawaiController extends Controller
 				$q = $q->whereRaw("id not in ( select pegawai_id from spt_detail where deleted_at is null and settled_at is null and spt_id not in ( ". $request->id ." ) )")
 					->where('pegawai_app', '1');
 			} else if($request->filter == 'user'){
-				$q = Pegawai::select('pegawai.nip as code', 'full_name as label')
-				->whereRaw("nip not in ( select nip from users )")->where('pegawai_app', '1');
+				$q = Pegawai::select('pegawai.email as code', 'full_name as label')
+				->whereRaw("email not in ( select email from users )")->where('pegawai_app', '1');
 			} else if($request->filter == 'report' ){
 				$q = $q->where('pegawai_app', '1');
 			} 

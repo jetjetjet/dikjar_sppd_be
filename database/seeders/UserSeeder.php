@@ -26,11 +26,11 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Bupati Kerinci',
 				'pangkat' => null,
 				'golongan' => null,
-				'nip' => '00000000',
+				'nip' => null,
 				'pegawai_app' => '0',
 				'full_name' => 'Dr. H. Adirozal M.Si.',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'dummy1@disdikkerinci.id',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
 			],
@@ -38,23 +38,23 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Wakil Bupati Kerinci',
 				'pangkat' => null,
 				'golongan' => null,
-				'nip' => '00000001',
+				'nip' => null,
 				'full_name' => 'Ir. H. Ami Taher',
 				'pegawai_app' => '0',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'dummy2@disdikkerinci.id',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
 			],
 			[
 				'jabatan' => 'Sekretaris Daerah Kerinci',
-				'nip' => '00000002',
+				'nip' => null,
 				'pangkat' => null,
 				'golongan' => null,
 				'full_name' => 'nama_sekda',
 				'jenis_kelamin' => 'Laki-laki',
 				'pegawai_app' => '0',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'dummy3@disdikkerinci.id',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
 			],
@@ -66,7 +66,7 @@ class UserSeeder extends Seeder
 				'full_name' => 'H.MURISON,S.Pd,S.Sos,M.Si',
 				'jenis_kelamin' => 'Laki-laki',
 				'pegawai_app' => '1',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'murison@disdikkerinci.id',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
 			], 
@@ -78,7 +78,7 @@ class UserSeeder extends Seeder
 				'full_name' => 'ROMUI ELADI,S.Pd.MM',
 				'pegawai_app' => '1',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'romui_eladi@disdikkerinci.id',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
 			],
@@ -90,7 +90,7 @@ class UserSeeder extends Seeder
 				'full_name' => 'DELVI SYOFRIADI,S.Sos, M.E.',
 				'jenis_kelamin' => 'Laki-laki',
 				'pegawai_app' => '1',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'delvi_syofriadi@disdikkerinci.id',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
 			],
@@ -102,7 +102,7 @@ class UserSeeder extends Seeder
 				'full_name' => 'DENI YANTO,SE. MM',
 				'jenis_kelamin' => 'Laki-laki',
 				'pegawai_app' => '1',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'deni_yanto@disdikkerinci.id',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
 			],
@@ -113,7 +113,7 @@ class UserSeeder extends Seeder
 				'nip' => '196506171986022002',
 				'full_name' => 'LISMI,S.Pd',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'lismi@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -125,7 +125,7 @@ class UserSeeder extends Seeder
 				'nip' => '196912171998031004',
 				'full_name' => 'YANTO DIUM,S.ST, Par. M.Si',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'yanto_dium@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -138,7 +138,7 @@ class UserSeeder extends Seeder
 				'full_name' => 'Drs. MAT AWAL',
 				'jenis_kelamin' => 'Laki-laki',
 				'pegawai_app' => '1',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'mat_awal@disdikkerinci.id',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
 			],
@@ -150,7 +150,7 @@ class UserSeeder extends Seeder
 				'full_name' => 'EDWAR,S.T.',
 				'jenis_kelamin' => 'Laki-laki',
 				'pegawai_app' => '1',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'edwar@disdikkerinci.id',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
 			],
@@ -162,7 +162,7 @@ class UserSeeder extends Seeder
 				'full_name' => 'ADLIZAR,S.Pd',
 				'jenis_kelamin' => 'Laki-laki',
 				'pegawai_app' => '1',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'adlizar@disdikkerinci.id',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
 			],
@@ -174,7 +174,7 @@ class UserSeeder extends Seeder
 				'full_name' => 'EVONI LUKIAWATI,S.E.',
 				'jenis_kelamin' => 'Laki-laki',
 				'pegawai_app' => '1',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'evoni@disdikkerinci.id',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
 			],
@@ -185,7 +185,7 @@ class UserSeeder extends Seeder
 				'nip' => '197704242012121001',
 				'full_name' => 'SALPANDI,S.T.',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'salpandi@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -197,7 +197,7 @@ class UserSeeder extends Seeder
 				'nip' => '198909292011011003',
 				'full_name' => 'RENGKI,S.Pdi',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'rengki@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -209,7 +209,7 @@ class UserSeeder extends Seeder
 				'nip' => '196507081992031008',
 				'full_name' => 'HAKIMI,S.Pd',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'hakimi@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -221,7 +221,7 @@ class UserSeeder extends Seeder
 				'nip' => '197012151990071002',
 				'full_name' => 'SAPREL,S.Pd',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'saprel@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -233,7 +233,7 @@ class UserSeeder extends Seeder
 				'nip' => '198204292007011004',
 				'full_name' => 'SILISMAN,S.Sos',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'silisman@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -245,7 +245,7 @@ class UserSeeder extends Seeder
 				'nip' => '197501112010011010',
 				'full_name' => 'ASWARUDIN',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'aswarudin@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -257,7 +257,7 @@ class UserSeeder extends Seeder
 				'nip' => '196404041989021002',
 				'full_name' => 'Drs. MAT AGUSSALIM,M.Pd',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'mat_agussalim@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -269,7 +269,7 @@ class UserSeeder extends Seeder
 				'nip' => '198509112008031001',
 				'full_name' => 'EFRI DONAL,S.Pd. M.PdI',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'efri_donal@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -281,7 +281,7 @@ class UserSeeder extends Seeder
 				'nip' => '197307092011012001',
 				'full_name' => 'SILISWATI,S.E.',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'siliswati@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -293,7 +293,7 @@ class UserSeeder extends Seeder
 				'nip' => '196905102012121002',
 				'full_name' => 'AINUL DAHRI,S.Pd',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'ainul_dahri@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -305,7 +305,7 @@ class UserSeeder extends Seeder
 				'nip' => '197706192009031003',
 				'full_name' => 'TAUFIKA OFIANDRI,S.Pd',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'taufika_ofiandri@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -317,7 +317,7 @@ class UserSeeder extends Seeder
 				'nip' => '196501072005021002',
 				'full_name' => 'KHAIRUL BAHRI,S.Pd.SD.,   M.M.',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'khairul_bahri@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -329,7 +329,7 @@ class UserSeeder extends Seeder
 				'nip' => '197407042007011005',
 				'full_name' => 'YOSKA MARDIZAL,S.E.',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'yoska_mardizal@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -341,7 +341,7 @@ class UserSeeder extends Seeder
 				'nip' => '196709292012121001',
 				'full_name' => 'MUKHTAR,S.Pd',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'mukhtar@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -353,7 +353,7 @@ class UserSeeder extends Seeder
 				'nip' => '196701092012121001',
 				'full_name' => 'PERLIUS,S.Pd',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'perlius@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -365,7 +365,7 @@ class UserSeeder extends Seeder
 				'nip' => '198906172010012002',
 				'full_name' => 'TIA YUNITA',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'tia_yunita@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -377,7 +377,7 @@ class UserSeeder extends Seeder
 				'nip' => '197512312014081001',
 				'full_name' => 'IKHWAN',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'ikhwan@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -389,7 +389,7 @@ class UserSeeder extends Seeder
 				'nip' => '196810102012122003',
 				'full_name' => 'ROHANIAH,S.Pd',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'rohaniah@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -401,7 +401,7 @@ class UserSeeder extends Seeder
 				'nip' => '197705252012122001',
 				'full_name' => 'EKA WADIANTI,S.Pd',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'eka_wadianti@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -413,7 +413,7 @@ class UserSeeder extends Seeder
 				'nip' => '198607022014081002',
 				'full_name' => 'JUL HERDI WIJAYA,S.PdI',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'jul_herdi@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -425,7 +425,7 @@ class UserSeeder extends Seeder
 				'nip' => '199311202020121008',
 				'full_name' => 'ENDANG SUBRATA,SE',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'endang_subrata@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -437,7 +437,7 @@ class UserSeeder extends Seeder
 				'nip' => '199604012020122021',
 				'full_name' => 'RIKE MONIKA FAUZIAH,SE',
 				'jenis_kelamin' => 'Perempuan',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'rike_monika@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -449,7 +449,7 @@ class UserSeeder extends Seeder
 				'nip' => '199305112020122021',
 				'full_name' => 'ANINDYA REZA MONICA,S.AP',
 				'jenis_kelamin' => 'Perempuan',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'anindya_reza@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -461,7 +461,7 @@ class UserSeeder extends Seeder
 				'nip' => '199312032020121013',
 				'full_name' => 'TRI OKA PUTRA,SE',
 				'jenis_kelamin' => 'Perempuan',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'tri_oka@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -473,7 +473,7 @@ class UserSeeder extends Seeder
 				'nip' => '199506122020122028',
 				'full_name' => 'AISYIAH ANGGUN PURNAMA,S.Pd',
 				'jenis_kelamin' => 'Perempuan',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'aisyiah_anggun@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -485,10 +485,10 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Staf Perencanaan, Evaluasi dan Pelaporan',
 				'pangkat' => '-',
 				'golongan' => '-',
-				'nip' => '910120140006',
+				'nip' => null,
 				'full_name' => 'OVIEN VALERIE, S.Kom',
 				'jenis_kelamin' => 'Perempuan',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'ovien@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -497,10 +497,10 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Staf Perencanaan, Evaluasi dan Pelaporan',
 				'pangkat' => '-',
 				'golongan' => '-',
-				'nip' => '910120180012',
+				'nip' => null,
 				'full_name' => 'FAUZIAH, S.Pd',
 				'jenis_kelamin' => 'Perempuan',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'fauziah@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -509,10 +509,10 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Staf Perencanaan, Evaluasi dan Pelaporan',
 				'pangkat' => '-',
 				'golongan' => '-',
-				'nip' => '9101201600021',
+				'nip' => null,
 				'full_name' => 'ADIANTO, SH',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'adianto@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -521,10 +521,10 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Staf Perencanaan, Evaluasi dan Pelaporan',
 				'pangkat' => '-',
 				'golongan' => '-',
-				'nip' => '910120160008',
+				'nip' => null,
 				'full_name' => 'DEBI PRADINATA, S.PdI',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'debi_pradinata@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -533,10 +533,10 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Staf Keuangan dan BMD',
 				'pangkat' => '-',
 				'golongan' => '-',
-				'nip' => '910120150001',
+				'nip' => null,
 				'full_name' => 'FENSI KOSVETAL, S.Sy',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'fensi_kosvetal@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -545,10 +545,10 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Staf Keuangan dan BMD',
 				'pangkat' => '-',
 				'golongan' => '-',
-				'nip' => '910120120006',
+				'nip' => null,
 				'full_name' => 'YASIR HABIBI, SE',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'yasir_habibi@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -557,10 +557,10 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Staf Keuangan dan BMD',
 				'pangkat' => '-',
 				'golongan' => '-',
-				'nip' => '910120130004',
+				'nip' => null,
 				'full_name' => 'EFNIKO SUPRATAMA, S.Kom',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'efniko_supratama@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -569,10 +569,10 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Staf Keuangan dan BMD',
 				'pangkat' => '-',
 				'golongan' => '-',
-				'nip' => '910120140015',
+				'nip' => null,
 				'full_name' => 'ELIZAR, A.Md',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'elizar@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -581,10 +581,10 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Staf Keuangan dan BMD',
 				'pangkat' => '-',
 				'golongan' => '-',
-				'nip' => '910120141000',
+				'nip' => null,
 				'full_name' => 'EFROL DONI, S.PdI',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'efrol_doni@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -593,10 +593,10 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Staf Umum dan Kepegawaian',
 				'pangkat' => '-',
 				'golongan' => '-',
-				'nip' => '910120181033',
+				'nip' => null,
 				'full_name' => 'LEO AMELZAL ZAMETA',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'leo_amelzal@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -605,10 +605,10 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Staf Umum dan Kepegawaian',
 				'pangkat' => '-',
 				'golongan' => '-',
-				'nip' => '910120120003',
+				'nip' => null,
 				'full_name' => 'ATENG NADA SURYA, A.Md',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'ateng_nada@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -617,10 +617,10 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Staf Umum dan Kepegawaian',
 				'pangkat' => '-',
 				'golongan' => '-',
-				'nip' => '910120200008',
+				'nip' => null,
 				'full_name' => 'SETIA PUTRI, SE',
 				'jenis_kelamin' => 'Perempuan',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'setia_putri@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -629,10 +629,10 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Staf Umum dan Kepegawaian',
 				'pangkat' => '-',
 				'golongan' => '-',
-				'nip' => '910120200010',
+				'nip' => null,
 				'full_name' => 'ILMAIDA,SPd',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'ilmaida@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -641,10 +641,10 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Staf Umum dan Kepegawaian',
 				'pangkat' => '-',
 				'golongan' => '-',
-				'nip' => '910120200009',
+				'nip' => null,
 				'full_name' => 'MOH.THORIQ KUNNASIHIN',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'thoriq@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -653,10 +653,10 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Staf Umum dan Kepegawaian',
 				'pangkat' => '-',
 				'golongan' => '-',
-				'nip' => '910120120012',
+				'nip' => null,
 				'full_name' => 'YOKO WAHYU,S.Sos',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'yoko_wahyu@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -665,10 +665,10 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Staf Umum dan Kepegawaian',
 				'pangkat' => '-',
 				'golongan' => '-',
-				'nip' => '9101201500311',
+				'nip' => null,
 				'full_name' => 'REVA KURNIA DEWI, SE',
 				'jenis_kelamin' => 'Perempuan',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'reva_kurnia@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -677,10 +677,10 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Staf Umum dan Kepegawaian',
 				'pangkat' => '-',
 				'golongan' => '-',
-				'nip' => '910120210001',
+				'nip' => null,
 				'full_name' => 'NILDA AFRIL YANSA, S.Hum.',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'nilda_afril@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
@@ -689,572 +689,572 @@ class UserSeeder extends Seeder
 				'jabatan' => 'Staf Umum dan Kepegawaian',
 				'pangkat' => '-',
 				'golongan' => '-',
-				'nip' => '910120210003',
+				'nip' => null,
 				'full_name' => 'NUAIMAN, S.Pd',
 				'jenis_kelamin' => 'Laki-laki',
-				'email' => 'dummy@disdikkerinci.id',
+				'email' => 'nuaiman@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
 			]
-	];
+		];
 
-	$staffPaudPnf = [
-		[
-			'jabatan' => 'Staf Bidang PAUD dan PNF',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120120002',
-			'full_name' => 'HIKMAH FADILA, S.Pd ',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+		$staffPaudPnf = [
+			[
+				'jabatan' => 'Staf Bidang PAUD dan PNF',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'HIKMAH FADILA, S.Pd ',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'hikmah_fadila@disdikkerinci.id',
+				'pegawai_app' => '1',
+					'created_at' => now()->toDateTimeString(),
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PAUD dan PNF',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'SUSMILIA, A.Md',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'susmilia@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PAUD dan PNF',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '9101201200251',
-			'full_name' => 'SUSMILIA, A.Md',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PAUD dan PNF',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'REREN AGNES MALDA, S.Kom',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'reren_agnes@disdikkerinci.id',
+				'pegawai_app' => '1',
+					'created_at' => now()->toDateTimeString(),
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PAUD dan PNF',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'RIA ANGRAINI, S.Pd',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'ria_angraini@disdikkerinci.id',
+				'pegawai_app' => '1',
+					'created_at' => now()->toDateTimeString(),
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PAUD dan PNF',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null, 
+				'full_name' => 'DORIS, S.Pd',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'doris@disdikkerinci.id',
+				'pegawai_app' => '1',
+					'created_at' => now()->toDateTimeString(),
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PAUD dan PNF',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'OCKI HEIDY NOFRA, S.Pd',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'ocki_heidy@disdikkerinci.id',
+				'pegawai_app' => '1',
+					'created_at' => now()->toDateTimeString(),
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PAUD dan PNF',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'TIO SONGGA TAMAMILE,S,Ap',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'tio_songga@disdikkerinci.id',
+				'pegawai_app' => '1',
+					'created_at' => now()->toDateTimeString(),
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PAUD dan PNF',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'TESMIZAR ALMI,SE',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'tesmizar@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PAUD dan PNF',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120140013',
-			'full_name' => 'REREN AGNES MALDA, S.Kom',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PAUD dan PNF',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'RISE AFRIANDI,SE',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'rise_afriandi@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PAUD dan PNF',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120140001',
-			'full_name' => 'RIA ANGRAINI, S.Pd',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PAUD dan PNF',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'AYZELA PUPUTRI,S.Pd',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'ayzela@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PAUD dan PNF',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120160002', 
-			'full_name' => 'DORIS, S.Pd',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PAUD dan PNF',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'ADYA PRAWIRA ASRIL, S.Kom.',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'adya_prawira@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PAUD dan PNF',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120160007',
-			'full_name' => 'OCKI HEIDY NOFRA, S.Pd',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
-				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PAUD dan PNF',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120190004',
-			'full_name' => 'TIO SONGGA TAMAMILE,S,Ap',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
-				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PAUD dan PNF',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120171003',
-			'full_name' => 'TESMIZAR ALMI,SE',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
-				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PAUD dan PNF',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120200003',
-			'full_name' => 'RISE AFRIANDI,SE',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
-				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PAUD dan PNF',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120200013',
-			'full_name' => 'AYZELA PUPUTRI,S.Pd',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
-				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PAUD dan PNF',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120210002',
-			'full_name' => 'ADYA PRAWIRA ASRIL, S.Kom.',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
-				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		]
-	];
+				'created_by' => 1
+			]
+		];
 
-	$staffSd = [
-		[
-			'jabatan' => 'Staf Bidang SD',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120120010',
-			'full_name' => 'ADIA MELAWATI, A.Md',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+		$staffSd = [
+			[
+				'jabatan' => 'Staf Bidang SD',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'ADIA MELAWATI, A.Md',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'adia_melawati@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SD',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120150029',
-			'full_name' => 'ELLA RAMADHANA, S.Pd',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SD',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'ELLA RAMADHANA, S.Pd',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'ella_ramadhana@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SD',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120120017',
-			'full_name' => 'NORA MATALANTHAU, S.Pd',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SD',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'NORA MATALANTHAU, S.Pd',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'nora_matalanthau@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SD',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120171005',
-			'full_name' => 'HENGKI PERNANDO, A.Md',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SD',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'HENGKI PERNANDO, A.Md',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'hengki_pernando@disdikkerinci.id',
+				'pegawai_app' => '1',
+					'created_at' => now()->toDateTimeString(),
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SD',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'ANISA PEBRIANI,S.Pd',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'anisa_pebriani@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SD',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120200012',
-			'full_name' => 'ANISA PEBRIANI,S.Pd',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SD',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'WIWIN ARDIA,S.Sn',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'wiwin_ardia@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SD',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120190003',
-			'full_name' => 'WIWIN ARDIA,S.Sn',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SD',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'DEPIAL KUNTARA, S.Sos',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'depial_kuntara@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SD',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120140019',
-			'full_name' => 'DEPIAL KUNTARA, S.Sos',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SD',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'ANIFRA, A.Md',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'anifra@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SD',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120130001',
-			'full_name' => 'ANIFRA, A.Md',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SD',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'MERI SILVIA, A.Md',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'meri_silvia@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SD',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120120018',
-			'full_name' => 'MERI SILVIA, A.Md',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SD',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'ZULPIA EFENDI, S.PdI',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'zulpia_efendi@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SD',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120140009',
-			'full_name' => 'ZULPIA EFENDI, S.PdI',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SD',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'ASENG YOPIN BESKA, S.E.',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'aseng_yopin@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SD',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120210004',
-			'full_name' => 'ASENG YOPIN BESKA, S.E.',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
-				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		]
-	];
+				'created_by' => 1
+			]
+		];
 
-	$staffSmp = [
-		[
-			'jabatan' => 'Staf Bidang SMP',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120140008',
-			'full_name' => 'DESI OKTARINA, S.Sy',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+		$staffSmp = [
+			[
+				'jabatan' => 'Staf Bidang SMP',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'DESI OKTARINA, S.Sy',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'desi_oktarina@disdikkerinci.id',
+				'pegawai_app' => '1',
+					'created_at' => now()->toDateTimeString(),
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SMP',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'CANDRA AFNOZA, S.Sy',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'candra_afnoza@disdikkerinci.id',
+				'pegawai_app' => '1',
+					'created_at' => now()->toDateTimeString(),
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SMP',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'REFNI, SE',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'refni@disdikkerinci.id',
+				'pegawai_app' => '1',
+					'created_at' => now()->toDateTimeString(),
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SMP',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'SYUFYANDI, SE',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'syufyandi@disdikkerinci.id',
+				'pegawai_app' => '1',
+					'created_at' => now()->toDateTimeString(),
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SMP',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'EVAL TRANISA, A.Md',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'eval_tranisa@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SMP',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120140026',
-			'full_name' => 'CANDRA AFNOZA, S.Sy',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SMP',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'ROMI SATRIA, S.Sos',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'romi_satria@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SMP',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120120020',
-			'full_name' => 'REFNI, SE',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SMP',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'RAIMIKA TIARA, S.PdI',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'raimika_tiara@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SMP',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120120026',
-			'full_name' => 'SYUFYANDI, SE',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SMP',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'FANEL MARTA ROZA,SE',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'fanel_marta@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SMP',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120120028',
-			'full_name' => 'EVAL TRANISA, A.Md',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SMP',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'HERI KURNIAWAN',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'heri_kurniawan@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SMP',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120171007',
-			'full_name' => 'ROMI SATRIA, S.Sos',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SMP',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'IMELDA SANTIA,SE',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'imelda_santia@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SMP',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120150031',
-			'full_name' => 'RAIMIKA TIARA, S.PdI',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
-				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SMP',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120200002',
-			'full_name' => 'FANEL MARTA ROZA,SE',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
-				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SMP',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120120029',
-			'full_name' => 'HERI KURNIAWAN',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
-				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SMP',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120200006',
-			'full_name' => 'IMELDA SANTIA,SE',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
-				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang SMP',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120210005',
-			'full_name' => 'VINTIA GERI SYAFITRI, S.AP',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
-				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		]
-	];
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang SMP',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'VINTIA GERI SYAFITRI, S.AP',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'vintia@disdikkerinci.id',
+				'pegawai_app' => '1',
+					'created_at' => now()->toDateTimeString(),
+				'created_by' => 1
+			]
+		];
 
-	$staffPTK = [
-		[
-			'jabatan' => 'Staf Bidang PTK',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120120001',
-			'full_name' => 'BENI YULIYANTO',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+		$staffPTK = [
+			[
+				'jabatan' => 'Staf Bidang PTK',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'BENI YULIYANTO',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'beni_yuliyanto@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PTK',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120150032',
-			'full_name' => 'DILA PRADINI, S.Pd',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PTK',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'DILA PRADINI, S.Pd',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'dila_pradini@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PTK',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120120025',
-			'full_name' => 'DEPI HELMIYANTO, S.Sos',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PTK',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'DEPI HELMIYANTO, S.Sos',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'depi_helmiyanto@disdikkerinci.id',
+				'pegawai_app' => '1',
+					'created_at' => now()->toDateTimeString(),
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PTK',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'KARLENA, A.Md',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'karlena@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PTK',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120141001',
-			'full_name' => 'KARLENA, A.Md',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PTK',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'RESI NOPITA, S.Pd',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'resi_nopita@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PTK',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '9101201500111',
-			'full_name' => 'RESI NOPITA, S.Pd',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PTK',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'FORDI SUSANTO, A.Md',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'fordi_susanto@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PTK',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120140012',
-			'full_name' => 'FORDI SUSANTO, A.Md',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PTK',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'BETA INDO PUTRA, S.Pd',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'beta_indo@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PTK',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120190002',
-			'full_name' => 'BETA INDO PUTRA, S.Pd',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PTK',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'NOLA ANGGELA,A.md',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'nola_anggela@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PTK',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120130150',
-			'full_name' => 'NOLA ANGGELA,A.md',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PTK',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'POFINSA ELANDA, A.Md',
+				'jenis_kelamin' => 'Perempuan',
+				'email' => 'pofinsa_elanda@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PTK',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120180015',
-			'full_name' => 'POFINSA ELANDA, A.Md',
-			'jenis_kelamin' => 'Perempuan',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PTK',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'DICKY MAHENDRA, S.Pd',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'dicky_mahendra@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PTK',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120200001',
-			'full_name' => 'DICKY MAHENDRA, S.Pd',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PTK',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'ROMIS LIADI,SE',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'romis_liadi@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PTK',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120200004',
-			'full_name' => 'ROMIS LIADI,SE',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Bidang PTK',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'ANDROMICO,S.Pd',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'andromico@disdikkerinci.id',
+				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'jabatan' => 'Staf Bidang PTK',
-			'pangkat' => '-',
-			'golongan' => '-',
-			'nip' => '910120200007',
-			'full_name' => 'ANDROMICO,S.Pd',
-			'jenis_kelamin' => 'Laki-laki',
-			'email' => 'dummy@disdikkerinci.id',
-			'pegawai_app' => '1',
-				'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		]
-	];
+				'created_by' => 1
+			]
+		];
 
-	Pegawai::insert(
+		Pegawai::insert(
 		[
 			'jabatan' => 'admin aplikasi',
-			'nip' => '12345678',
+			'nip' => null,
 			'full_name' => 'Super Admin',
 			'jenis_kelamin' => 'Laki-laki',
 			'email' => 'admin@disdikkerinci.id',
@@ -1263,635 +1263,43 @@ class UserSeeder extends Seeder
 			'created_by' => 1
 		]);
 
-	Pegawai::insert($dataPegawai);
-	Pegawai::insert($staffData);
-	Pegawai::insert($staffPaudPnf);
-	Pegawai::insert($staffSd);
-	Pegawai::insert($staffSmp);
-	Pegawai::insert($staffPTK);
+		Pegawai::insert($dataPegawai);
+		Pegawai::insert($staffData);
+		Pegawai::insert($staffPaudPnf);
+		Pegawai::insert($staffSd);
+		Pegawai::insert($staffSmp);
+		Pegawai::insert($staffPTK);
 
-	// User
-	sleep(3);
+		// User
+		sleep(3);
 
-	$userPegawai = [
+		$pegawai = Pegawai::where('pegawai_app', '1')->where('id', '>', 4)->where('email', '!=', 'ovien@disdikkerinci.id')->get();
+		User::create([
+			'email' => 'admin@disdikkerinci.id',
+			'password' => bcrypt('admin'),
+			'created_at' => now()->toDateTimeString(),
+			'created_by' => 1
+		]);
+		User::create(
 		[
-			'nip' => '196505291990031007',
+			'email' => 'ovien@disdikkerinci.id',
 			'password' => bcrypt('password'),
 			'created_at' => now()->toDateTimeString(),
 			'created_by' => 1
-		],
-		[
-			'nip' => '196409161986021001',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '198112042006041010',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '197907092006041015',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '196506171986022002',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '196912171998031004',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '196710061995121002',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '197507312014081001',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '198006022010011005',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '198005252009012007',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '197704242012121001',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '198909292011011003',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '196507081992031008',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '197012151990071002',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '198204292007011004',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '197501112010011010',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '196404041989021002',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '198509112008031001',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '197307092011012001',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '196905102012121002',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '197706192009031003',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '196501072005021002',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '197407042007011005',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '196709292012121001',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '196701092012121001',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '198906172010012002',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '197512312014081001',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '196810102012122003',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '197705252012122001',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '198607022014081002',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '199311202020121008',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '199604012020122021',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '199305112020122021',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '199312032020121013',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '199506122020122028',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		]
-	];
+		]);
 
-	$userSekretariat = [
-		[
-			'nip' => '910120180012',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '9101201600021',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120160008',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120150001',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120120006',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120130004',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120140015',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120141000',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120181033',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120120003',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120200008',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120200010',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120200009',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120120012',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '9101201500311',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120210001',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120210003',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		]
-	];
+		$temp = array();
+		foreach($pegawai as $peg) {
+			$data = array(
+				'email' => $peg->email,
+				'password' => bcrypt('password'),
+				'created_at' => now()->toDateTimeString(),
+				'created_by' => 1
+			);
+			array_push($temp, $data);
+		}
 
-	$stafPaud = [
-		[
-			'nip' => '910120120002',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '9101201200251',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120140013',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120140001',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120160002',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120160007',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120190004',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120171003',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120200003',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120200013',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120210002',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120200007',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		]
-	];
-
-	$stafSD = [
-		[
-			'nip' => '910120120010',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120150029',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120120017',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120171005',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120200012',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120190003',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120140019',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120130001',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120120018',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120140009',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120210004',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		]
-	];
-
-	$stafSmp= [
-		[
-			'nip' => '910120140008',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120120020',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120120026',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120120028',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120171007',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120150031',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120200002',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120120029',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120200006',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120210005',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		]
-	];
-
-	$userStafPTK = [
-		[
-			'nip' => '910120120001',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120150032',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120120025',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120141001',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '9101201500111',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120140012',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120190002',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120130150',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120180015',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120200001',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120200004',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		],
-		[
-			'nip' => '910120200007',
-			'password' => bcrypt('password'),
-			'created_at' => now()->toDateTimeString(),
-			'created_by' => 1
-		]
-	];
-	
-	User::create([
-		'nip' => '12345678',
-		'password' => bcrypt('admin'),
-		'created_at' => now()->toDateTimeString(),
-		'created_by' => 1
-	]);
-	User::create(
-	[
-		'nip' => '910120140006',
-		'password' => bcrypt('password'),
-		'created_at' => now()->toDateTimeString(),
-		'created_by' => 1
-	]);
-	User::insert($userPegawai);
-	User::insert($userSekretariat);
-	User::insert($stafPaud);
-	User::insert($stafSD);
-	User::insert($stafSmp);
-	User::insert($userStafPTK);
+		User::insert($temp);
 
 	}
 }

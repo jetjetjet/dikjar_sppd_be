@@ -15,11 +15,11 @@ class UserController extends Controller
 	{
 		$results = $this->responses;
 
-		$results['data'] = User::join('pegawai as p', 'p.nip', 'users.nip')
+		$results['data'] = User::join('pegawai as p', 'p.email', 'users.email')
 		->orderBy('p.created_at', 'DESC')
 		->select(
 			'users.id',
-			'p.nip',
+			'p.email',
 			'full_name',
 			'jabatan'
 		)->get();
@@ -35,7 +35,7 @@ class UserController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-			'nip' => 'required|unique:users,nip',
+			'email' => 'required|unique:users,email',
 			'role' => 'required',
 			'password' => 'required'
 		);
@@ -48,9 +48,9 @@ class UserController extends Controller
     }
 		
 		try{
-			$defaultPassword = bcrypt('12345678');
+			$defaultPassword = bcrypt('password');
 			$user = User::create([
-				'nip' => $inputs['nip'],
+				'email' => $inputs['email'],
 				'password' => bcrypt($inputs['password'])
 			]);
 
@@ -88,7 +88,6 @@ class UserController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-			'nip' => 'required',
 			'role' => 'required'
 		);
 

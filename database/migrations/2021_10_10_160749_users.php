@@ -16,7 +16,7 @@ class Users extends Migration
         
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('nip');
+            $table->string('email');
             $table->string('password', 100);
             $table->dateTime('last_login')->nullable();
             $table->rememberToken();
@@ -26,7 +26,7 @@ class Users extends Migration
             $table->bigInteger('updated_by')->nullable();
             $table->bigInteger('deleted_by')->nullable();
 
-            $table->foreign('nip')->references('nip')->on('pegawai');
+            $table->foreign('email')->references('email')->on('pegawai');
         });
     }
 
