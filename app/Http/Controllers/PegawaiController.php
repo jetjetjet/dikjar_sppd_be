@@ -60,12 +60,12 @@ class PegawaiController extends Controller
 		$inputs = $request->all();
 		$inputs['file'] = $inputs['file'] != 'null' ? $inputs['file'] : null;
 		$rules = array(
-			'nip' => 'required|unique:pegawai,nip',
+			// 'nip' => 'required|unique:pegawai,nip',
 			'email' => 'required',
 			'full_name' => 'required',
 			'jabatan' => 'required',
-			'pangkat' => 'required',
-			'golongan' => 'required',
+			// 'pangkat' => 'required',
+			// 'golongan' => 'required',
 			'jenis_kelamin' => 'required',
 			'phone' => 'max:15',
 			// 'file' => 'mimes:jpeg,bmp,png,gif'
@@ -82,22 +82,22 @@ class PegawaiController extends Controller
 			DB::beginTransaction();
 
 			$pegawai = Pegawai::create([
-				'nip' => $inputs['nip'],
+				'nip' => $inputs['nip'] == 'null' ? null : $inputs['nip'],
 				'full_name' => $inputs['full_name'],
 				'jabatan' => $inputs['jabatan'],
-				'pangkat' => $inputs['pangkat'],
-				'golongan' => $inputs['golongan'],
+				'pangkat' => $inputs['pangkat'] == 'null' ? null : $inputs['pangkat'],
+				'golongan' => $inputs['golongan'] == 'null' ? null : $inputs['golongan'],
 				'email' => $inputs['email'],
 				'jenis_kelamin' => $inputs['jenis_kelamin'],
-				'address' => $inputs['address'] ?? null,
-				'phone' => $inputs['phone'] ?? null,
+				'address' => $inputs['address'] == 'null' ? null : $inputs['address'],
+				'phone' => $inputs['phone'] == 'null' ? null : $inputs['phone'],
 				'tgl_lahir' => json_decode($inputs['tgl_lahir']) ?? null,
 				'pegawai_app' => '1'
 			]);
 
 			if($inputs['pegawai_app']) {
 				User::create([
-					'nip' => $inputs['nip'],
+					'email' => $inputs['email'],
 					'password' => bcrypt('password')
 				]);
 			}
@@ -138,9 +138,9 @@ class PegawaiController extends Controller
 
 		$inputs = $request->all();
 		$rules = array(
-			'nip' => 'required',
-			'golongan' => 'required',
-			'pangkat' => 'required',
+			// 'nip' => 'required',
+			// 'golongan' => 'required',
+			// 'pangkat' => 'required',
 			'jabatan' => 'required',
 			'email' => 'required',
 			'full_name' => 'required',
