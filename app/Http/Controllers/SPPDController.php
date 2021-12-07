@@ -152,18 +152,18 @@ class SPPDController extends Controller
 			$checkFile = FaFile::exists($templatePath);
 			if($checkFile) {
 				$pegawai = Pegawai::where('id', $pegawaiId)
-				->select('nip', 'full_name')
+				->select(DB::raw("coalesce(nip,'-') as nip"), 'full_name as pegawai_name')
 				->first();
 				
 				$bendahara = DB::table('pejabat_ttd as pt')
 				->join('pegawai as p', 'p.id', 'pt.pegawai_id')
 				->where('autorisasi', 'Bendahara')
 				->where('is_active', '1')
-				->select('nip', 'full_name')
+				->select('nip', 'full_name as bendahara_name')
 				->first();
 	
 				$kadin = Pegawai::where('pegawai.id', 5)
-				->select('nip', 'full_name')
+				->select('nip', 'full_name as kadin_name')
 				->first();
 	
 				$spt = SPT::join('anggaran as a', 'a.id', 'anggaran_id')
@@ -238,11 +238,11 @@ class SPPDController extends Controller
 					$template->setValue('tgl', $tgl);
 					$template->setValue('jml_hari', $spt->jumlah_hari);
 					$template->setValue('daerah_tujuan', ucwords(strtolower($spt->daerah_tujuan)));
-					$template->setValue('nama_bendahara', $bendahara->full_name);
+					$template->setValue('nama_bendahara', $bendahara->bendahara_name);
 					$template->setValue('nip_bendahara', $bendahara->nip);
-					$template->setValue('nama_penerima', $pegawai->full_name);
+					$template->setValue('nama_penerima', $pegawai->pegawai_name);
 					$template->setValue('nip_penerima', $pegawai->nip);
-					$template->setValue('nama_kadin', $kadin->full_name);
+					$template->setValue('nama_kadin', $kadin->kadin_name);
 					$template->setValue('nip_kadin', $kadin->nip);
 					$template->cloneRowAndSetValues('pengeluaran', $biayaTb);
 					
