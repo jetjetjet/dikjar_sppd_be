@@ -17,7 +17,7 @@ class PegawaiController extends Controller
 		$results = $this->responses;
 
 		$results['data'] = Pegawai::select('pegawai.id', 'nip', 'full_name', 'golongan', 'pangkat', 'jabatan')
-		->orderBy('pegawai.created_at')->get();
+		->orderBy('pegawai.id')->get();
 		$results['state_code'] = 200;
 		$results['success'] = true;
 
