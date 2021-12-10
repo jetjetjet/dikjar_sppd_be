@@ -17,7 +17,7 @@ class CreateAnggaransTable extends Migration
             $table->id();
             $table->string('kode_rekening');
             $table->string('nama_rekening');
-            $table->string('uraian');
+            $table->string('uraian')->nullable();
             $table->decimal('pagu', 18, 0);
             $table->integer('periode');
             

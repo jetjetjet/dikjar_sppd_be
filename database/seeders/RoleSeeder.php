@@ -18,7 +18,7 @@ class RoleSeeder extends Seeder
 	{
 		Role::truncate();
 		$role = Role::insert([
-			'name'       => 'SUPER ADMIN',
+			'name'       => 'Super Admin',
 			'guard_name' => 'sanctum',
 			'created_at' => \Carbon\Carbon::now(),
 		]);
@@ -30,27 +30,53 @@ class RoleSeeder extends Seeder
 		]);
 		
 		$role2 = Role::insert([
-			'name'       => 'SEKRETARIS',
+			'name'       => 'Sekretaris',
 			'guard_name' => 'sanctum',
 			'created_at' => \Carbon\Carbon::now(),
 		]);
 
 		$role2 = Role::insert([
-			'name'       => 'KASUBBAG',
+			'name'       => 'Pegawai',
 			'guard_name' => 'sanctum',
 			'created_at' => \Carbon\Carbon::now(),
 		]);
 
-		$role2 = Role::insert([
-			'name'       => 'STAFF',
+		$Sekretariat = Role::insert([
+			'name'       => 'Staf Sekretariat',
+			'guard_name' => 'sanctum',
+			'created_at' => \Carbon\Carbon::now(),
+		]);
+		
+		$paudpnf = Role::insert([
+			'name'       => 'Staf Pembinaan PAUD dan PNF',
 			'guard_name' => 'sanctum',
 			'created_at' => \Carbon\Carbon::now(),
 		]);
 
-		$user = User::find('1');
+		$sd = Role::insert([
+			'name'       => 'Staf Pembinaan Sekolah Dasar',
+			'guard_name' => 'sanctum',
+			'created_at' => \Carbon\Carbon::now(),
+		]);
+
+		$smp = Role::insert([
+			'name'       => 'Staf Pembinaan SMP',
+			'guard_name' => 'sanctum',
+			'created_at' => \Carbon\Carbon::now(),
+		]);
+		
+		$ptk = Role::insert([
+			'name'       => 'Staf Pembinaan Pendidik dan Tenaga Kependidikan',
+			'guard_name' => 'sanctum',
+			'created_at' => \Carbon\Carbon::now(),
+		]);
+
+		$user = User::find(1);
 		$user2 = User::find(2);
-		$user->assignRole('SUPER ADMIN');
-		$user2->assignRole('KADIN');
+		$user5 = User::find(2);
+		$user->assignRole('Super Admin');
+		$user2->assignRole('Super Admin');
+		$user5->assignRole('KADIN');
 		$role_first = Role::first();
 
 		$permissions = [
@@ -64,11 +90,6 @@ class RoleSeeder extends Seeder
 				'guard_name' => 'sanctum',
 				'action'     => ['view', 'add', 'edit', 'delete'],
 			],
-			// [
-			// 	'name'       => 'bidang',
-			// 	'guard_name' => 'sanctum',
-			// 	'action'     => ['view', 'add', 'edit', 'delete'],
-			// ],
 			[
 				'name'       => 'pejabat',
 				'guard_name' => 'sanctum',
@@ -79,11 +100,11 @@ class RoleSeeder extends Seeder
 				'guard_name' => 'sanctum',
 				'action'     => ['view', 'add', 'edit', 'delete'],
 			],
-			[
-				'name'       => 'jabatan',
-				'guard_name' => 'sanctum',
-				'action'     => ['view', 'add', 'edit', 'delete'],
-			],
+			// [
+			// 	'name'       => 'jabatan',
+			// 	'guard_name' => 'sanctum',
+			// 	'action'     => ['view', 'add', 'edit', 'delete'],
+			// ],
 			[
 				'name'       => 'setting',
 				'guard_name' => 'sanctum',
@@ -94,25 +115,30 @@ class RoleSeeder extends Seeder
 				'guard_name' => 'sanctum',
 				'action'     => ['view', 'add', 'edit', 'delete'],
 			],
-			// [
-			// 	'name'       => 'wilayah',
-			// 	'guard_name' => 'sanctum',
-			// 	'action'     => ['view'],
-			// ],
 			[
 				'name'       => 'spt',
 				'guard_name' => 'sanctum',
-				'action'     => ['view', 'add', 'edit', 'delete', 'finish', 'generate', 'generate_SPPD', 'download'],
+				'action'     => ['view', 'add', 'edit', 'delete', 'finish', 'proses', 'generate', 'kwitansi'],
 			],
 			[
 				'name'       => 'sppd',
 				'guard_name' => 'sanctum',
-				'action'     => ['edit', 'delete', 'generate', 'download'],
+				'action'     => ['edit', 'delete', ],
 			],
 			[
 				'name'       => 'laporan',
 				'guard_name' => 'sanctum',
 				'action'     => ['view', 'anggaran', 'pegawai', 'tahunan', 'export'],
+			],
+			[
+				'name'       => 'kategoriPengeluaran',
+				'guard_name' => 'sanctum',
+				'action'     => ['view', 'edit', 'delete'],
+			],
+			[
+				'name'       => 'satuan',
+				'guard_name' => 'sanctum',
+				'action'     => ['view', 'edit', 'delete'],
 			]
 		];
 

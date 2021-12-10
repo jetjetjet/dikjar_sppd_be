@@ -70,7 +70,7 @@ class BiayaProcedure extends Migration
         //       and biaya_id = p_biaya_id
         //       and pegawai_id = p_pegawai_id 
         //     ) a
-        //     order by a.created_at desc;
+        //     order by a.tanggal desc;
         // end;
         // $$LANGUAGE plpgsql;";
   

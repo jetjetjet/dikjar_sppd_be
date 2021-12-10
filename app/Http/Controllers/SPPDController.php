@@ -10,6 +10,7 @@ use App\Models\Transport;
 use App\Models\Inap;
 use App\Models\Biaya;
 use App\Models\Pengeluaran;
+use App\Models\ReportSPPD;
 use DB;
 use Validator;
 use Carbon\Carbon;
@@ -307,6 +308,10 @@ class SPPDController extends Controller
 					'nama_rekening',
 					'spt.periode',
 					'dasar_pelaksana',
+					'daerah_asal',
+					'daerah_tujuan',
+					'tgl_berangkat',
+					'tgl_kembali',
 					'untuk',
 					'tgl_spt',
 					'no_spt',
@@ -320,66 +325,72 @@ class SPPDController extends Controller
 				$nameFile = "090_".$spt->index."_SPPD_PDK_2021";
 				$totalBiaya = Biaya::where('spt_id', $id)->sum('total_biaya');
 				
-				try{
-					$bendahara = DB::table('pegawai as p')
-					->where('id', $spt->bendahara_id)
-					->select('nip', 'full_name')
-					->first();
-					
-					$ppk = DB::table('pegawai as p')
-					->where('id', $spt->pptk_id)
-					->select('nip', 'full_name')
-					->first();
-	
-					$kadin = Pegawai::where('pegawai.id', 5)
-					->select('nip', 'full_name')
-					->first();
-	
-					$totalBiaya = Biaya::where('spt_id', $id)->sum('total_biaya');
-					$terbilang = Utils::rupiahTeks($totalBiaya);
-					$tgl = (new Carbon($spt->tgl_spt))->isoFormat('D MMMM Y');
-					
-					$template = new TemplateProcessor($templatePath);
-	
-					$template->setValue('tahun_anggaran', $spt->periode);
-					$template->setValue('kode_rekening', $spt->kode_rekening);
-					$template->setValue('nama_rekening', $spt->nama_rekening);
-					$template->setValue('nama_bendahara', $bendahara->full_name);
-					$template->setValue('nip_bendahara', $bendahara->nip);
-					$template->setValue('total_biaya', number_format($totalBiaya));
-					$template->setValue('terbilang', $terbilang);
-					$template->setValue('maksud', $spt->dasar_pelaksana);
-					$template->setValue('no_spt', $spt->no_spt);
-					$template->setValue('tgl_spt', $tgl);
-	
-					$template->setValue('nama_kadin', $kadin->full_name);
-					$template->setValue('nip_kadin', $kadin->nip);
-	
-					$template->setValue('nama_pptk', $ppk->full_name);
-					$template->setValue('nip_pptk', $ppk->nip);
-					
-					$template->setValue('nama_penerima', $spt->nama_penyelenggara);
-					$template->setValue('nip_penerima', $spt->nip_pengelenggara);
-					
-					$newFile = new \stdClass();
-					$newFile->dbPath ='/storage/kwitansi/';
-					$newFile->ext = '.pdf';
-					$newFile->originalName = "kwitansi_" . $nameFile;
-					$newFile->newName = $newFile->originalName;
-					
-					$path = base_path('/public');
-					$template->saveAs($path . $newFile->dbPath . $newFile->newName . ".docx", TRUE);
-					
-					$docPath = $path . $newFile->dbPath . $newFile->newName . ".docx";
-					$converter = new OfficeConverter($docPath);
-					$converter->convertTo($newFile->newName.".pdf");
-	
-					if(FaFile::exists($path . $newFile->dbPath . $newFile->newName . ".docx")) {
-						FaFile::delete($path . $newFile->dbPath . $newFile->newName . ".docx");
-					}
+				$bendahara = DB::table('pegawai as p')
+				->where('id', $spt->bendahara_id)
+				->select('nip', 'full_name')
+				->first();
+				
+				$ppk = DB::table('pegawai as p')
+				->where('id', $spt->pptk_id)
+				->select('nip', 'full_name')
+				->first();
 
+				$kadin = Pegawai::where('pegawai.id', 5)
+				->select('nip', 'full_name')
+				->first();
+
+				$totalBiaya = Biaya::where('spt_id', $id)->sum('total_biaya');
+				$terbilang = Utils::rupiahTeks($totalBiaya);
+				$tgl = (new Carbon($spt->tgl_spt))->isoFormat('D MMMM Y');
+				
+				$template = new TemplateProcessor($templatePath);
+
+				$template->setValue('tahun_anggaran', $spt->periode);
+				$template->setValue('kode_rekening', $spt->kode_rekening);
+				$template->setValue('nama_rekening', $spt->nama_rekening);
+				$template->setValue('nama_bendahara', $bendahara->full_name);
+				$template->setValue('nip_bendahara', $bendahara->nip);
+				$template->setValue('total_biaya', number_format($totalBiaya));
+				$template->setValue('terbilang', $terbilang);
+				$template->setValue('maksud', $spt->dasar_pelaksana);
+				$template->setValue('no_spt', $spt->no_spt);
+				$template->setValue('tgl_spt', $tgl);
+
+				$template->setValue('nama_kadin', $kadin->full_name);
+				$template->setValue('nip_kadin', $kadin->nip);
+
+				$template->setValue('nama_pptk', $ppk->full_name);
+				$template->setValue('nip_pptk', $ppk->nip);
+				
+				$template->setValue('nama_penerima', $spt->nama_penyelenggara);
+				$template->setValue('nip_penerima', $spt->nip_pengelenggara);
+				
+				$newFile = new \stdClass();
+				$newFile->dbPath ='/storage/kwitansi/';
+				$newFile->ext = '.pdf';
+				$newFile->originalName = "kwitansi_" . $nameFile;
+				$newFile->newName = $newFile->originalName;
+				
+				$path = base_path('/public');
+				$template->saveAs($path . $newFile->dbPath . $newFile->newName . ".docx", TRUE);
+				
+				$docPath = $path . $newFile->dbPath . $newFile->newName . ".docx";
+				$converter = new OfficeConverter($docPath);
+				$converter->convertTo($newFile->newName.".pdf");
+
+				if(FaFile::exists($path . $newFile->dbPath . $newFile->newName . ".docx")) {
+					FaFile::delete($path . $newFile->dbPath . $newFile->newName . ".docx");
+				}
+					
+				try{
+					// Start Transaction
+					DB::beginTransaction();
+					
 					//upload to table
 					$file = Utils::saveFile($newFile);
+
+					//save to report
+					$this->saveReport($id, $spt);
 
 					$loginId = auth('sanctum')->user()->pegawai->id;
 					$updateSpt->update([
@@ -394,10 +405,12 @@ class SPPDController extends Controller
 						'settled_by' => $loginId
 					]);
 					
+					DB::commit();
 					$results['success'] = true;
 					$results['state_code'] = 200;
 					$results['data'] = $newFile->dbPath . $newFile->newName . ".pdf";
 				} catch (\Exception $e) {
+					DB::rollBack();
 					Log::channel('spderr')->info('spt_cetak_err: '. json_encode($e->getMessage()));
 					array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
 				}
@@ -413,6 +426,103 @@ class SPPDController extends Controller
 		}
 		
 		return response()->json($results, $results['state_code']);
+	}
+
+	private function saveReport($id, $spt)
+	{
+		$sppd = SPTDetail::where('spt_id', $id)->get();
+		foreach($sppd as $dtl) {
+			$biaya = Biaya::where('spt_id', $id)
+			->where('pegawai_id', $dtl->pegawai_id)->first();
+
+			$userJbtn = Pegawai::where('pegawai.id', $dtl->pegawai_id)
+			->select(
+				'full_name',
+				'jabatan'
+			)->first();
+
+			$inap = Inap::where('biaya_id', $biaya->id)
+			->where('pegawai_id', $dtl->pegawai_id)->first();
+
+			$uangSaku = Pengeluaran::where('biaya_id', $biaya->id)
+			->where('pegawai_id', $dtl->pegawai_id)
+			->whereRaw("UPPER(kategori) like '%UANG SAKU%'")
+			->sum('total');
+
+			$uangMakan = Pengeluaran::where('biaya_id', $biaya->id)
+			->where('pegawai_id', $dtl->pegawai_id)
+			->whereRaw("UPPER(kategori) like '%UANG MAKAN%'")
+			->sum('total');
+
+			$uangRepresentasi = Pengeluaran::where('biaya_id', $biaya->id)
+			->where('pegawai_id', $dtl->pegawai_id)
+			->whereRaw("UPPER(kategori) like '%UANG REPRESENTASI%'")
+			->sum('total');
+
+			$pesawatBrgkt = Transport::where('biaya_id', $biaya->id)
+			->where('pegawai_id', $dtl->pegawai_id)
+			->where('perjalanan', 'Berangkat')
+			->where('jenis_transport', 'Pesawat')
+			->first();
+		
+			$pesawatPlg = Transport::where('biaya_id', $biaya->id)
+			->where('pegawai_id', $dtl->pegawai_id)
+			->where('perjalanan', 'Pulang')
+			->where('jenis_transport', 'Pesawat')
+			->first();
+
+			$asal = ucwords(strtolower($spt->daerah_asal));
+			$tujuan = ucwords(strtolower($spt->daerah_tujuan));
+			$checkin = $inap->tgl_checkin ?? null;
+			$checkout = $inap->tgl_checkout ?? null;
+
+			$pesbrgkt_tgl = $pesawatBrgkt->tgl ?? null;
+			$peskmbl_tgl = $pesawatPlg->tgl ?? null;
+
+			$report = ReportSPPD::insert([
+				'pegawai_id' => $dtl->pegawai_id,
+				'spt_id' => $id,
+				'spt_detail_id' => $dtl->id,
+				'biaya_id' => $biaya->id,
+				'nama_pelaksana' => $userJbtn->full_name,
+				'jabatan' => $userJbtn->jabatan,
+				'no_pku' => null,
+				'no_spt' => $spt->no_spt,
+				'no_sppd' => null,
+				'kegiatan' => $spt->untuk,
+				'penyelenggara' => 'SD Dalam Kab. Kerinci',
+				'lok_asal'=> $asal,
+				'lok_tujuan' => $tujuan,
+				'tgl_berangkat' => $spt->tgl_berangkat,
+				'tgl_kembali' => $spt->tgl_kembali,
+				'uang_saku' => $uangSaku ?? null,
+				'uang_makan' => $uangMakan ?? null,
+				'uang_representasi' => $uangRepresentasi ?? null,
+				'uang_penginapan'  => $biaya->total_biaya_inap ?? null,
+				'uang_travel' => $biaya->total_biaya_travel ?? null,
+				'uang_total' => $biaya->total_biaya ?? null,
+				'uang_pesawat' => $biaya->total_biaya_pesawat ?? null,
+				'inap_hotel' => $inap->hotel ?? null,
+				'inap_room' => $inap->room ?? null,
+				'inap_checkin' => $checkin,
+				'inap_checkout' => $checkout,
+				'inap_jml_hari' => $inap->jml_hari ?? null,
+				'inap_per_malam' => $inap->harga ?? null,
+				'inap_jumlah' => $inap->total_bayar ?? null,
+				'pesbrgkt_maskapai' => $pesawatBrgkt->agen ?? null,
+				'pesbrgkt_no_tiket' => $pesawatBrgkt->no_tiket ?? null,
+				'pesbrgkt_kode_booking' => $pesawatBrgkt->kode_booking ?? null,
+				'pesbrgkt_no_penerbangan' => $pesawatBrgkt->no_penerbangan ?? null,
+				'pesbrgkt_tgl' => $pesbrgkt_tgl,
+				'pesbrgkt_jumlah' => $pesawatBrgkt->total_bayar ?? null,
+				'peskmbl_maskapai' => $pesawatPlg->agen ?? null,
+				'peskmbl_no_tiket' => $pesawatPlg->no_tiket ?? null,
+				'peskmbl_kode_booking' => $pesawatPlg->kode_booking ?? null,
+				'peskmbl_no_penerbangan' => $pesawatPlg->no_penerbangan ?? null,
+				'peskmbl_tgl' => $peskmbl_tgl,
+				'peskmbl_jumlah' => $pesawatPlg->total_bayar ?? null
+			]);
+		}
 	}
 
 	public function mapBiaya($db)

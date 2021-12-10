@@ -4,7 +4,7 @@
       <th colspan=40> REKAPITULASI PERJALANAN DINAS LUAR DAERAH DAN DALAM DAERAH (LUAR KABUPATEN KERINCI) </th>
     </tr>
     <tr>
-      <th colspan=40> PERIODE:  1  Januari 2020 S.D  31  Desember 2020 </th>
+      <th colspan=40> PERIODE: {{ $startDate }} S.D {{ $endDate }} </th>
     </tr>
     <tr>
       <th colspan=40> PADA BADAN KEPEGAWAIAN DAN PENGEMBANGAN SUMBER DAYA MANUSIA DAERAH </th>

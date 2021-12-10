@@ -108,6 +108,6 @@ class ReportController extends Controller
 
 	public function exportFinishedSPT()
 	{
-		return Excel::download(new SPTFinish, 'tesss.xlsx');
+		return Excel::download(new SPTFinish, 'Report_Tahunan_Perjalanan_Dinas.xlsx');
 	}
 }

@@ -590,7 +590,6 @@ class SPTController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 	
-
 	public function update(Request $request, $id)
 	{
 		$results = $this->responses;
@@ -621,26 +620,45 @@ class SPTController extends Controller
 			DB::transaction(function () use ($inputs, $id) {
 				$spt = SPT::find($id);
 				
+				$brgkt = new Carbon($inputs['tgl_berangkat']);
+				$kembali = new Carbon($inputs['tgl_kembali']);
+				$jumlahHari = $brgkt->diff($kembali)->days;
+
 				$updateSpt = $spt->update([
-					// 'bidang_id' => $inputs['bidang_id'],
 					'jenis_dinas' => $inputs['jenis_dinas'],
 					'anggaran_id' => $inputs['anggaran_id'],
 					'pttd_id' => $inputs['pttd_id'],
 					'pptk_id' => $inputs['pptk_id'],
+					'pelaksana_id' => $inputs['pelaksana_id'],
+					'bendahara_id' => $inputs['bendahara_id'],
 					'dasar_pelaksana' => $inputs['dasar_pelaksana'],
 					'untuk' => $inputs['untuk'],
 					'transportasi' => $inputs['transportasi'],
 					'daerah_asal' => $inputs['daerah_asal'],
 					'daerah_tujuan' => $inputs['daerah_tujuan'],
 					'tgl_berangkat' => $inputs['tgl_berangkat'],
-					'tgl_kembali' => $inputs['tgl_kembali']
+					'tgl_kembali' => $inputs['tgl_kembali'],
+					'jumlah_hari' => $jumlahHari + 1,
+					'tgl_spt' => $inputs['tgl_spt'],
 				]);
 
 				//Delete Missing Pegawai Id
+				array_push($inputs['pegawai_id'], $inputs['pelaksana_id']);
 				$data = SPTDetail::where('spt_id', $id)
 				->whereNotIn('pegawai_id', $inputs['pegawai_id'])
-				->where('is_pelaksana', '0')
+				// ->where('is_pelaksana', '0')
 				->delete();
+
+				//check if is pelaksana null
+				$validasiPelaksana = SPTDetail::where('spt_id', $id)->where('is_pelaksana', '0')->first();
+
+				if($validasiPelaksana == null) {
+					SPTDetail::create([
+						'spt_id' => $spt->id,
+						'pegawai_id' => $inputs['pelaksana_id'],
+						'is_pelaksana' => '1'
+					]);
+				}
 
 				//Insert new or skip
 				foreach($inputs['pegawai_id'] as $pegawaiId){
@@ -648,7 +666,8 @@ class SPTController extends Controller
 					if ($detailSPT == null ){
 						$detail = SPTDetail::create([
 							'spt_id' => $id,
-							'pegawai_id' => $pegawaiId
+							'pegawai_id' => $pegawaiId,
+							'is_pelaksana' => '0'
 						]);
 					}
 				}

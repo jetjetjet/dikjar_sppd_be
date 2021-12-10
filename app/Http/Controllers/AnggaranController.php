@@ -94,7 +94,7 @@ class AnggaranController extends Controller
 		$rules = array(
 			'kode_rekening' => 'required',
 			'nama_rekening' => 'required',
-      'uraian' => 'required',
+      // 'uraian' => 'required',
       'pagu' => 'required|numeric|min:1000000|max:999999999999',
       'pejabat_pptk' => 'required',
 			'bendahara' => 'required'

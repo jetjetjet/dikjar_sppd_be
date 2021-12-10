@@ -7,6 +7,7 @@ use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Carbon\Carbon;
 
 class SPTFinish implements FromView, ShouldAutoSize, WithStyles
 {
@@ -32,8 +33,15 @@ class SPTFinish implements FromView, ShouldAutoSize, WithStyles
 
   public function view(): View
   {
+    $date = Carbon::now();
+
+    $startOfYear = ($date->copy()->startOfYear())->isoFormat('D MMMM Y');
+    $endOfYear   = ($date->copy()->endOfYear())->isoFormat('D MMMM Y');
+
     return view('Exports.sptFinish', [
-      'data' => ReportSPPD::all()
+      'data' => ReportSPPD::all(),
+      'startDate' => $startOfYear,
+      'endDate' => $endOfYear,
     ]);
   }
 }
