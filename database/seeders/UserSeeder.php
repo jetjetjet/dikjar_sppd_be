@@ -487,8 +487,20 @@ class UserSeeder extends Seeder
 				'golongan' => '-',
 				'nip' => null,
 				'full_name' => 'OVIEN VALERIE, S.Kom',
-				'jenis_kelamin' => 'Perempuan',
+				'jenis_kelamin' => 'Laki-laki',
 				'email' => 'ovien@disdikkerinci.id',
+				'pegawai_app' => '1',
+				'created_at' => now()->toDateTimeString(),
+				'created_by' => 1
+			],
+			[
+				'jabatan' => 'Staf Perencanaan, Evaluasi dan Pelaporan',
+				'pangkat' => '-',
+				'golongan' => '-',
+				'nip' => null,
+				'full_name' => 'RIZKI SHANDRA H, S.Kom',
+				'jenis_kelamin' => 'Laki-laki',
+				'email' => 'rizki_shandra@disdikkerinci.id',
 				'pegawai_app' => '1',
 				'created_at' => now()->toDateTimeString(),
 				'created_by' => 1
