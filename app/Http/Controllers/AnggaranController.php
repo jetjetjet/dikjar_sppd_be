@@ -7,6 +7,7 @@ use App\Models\Anggaran;
 use App\Models\PejabatTtd;
 use DB;
 use Validator;
+use Auth;
 
 use App\Helpers\Utils;
 
@@ -15,29 +16,61 @@ class AnggaranController extends Controller
 	public function grid(Request $request)
 	{
 		$results = $this->responses;
-		$realisasi = DB::table('spt as s')
-		->join('biaya as b', 'b.spt_id', 's.id')
-		->whereNull('b.deleted_at')
-		->whereNull('s.deleted_at')
-		->whereNotNull('s.settled_at')
-		->groupBy('s.anggaran_id')
-		->select('s.anggaran_id', DB::raw("sum(b.total_biaya) as realisasi"));
-
-		$results['data'] = Anggaran::where('periode', date('Y'))
-		->leftJoinSub($realisasi, 'r', function ($join) {
-			$join->on('anggaran.id', '=', 'r.anggaran_id');
-		})->orderBy('anggaran.created_at', 'DESC')
-		->select(
-			'anggaran.id',
-			'kode_rekening',
-			'nama_rekening',
-			'uraian',
-			DB::raw("to_char(pagu, 'FM999,999,999,999') as pagu"),
-			DB::raw("to_char(coalesce(realisasi,0), 'FM999,999,999,999') as realisasi"),
-			DB::raw("to_char(pagu - coalesce(realisasi,0), 'FM999,999,999,999') as sisa"),
-			'periode'
-		)->get();
 		
+		$role = Auth::user()->roles->pluck('name')[0] ?? null;
+		$isAdmin = Auth::user()->tokenCan('is_admin') ? true : false;
+		
+		if ($role != null) {
+			$realisasi = DB::table('spt as s')
+			->join('biaya as b', 'b.spt_id', 's.id')
+			->whereNull('b.deleted_at')
+			->whereNull('s.deleted_at')
+			->whereNotNull('s.settled_at')
+			->groupBy('s.anggaran_id')
+			->select('s.anggaran_id', DB::raw("sum(b.total_biaya) as realisasi"));
+	
+			$datas = Anggaran::where('periode', date('Y'))
+			->leftJoinSub($realisasi, 'r', function ($join) {
+				$join->on('anggaran.id', '=', 'r.anggaran_id');
+			})->orderBy('anggaran.created_at', 'DESC');
+			
+			$datas = Anggaran::leftJoinSub($realisasi, 'r', function ($join) {
+				$join->on('anggaran.id', '=', 'r.anggaran_id');
+			})->where('periode', date('Y'));
+
+			if(!$isAdmin){
+				$datas = $datas->where('bidang', $role);
+			}
+
+			$results['data'] = $datas->select(
+				'anggaran.id',
+				'kode_rekening',
+				'nama_rekening',
+				'uraian',
+				DB::raw("to_char(pagu, 'FM999,999,999,999') as pagu"),
+				DB::raw("to_char(coalesce(realisasi,0), 'FM999,999,999,999') as realisasi"),
+				DB::raw("to_char(pagu - coalesce(realisasi,0), 'FM999,999,999,999') as sisa"),
+				'periode'
+			)->get();
+			
+			$results['state_code'] = 200;
+			$results['success'] = true;
+	
+		} else {
+			array_push($results['messages'], 'Anggaran tidak ditemukan.');
+			$results['state_code'] = 500;
+			$results['success'] = false;
+		}
+		
+		return response()->json($results, $results['state_code']);
+	}
+
+	public function searchRole(Request $request)
+	{
+		$results = $this->responses;
+
+		$staf = strtoupper('staf');
+		$results['data'] = DB::table('roles')->whereRaw( "UPPER(name) like '%". $staf . "%'")->select('*')->pluck('name');
 		$results['state_code'] = 200;
 		$results['success'] = true;
 
@@ -47,41 +80,55 @@ class AnggaranController extends Controller
 	public function search(Request $request)
 	{
 		$results = $this->responses;
+		$role = Auth::user()->roles->pluck('name')[0] ?? null;
 		
-		$realisasi = DB::table('spt as s')
-		->join('biaya as b', 'b.spt_id', 's.id')
-		->whereNull('b.deleted_at')
-		->whereNull('s.deleted_at')
-		->whereNotNull('s.settled_at')
-		->groupBy('s.anggaran_id')
-		->select('s.anggaran_id', DB::raw("sum(b.total_biaya) as realisasi"));
+		$isAdmin = Auth::user()->tokenCan('is_admin') ? true : false;
 
-		$datas = Anggaran::leftJoinSub($realisasi, 'r', function ($join) {
-			$join->on('anggaran.id', '=', 'r.anggaran_id');
-		})->where('periode', date('Y'))
-		->select(
-			'anggaran.id',
-			'kode_rekening',
-			'nama_rekening',
-			'uraian',
-			'pagu',
-			DB::raw("pagu - coalesce(realisasi,0) as sisa")
-		)->get();
-		foreach($datas as $dt){
-			$ui = Array(
-				'id' => $dt->id,
-				'kode_rekening' => $dt->kode_rekening,
-				'nama_rekening' => $dt->nama_rekening,
-				'uraian' => $dt->uraian,
-				'pagu' => 'Rp ' . number_format($dt->pagu),
-				'sisa' => 'Rp ' . number_format($dt->sisa)
-			);
-		
-			array_push($results['data'], $ui);
+		if ($role != null) {
+			$realisasi = DB::table('spt as s')
+			->join('biaya as b', 'b.spt_id', 's.id')
+			->whereNull('b.deleted_at')
+			->whereNull('s.deleted_at')
+			->whereNotNull('s.settled_at')
+			->groupBy('s.anggaran_id')
+			->select('s.anggaran_id', DB::raw("sum(b.total_biaya) as realisasi"));
+	
+			$datas = Anggaran::leftJoinSub($realisasi, 'r', function ($join) {
+				$join->on('anggaran.id', '=', 'r.anggaran_id');
+			})->where('periode', date('Y'));
+
+			if(!$isAdmin){
+				$datas = $datas->where('bidang', $role);
+			}
+
+			$datas = $datas->select(
+				'anggaran.id',
+				'kode_rekening',
+				'nama_rekening',
+				'uraian',
+				'pagu',
+				DB::raw("pagu - coalesce(realisasi,0) as sisa")
+			)->get();
+			foreach($datas as $dt){
+				$ui = Array(
+					'id' => $dt->id,
+					'kode_rekening' => $dt->kode_rekening,
+					'nama_rekening' => $dt->nama_rekening,
+					'uraian' => $dt->uraian,
+					'pagu' => 'Rp ' . number_format($dt->pagu),
+					'sisa' => 'Rp ' . number_format($dt->sisa)
+				);
+			
+				array_push($results['data'], $ui);
+			}
+	
+			$results['state_code'] = 200;
+			$results['success'] = true;
+		} else {
+			array_push($results['messages'], 'Anggaran tidak ditemukan.');
+			$results['state_code'] = 500;
+			$results['success'] = false;
 		}
-
-		$results['state_code'] = 200;
-		$results['success'] = true;
 
 		return response()->json($results, $results['state_code']);
 	}
@@ -90,13 +137,16 @@ class AnggaranController extends Controller
 	{
 		$results = $this->responses;
 
+		$year = date('Y');
+		$year1 = $year + 1;
 		$inputs = $request->all();
 		$rules = array(
 			'kode_rekening' => 'required',
 			'nama_rekening' => 'required',
-      // 'uraian' => 'required',
+      'periode' => 'required|numeric|min:'.$year.'|max:'.$year1,
       'pagu' => 'required|numeric|min:1000000|max:999999999999',
       'pejabat_pptk' => 'required',
+			'bidang' => 'required',
 			'bendahara' => 'required'
 		);
 
@@ -113,9 +163,10 @@ class AnggaranController extends Controller
 			$anggaran = Anggaran::create([
 				'kode_rekening' => $inputs['kode_rekening'],
 				'nama_rekening' => $inputs['nama_rekening'],
+				'bidang' => $inputs['bidang'],
 				'uraian' => $inputs['uraian'],
 				'pagu' => $inputs['pagu'],
-				'periode' => date('Y')
+				'periode' => $inputs['periode']
 			]);
 
 			$pejabat = [
@@ -180,12 +231,14 @@ class AnggaranController extends Controller
 	public function update(Request $request, $id)
 	{
 		$results = $this->responses;
-
+		$year = date('Y');
+		$year1 = $year + 1;
 		$inputs = $request->all();
 		$rules = array(
 			'kode_rekening' => 'required',
+			'bidang' => 'required',
 			'nama_rekening' => 'required',
-      'uraian' => 'required',
+      'periode' => 'required|numeric|min:'.$year.'|max:'.$year1,
       'pagu' => 'required|numeric|min:1000000|max:999999999999',
       'pejabat_pptk' => 'required',
 			'bendahara' => 'required'
@@ -205,8 +258,10 @@ class AnggaranController extends Controller
 			$anggaran->update([
 				'kode_rekening' => $inputs['kode_rekening'],
 				'nama_rekening' => $inputs['nama_rekening'],
+				'bidang' => $inputs['bidang'],
 				'uraian' => $inputs['uraian'],
 				'pagu' => $inputs['pagu'],
+				'periode' => $inputs['periode']
 			]);
 
 			//delete missing pegawai

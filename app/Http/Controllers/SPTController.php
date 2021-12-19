@@ -12,6 +12,7 @@ use App\Models\Inap;
 use App\Models\Transport;
 use App\Models\Pengeluaran;
 use App\Models\Jabatan;
+use App\Models\SPTGuest;
 use App\Helpers\Utils;
 use Auth;
 
@@ -47,14 +48,17 @@ class SPTController extends Controller
 			'spt_id',
 			DB::raw("string_agg(p.full_name, '_') as name")
 		);
-		if (!$isAdmin) {
-			$pegawaiId = auth('sanctum')->user()->pegawai->id;
-			$pegawai = $pegawai->where('p.id', $pegawaiId)->orWhere('pttd_id', $pegawaiId);
-		}
 
 		$q = SPT::joinSub($pegawai, 'u', function ($join) {
 			$join->on('spt.id', 'u.spt_id');
-		})->select(
+		});
+
+		if (!$isAdmin) {
+			$loginid = auth('sanctum')->user()->id;
+			$q = $q->where('spt.created_by', $loginid);
+		}
+		
+		$q = $q->select(
 			'id',
 			'no_spt',
 			'jenis_dinas',
@@ -72,6 +76,36 @@ class SPTController extends Controller
 
 		$results['state_code'] = 200;
 		$results['success'] = true;
+
+		return response()->json($results, $results['state_code']);
+	}
+
+	public function viewSPT(Request $request)
+	{
+		$results = $this->responses;
+
+		$q = SPTGuest::join('spt', 'spt_id', 'spt.id')
+		->where('key', $inputs['key'])
+		->first();
+
+		if($q != null) {
+			$data = $this->mapSPT($q);
+
+			$data->pegawai = SPTDetail::join('pegawai as p', 'pegawai_id', 'p.id')
+			->where('spt_id', $data['spt_id'])
+			->select(
+				'full_name',
+				DB::raw("coalesce(nip, '-') as nip"),
+				DB::raw("coalesce(pangkat, '-') as pangkat"),
+				DB::raw("coalesce(golongan, '-') as golongan")
+			)->get();
+
+			$results['state_code'] = 200;
+			$results['success'] = true;
+			$results['data'] = $data;
+		} else {
+			array_push($results['messages'], 'Data tidak ditemukan!.');
+		}
 
 		return response()->json($results, $results['state_code']);
 	}
@@ -213,7 +247,7 @@ class SPTController extends Controller
 						->update([
 							'sppd_file_id' => $file,
 							'sppd_generated_at' => DB::raw("now()"),
-							'sppd_generated_by' => auth('sanctum')->user()->pegawai->id,
+							'sppd_generated_by' => auth('sanctum')->user()->id,
 						]);
 
 						//create biaya awal
@@ -293,7 +327,7 @@ class SPTController extends Controller
 					//save to table
 					$file = Utils::saveFile($newFile);
 					// update
-					$loginId = auth('sanctum')->user()->pegawai->id;
+					$loginId = auth('sanctum')->user()->id;
 					$spt->update([
 						'proceed_at' => DB::raw("now()"),
 						'proceed_by' => $loginId,
@@ -425,7 +459,7 @@ class SPTController extends Controller
 		$results = $this->responses;
 		$finish = array(
 			'completed_at' => DB::raw("now()"),
-			'completed_by' => auth('sanctum')->user()->pegawai->id
+			'completed_by' => auth('sanctum')->user()->id
 		);
 
 		$spt = SPT::where('id', $id)->first();
@@ -444,7 +478,7 @@ class SPTController extends Controller
 		$results = $this->responses;
 		try {
 			DB::transaction(function () use ($id, &$results) {
-				$loginId = auth('sanctum')->user()->pegawai->id;
+				$loginId = auth('sanctum')->user()->id;
 				$finish = array(
 					'settled_at' => DB::raw("now()"),
 					'settled_by' => $loginId

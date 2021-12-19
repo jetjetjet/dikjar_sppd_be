@@ -12,6 +12,7 @@ class Anggaran extends Model
 	protected $table = 'anggaran';
 	protected $fillable = [
 		'kode_rekening',
+		'bidang',
 		'nama_rekening',
 		'uraian',
 		'pagu',

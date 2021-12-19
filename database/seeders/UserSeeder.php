@@ -1300,18 +1300,18 @@ class UserSeeder extends Seeder
 			'created_by' => 1
 		]);
 
-		$temp = array();
-		foreach($pegawai as $peg) {
-			$data = array(
-				'email' => $peg->email,
-				'password' => bcrypt('password'),
-				'created_at' => now()->toDateTimeString(),
-				'created_by' => 1
-			);
-			array_push($temp, $data);
-		}
+		// $temp = array();
+		// foreach($pegawai as $peg) {
+		// 	$data = array(
+		// 		'email' => $peg->email,
+		// 		'password' => bcrypt('password'),
+		// 		'created_at' => now()->toDateTimeString(),
+		// 		'created_by' => 1
+		// 	);
+		// 	array_push($temp, $data);
+		// }
 
-		User::insert($temp);
+		// User::insert($temp);
 
 	}
 }

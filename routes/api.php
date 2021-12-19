@@ -46,6 +46,7 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 
 	//MASTER DATA
 	Route::get('/anggaran-grid', [AnggaranController::class, 'grid'])->middleware('can:anggaran-view');
+	Route::get('/role-search', [AnggaranController::class, 'searchRole']);
 	Route::get('/anggaran-search', [AnggaranController::class, 'search']);
 	Route::get('/anggaran/{id}', [AnggaranController::class, 'show'])->middleware('can:anggaran-view');
 	Route::post('/anggaran', [AnggaranController::class, 'store'])->middleware('can:anggaran-add');

@@ -64,7 +64,7 @@ class SPPDController extends Controller
 				'full_name',
 				'nip',
 				DB::raw("coalesce(total_biaya,0) as total_biaya"),
-				DB::raw("case when 1 = {$isAdmin} or p.id = {$loginid} then true else false end as can_edit")
+				DB::raw("case when 1 = {$isAdmin} or spt_detail.created_by = {$loginid} then true else false end as can_edit")
 			)->orderBy('full_name')
 			->get();
 		}
@@ -99,7 +99,7 @@ class SPPDController extends Controller
 
 		$user = $request->user();
 		$isAdmin = $user->tokenCan('is_admin') ? 1 : 0;
-		$loginId = $user->pegawai->id;
+		$loginId = $user->id;
 
 		$results['data'] = SPT::join('spt_detail as sd', 'sd.spt_id', 'spt.id')
 		->where('sd.id', $sptDetailId)
@@ -117,7 +117,7 @@ class SPPDController extends Controller
 			DB::raw("( select id from biaya where spt_id = {$id} and pegawai_id = {$pegawaiId} and deleted_at is null limit 1 ) as biaya_id"),
 			DB::raw("( select total_biaya from biaya where spt_id = {$id} and pegawai_id = {$pegawaiId} and deleted_at is null limit 1 ) as total_biaya"),
 			DB::raw("( select sppd_file_id from spt_detail as sd where spt.id = spt_id and deleted_at is null and pegawai_id = {$pegawaiId} limit 1 ) as sppd_file_id"),
-			DB::raw(" case when pegawai_id = {$loginId} or {$isAdmin} = 1 then 1 else 0 end as can_kwitansi"),
+			DB::raw(" case when spt.created_by = {$loginId} or {$isAdmin} = 1 then 1 else 0 end as can_kwitansi"),
 			
 		)->first();
 		
@@ -266,7 +266,7 @@ class SPPDController extends Controller
 					//upload to table
 					$file = Utils::saveFile($newFile);
 
-					$loginId = auth('sanctum')->user()->pegawai->id;
+					$loginId = auth('sanctum')->user()->id;
 					$sptDetail->update([
 						'rumming_file_id' => $file
 					]);
@@ -392,7 +392,7 @@ class SPPDController extends Controller
 					//save to report
 					$this->saveReport($id, $spt);
 
-					$loginId = auth('sanctum')->user()->pegawai->id;
+					$loginId = auth('sanctum')->user()->id;
 					$updateSpt->update([
 						'settled_at' => DB::raw("now()"),
 						'settled_by' => $loginId,

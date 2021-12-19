@@ -129,16 +129,6 @@ class RoleSeeder extends Seeder
 				'name'       => 'laporan',
 				'guard_name' => 'sanctum',
 				'action'     => ['view', 'anggaran', 'pegawai', 'tahunan', 'export'],
-			],
-			[
-				'name'       => 'kategoriPengeluaran',
-				'guard_name' => 'sanctum',
-				'action'     => ['view', 'edit', 'delete'],
-			],
-			[
-				'name'       => 'satuan',
-				'guard_name' => 'sanctum',
-				'action'     => ['view', 'edit', 'delete'],
 			]
 		];
 

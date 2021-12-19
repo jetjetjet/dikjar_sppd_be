@@ -12,7 +12,13 @@ class SatuanController extends Controller
   public function grid(Request $request)
 	{
 		$results = $this->responses;
-		$results['data'] = Satuan::all();
+		$results['data'] = Satuan::select(
+			'id',
+			'name',
+			DB::raw("to_char(created_at, 'DD-MM-YYYY HH:MI') as tgl_buat"),
+			DB::raw("to_char(updated_at, 'DD-MM-YYYY HH:MI') as tgl_ubah"),
+		)->get();
+
 		$results['state_code'] = 200;
 		$results['success'] = true;
 

@@ -15,6 +15,7 @@ class CreateAnggaransTable extends Migration
     {
         Schema::create('anggaran', function (Blueprint $table) {
             $table->id();
+            $table->string('bidang');
             $table->string('kode_rekening');
             $table->string('nama_rekening');
             $table->string('uraian')->nullable();
