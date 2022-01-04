@@ -11,6 +11,7 @@ use App\Models\Inap;
 use App\Models\Biaya;
 use App\Models\Pengeluaran;
 use App\Models\ReportSPPD;
+use App\Models\SPTLog;
 use DB;
 use Validator;
 use Carbon\Carbon;
@@ -43,6 +44,8 @@ class SPPDController extends Controller
 			'settled_at',
 			'proceed_at',
 			'completed_at',
+			'saran',
+			'hasil',
 			DB::raw("case when to_char(tgl_kembali, 'YYYY-MM-DD') <= to_char(now(), 'YYYY-MM-DD') and completed_at is null and proceed_at is not null then 1 else 0 end as can_finish"),
 			DB::raw("case when settled_at is null and completed_at is not null then 1 else 0 end as can_generate")
 		)->first();
@@ -65,7 +68,9 @@ class SPPDController extends Controller
 				'nip',
 				DB::raw("coalesce(total_biaya,0) as total_biaya"),
 				DB::raw("case when 1 = {$isAdmin} or spt_detail.created_by = {$loginid} then true else false end as can_edit")
-			)->orderBy('full_name')
+			)->orderBy('is_pelaksana', 'DESC')
+			->orderBy('nip')
+			->orderBy('full_name')
 			->get();
 		}
 
@@ -270,6 +275,15 @@ class SPPDController extends Controller
 					$sptDetail->update([
 						'rumming_file_id' => $file
 					]);
+
+					//save to log
+					SPTLog::create([
+						'user_id' => auth('sanctum')->user()->id,
+						'username' => auth('sanctum')->user()->pegawai->full_name,
+						'reference_id' => $id,
+						'aksi' => 'Cetak Rumming ' . $pegawai->pegawai_name,
+						'success' => '1'
+					]);
 	
 					$results['success'] = true;
 					$results['state_code'] = 200;
@@ -289,6 +303,129 @@ class SPPDController extends Controller
 			$results['state_code'] = 200;
 		}
 
+		return response()->json($results, $results['state_code']);
+	}
+
+	public function cetakLaporan(Request $request, $id)
+	{
+		$results = $this->responses;
+		$spt = SPT::find($id)->update([
+			'hasil' => $request->hasil ?? '',
+			'saran' => $request->saran ?? ''
+		]);
+
+		$updateSpt = SPT::find($id);
+		if(true) { 
+			$templatePath = base_path('public/storage/template/template_laporan.docx');
+			$checkFile = FaFile::exists($templatePath);
+			if($checkFile) {
+				$pelaksana = DB::table('pegawai as p')
+				->where('id', $updateSpt->pelaksana_id)
+				->select(
+					'nip', 
+					'full_name as nama',
+					'jabatan',
+					DB::raw("pangkat || ' ' || golongan as pangkat"))
+				->first();
+
+				$nameFile = "laporan_090_".$updateSpt->index."_SPPD_PDK_2021";
+
+				$tgl_cetak = (new Carbon())->isoFormat('D MMMM Y');
+				$tglAwal = (new Carbon($updateSpt->tgl_berangkat))->isoFormat('D MMMM Y');
+				$tglAkhir = (new Carbon($updateSpt->tgl_kembali))->isoFormat('D MMMM Y');
+
+				$users = SPTDetail::join('pegawai as p', 'p.id', 'spt_detail.pegawai_id')
+				->where('spt_id',$id)
+				->select(
+					'is_pelaksana',
+					'full_name as nama_pegawai')
+				->orderBy('is_pelaksana', 'DESC')
+				->orderBy('full_name')
+				->get();
+				$tempUserValue = array();
+				$tempPengikut = array();
+				$countPengikut = 1;
+				foreach($users as $key => $user){
+					if ($user->is_pelaksana == false) {
+						$temp1 = array(
+							'np' => $countPengikut,
+							'nama_pengikut' => $user->nama_pegawai
+						);
+						array_push($tempPengikut, $temp1);
+						$countPengikut++;
+					}
+					$temp = array(
+						'np' => $key + 1,
+						'nama_pengikut' => $user->nama_pegawai
+					);
+					array_push($tempUserValue, $temp);
+				}
+				
+				//
+				$template = new TemplateProcessor($templatePath);
+				
+				$template->setValue('tgl_cetak', $tgl_cetak);
+				$template->setValue('nama_pelaksana', $pelaksana->nama);
+				$template->setValue('nip_pelaksana', $pelaksana->nip);
+				$template->setValue('pangkat_pelaksana', $pelaksana->pangkat);
+				$template->setValue('jabatan_pelaksana', $pelaksana->jabatan);
+				$template->setValue('no_spt', $updateSpt->no_spt);
+				$template->setValue('tgl_dinas', $tglAwal . ' s.d ' . $tglAkhir);
+				$template->setValue('tujuan', $updateSpt->untuk);
+				$template->setValue('maksud', $updateSpt->dasar_pelaksana);
+				$template->setValue('saran', strip_tags($updateSpt->saran));
+
+				$tHasil = array();
+				$hasil = explode("<li>",$updateSpt->hasil);
+				$ctr = 1;
+				foreach($hasil as $hsl) {
+					$vHsl = strip_tags($hsl);
+					if(!empty($vHsl)){
+						$tmpHsl = array (
+							'nh' => $ctr,
+							'hasil' => strip_tags($hsl)
+						);
+						array_push($tHasil, $tmpHsl);
+						$ctr++;
+					}
+				}
+
+				$template->cloneRowAndSetValues('np', $tempPengikut);
+				$template->cloneRowAndSetValues('nh', $tHasil);
+				$template->cloneRowAndSetValues('np', $tempUserValue);
+
+				$newFile = new \stdClass();
+				$newFile->dbPath ='/storage/laporan/';
+				$newFile->ext = '.pdf';
+				$newFile->originalName = $nameFile;
+				$newFile->newName = $newFile->originalName;
+				
+				$path = base_path('/public');
+				$template->saveAs($path . $newFile->dbPath . $newFile->newName . ".docx", TRUE);
+				
+				$docPath = $path . $newFile->dbPath . $newFile->newName . ".docx";
+				$converter = new OfficeConverter($docPath);
+				$converter->convertTo($newFile->newName.".pdf");
+
+				if(FaFile::exists($path . $newFile->dbPath . $newFile->newName . ".docx")) {
+					FaFile::delete($path . $newFile->dbPath . $newFile->newName . ".docx");
+				}
+				
+				$results['success'] = true;
+				$results['state_code'] = 200;
+				array_push($results['messages'], 'OK.');
+				$results['data'] = $newFile->dbPath . $newFile->newName . ".pdf";
+
+			} else {
+				array_push($results['messages'], 'Template Laporan SPT tidak ditemukan.');
+			}
+		} else {
+			$file = DB::table('files')->where('id', $updateSpt->laporan_file_id)->first();
+			$results['data'] = $file->file_path . $file->file_name. ".pdf";
+			$results['success'] = true;
+			$results['state_code'] = 200;
+		}
+		
 		return response()->json($results, $results['state_code']);
 	}
 
@@ -403,6 +540,15 @@ class SPPDController extends Controller
 					->update([
 						'settled_at' => now()->toDateTimeString(),
 						'settled_by' => $loginId
+					]);
+
+					//save to log
+					SPTLog::create([
+						'user_id' => auth('sanctum')->user()->id,
+						'username' => auth('sanctum')->user()->pegawai->full_name,
+						'reference_id' => $id,						
+						'aksi' => 'Cetak Kwitansi',
+						'success' => '1'
 					]);
 					
 					DB::commit();

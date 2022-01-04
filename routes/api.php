@@ -23,6 +23,8 @@ use App\Http\Controllers\TransportController;
 use App\Http\Controllers\PengeluaranController;
 use App\Http\Controllers\SPTController;
 use App\Http\Controllers\SPPDController;
+use App\Http\Controllers\SPTLogController;
+use App\Http\Controllers\CekSPTController;
 
 use App\Http\Controllers\ReportController;
 
@@ -36,7 +38,7 @@ use App\Http\Controllers\ReportController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::get('/tgl', [SPTController::class, 'tgl']);
+Route::get('/spt/verifikasi', [CekSPTController::class, 'verifikasi']);
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
 Route::get('/report/spt/selesai/export', [ReportController::class, 'exportFinishedSPT']);
@@ -154,6 +156,9 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::get('/spt/{id}/sppd/{sptDetailId}/{pegawaiId}', [SPPDController::class, 'show']);
 	Route::get('/spt/lihat-sppd/{sptDetailId}/{pegawaiId}', [SPPDController::class, 'getSPPD']);
 
+	//Log
+	Route::get('/spt-log', [SPTLogController::class, 'grid'])->middleware('can:spt-log');
+
 	Route::get('/biaya/grid/{id}/{pegawaiId}', [BiayaController::class, 'grid']);
 	Route::post('/biaya', [BiayaController::class, 'store']);
 	Route::put('/biaya/{id}', [BiayaController::class, 'update']);
@@ -183,5 +188,6 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	
 	
 	Route::get('/spt/{id}/kwitansi', [SPPDController::class, 'cetakKwitansi']);
+	Route::put('/spt/{id}/laporan', [SPPDController::class, 'cetakLaporan']);
 	Route::get('/spt/{id}/biaya/{biayaId}/rumming/{pegawaiId}', [SPPDController::class, 'cetakRumming']);
 });

@@ -9,6 +9,7 @@ use App\Models\ReportSPPD;
 use App\Models\Pegawai;
 use App\Models\Biaya;
 use App\Models\Inap;
+use App\Models\SPTLog;
 use App\Models\Transport;
 use App\Models\Pengeluaran;
 use App\Models\Jabatan;
@@ -265,7 +266,7 @@ class SPTController extends Controller
 							'nama_pegawai' => $user->nama_pegawai,
 							'jabatan_pegawai' => $user->jabatan_pegawai,
 							'nip_pegawai' => $user->nip_pegawai,
-							'pangkat_pegawai' => $user->golongan_pegawai
+							'pangkat_pegawai' => str_replace("- -","-", $user->golongan_pegawai)
 						);
 						array_push($tempUserValue, $temp);
 					}
@@ -292,7 +293,7 @@ class SPTController extends Controller
 						//generate QRCode
 						$uuid = (string) Str::uuid();
 						$uuidSplit = explode('-', $uuid);
-						QrCode::format('png')->generate('https://sppd.disdikkerinci.id/spt/guest?key='. $uuidSplit[0] , base_path('public/storage/images/spt_qr.png'));
+						QrCode::format('png')->generate('https://sppd.disdikkerinci.id/verifikasi?key='. $uuidSplit[0] , base_path('public/storage/images/spt_qr.png'));
 						$template->setImageValue('QRCODE', base_path('public/storage/images/spt_qr.png'));
 						
 						$sptGuest = DB::table('spt_guest')->insert([
@@ -335,6 +336,15 @@ class SPTController extends Controller
 						'spt_generated_at' => DB::raw("now()"),
 						'spt_generated_by' => $loginId,
 						'status' => 'PROCEED'
+					]);
+
+					//save to log
+					SPTLog::create([
+						'user_id' => $loginId,
+						'username' => auth('sanctum')->user()->pegawai->full_name,
+						'reference_id' => $id,
+						'aksi' => 'Proses SPT',
+						'success' => '1'
 					]);
 
 					//commit to DB
@@ -402,9 +412,14 @@ class SPTController extends Controller
 				$kembali = new Carbon($inputs['tgl_kembali']);
 				$jumlahHari = $brgkt->diff($kembali)->days;
 
-				$noMax = SPT::max('no_index') + 1 ?? 1;
+				if(Carbon::now()->format('d-m') == '01-01') {
+					$noMax = 1;
+				} else {
+					$noMax = SPT::max('no_index') + 1 ?? 1;
+				}
+				
 				$tahun = Carbon::now()->format('Y');
-				$noSpt = '090/'. str_pad($noMax, 3, '0', STR_PAD_LEFT) . '/SPPD/PDK/' . $tahun ;
+				$noSpt = '090/'. str_pad($noMax, 3, '0', STR_PAD_LEFT) . '/SPT/PDK/' . $tahun ;
 				$spt = SPT::create([
 					'no_index' => $noMax,
 					'no_spt' => $noSpt,
@@ -441,6 +456,15 @@ class SPTController extends Controller
 						'is_pelaksana' => '0'
 					]);
 				}
+
+				//save to log
+				SPTLog::create([
+					'user_id' => auth('sanctum')->user()->id,
+					'username' => auth('sanctum')->user()->pegawai->full_name,
+					'reference_id' => $spt->id,
+					'aksi' => 'Simpan SPT',
+					'success' => '1'
+				]);
 			});
 	
 			array_push($results['messages'], 'Berhasil menambahkan SPT baru.');
@@ -465,132 +489,20 @@ class SPTController extends Controller
 		$spt = SPT::where('id', $id)->first();
 		$spt->update($finish);
 		// SPTDetail::where('spt_id', $id)->update($finish);
+		
+		//save to log
+		SPTLog::create([
+			'user_id' => auth('sanctum')->user()->id,
+			'username' => auth('sanctum')->user()->pegawai->full_name,
+			'reference_id' => $id,
+			'aksi' => 'Selesai SPT',
+			'success' => '1'
+		]);
 
 		array_push($results['messages'], 'Perjalanan Dinas berhasil diselesaikan.');
 		$results['state_code'] = 200;
 		$results['success'] = true;
 
-		return response()->json($results, $results['state_code']);
-	}
-
-	public function finish1($id)
-	{
-		$results = $this->responses;
-		try {
-			DB::transaction(function () use ($id, &$results) {
-				$loginId = auth('sanctum')->user()->id;
-				$finish = array(
-					'settled_at' => DB::raw("now()"),
-					'settled_by' => $loginId
-				);
-				$spt = SPT::where('id', $id)->first();
-				$sppd = SPTDetail::where('spt_id', $id)->get();
-				foreach($sppd as $dtl) {
-					$biaya = Biaya::where('spt_id', $id)
-					->where('pegawai_id', $dtl->pegawai_id)->first();
-
-					$userJbtn = Pegawai::where('pegawai.id', $dtl->pegawai_id)
-					->select(
-						'full_name',
-						'jabatan'
-					)->first();
-
-					$inap = Inap::where('biaya_id', $biaya->id)
-					->where('pegawai_id', $dtl->pegawai_id)->first();
-
-					$uangSaku = Pengeluaran::where('biaya_id', $biaya->id)
-					->where('pegawai_id', $dtl->pegawai_id)
-					->whereRaw("UPPER(kategori) like '%UANG JAJAN%'")
-					->sum('total');
-
-					$uangMakan = Pengeluaran::where('biaya_id', $biaya->id)
-					->where('pegawai_id', $dtl->pegawai_id)
-					->whereRaw("UPPER(kategori) like '%UANG MAKAN%'")
-					->sum('total');
-
-					$uangRepresentasi = Pengeluaran::where('biaya_id', $biaya->id)
-					->where('pegawai_id', $dtl->pegawai_id)
-					->whereRaw("UPPER(kategori) like '%UANG REPRESENTASI%'")
-					->sum('total');
-
-					$pesawatBrgkt = Transport::where('biaya_id', $biaya->id)
-					->where('pegawai_id', $dtl->pegawai_id)
-					->where('perjalanan', 'Berangkat')
-					->where('jenis_transport', 'Pesawat')
-					->first();
-				
-					$pesawatPlg = Transport::where('biaya_id', $biaya->id)
-					->where('pegawai_id', $dtl->pegawai_id)
-					->where('perjalanan', 'Pulang')
-					->where('jenis_transport', 'Pesawat')
-					->first();
-
-					$asal = ucwords(strtolower($spt->daerah_asal));
-					$tujuan = ucwords(strtolower($spt->daerah_tujuan));
-					$checkin = $inap->tgl_checkin ?? null;
-					$checkout = $inap->tgl_checkout ?? null;
-
-					$pesbrgkt_tgl = $pesawatBrgkt->tgl ?? null;
-					$peskmbl_tgl = $pesawatPlg->tgl ?? null;
-
-					$report = ReportSPPD::insert([
-						'pegawai_id' => $dtl->pegawai_id,
-						'spt_id' => $spt->id,
-						'spt_detail_id' => $dtl->id,
-						'biaya_id' => $biaya->id,
-						'nama_pelaksana' => $userJbtn->full_name,
-						'jabatan' => $userJbtn->jabatan,
-						'no_pku' => null,
-						'no_spt' => $spt->no_spt,
-						'no_sppd' => null,
-						'kegiatan' => $spt->untuk,
-						'penyelenggara' => 'SD Dalam Kab. Kerinci',
-						'lok_asal'=> $asal,
-						'lok_tujuan' => $tujuan,
-						'tgl_berangkat' => $spt->tgl_berangkat,
-						'tgl_kembali' => $spt->tgl_kembali,
-						'uang_saku' => $uangSaku ?? null,
-						'uang_makan' => $uangMakan ?? null,
-						'uang_representasi' => $uangRepresentasi ?? null,
-						'uang_penginapan'  => $biaya->total_biaya_inap ?? null,
-						'uang_travel' => $biaya->total_biaya_travel ?? null,
-						'uang_total' => $biaya->total_biaya ?? null,
-						'uang_pesawat' => $biaya->total_biaya_pesawat ?? null,
-						'inap_hotel' => $inap->hotel ?? null,
-						'inap_room' => $inap->room ?? null,
-						'inap_checkin' => $checkin,
-						'inap_checkout' => $checkout,
-						'inap_jml_hari' => $inap->jml_hari ?? null,
-						'inap_per_malam' => $inap->harga ?? null,
-						'inap_jumlah' => $inap->total_bayar ?? null,
-						'pesbrgkt_maskapai' => $pesawatBrgkt->agen ?? null,
-						'pesbrgkt_no_tiket' => $pesawatBrgkt->no_tiket ?? null,
-						'pesbrgkt_kode_booking' => $pesawatBrgkt->kode_booking ?? null,
-						'pesbrgkt_no_penerbangan' => $pesawatBrgkt->no_penerbangan ?? null,
-						'pesbrgkt_tgl' => $pesbrgkt_tgl,
-						'pesbrgkt_jumlah' => $pesawatBrgkt->total_bayar ?? null,
-						'peskmbl_maskapai' => $pesawatPlg->agen ?? null,
-						'peskmbl_no_tiket' => $pesawatPlg->no_tiket ?? null,
-						'peskmbl_kode_booking' => $pesawatPlg->kode_booking ?? null,
-						'peskmbl_no_penerbangan' => $pesawatPlg->no_penerbangan ?? null,
-						'peskmbl_tgl' => $peskmbl_tgl,
-						'peskmbl_jumlah' => $pesawatPlg->total_bayar ?? null
-					]);
-				}
-
-				$spt->update($finish);
-				SPTDetail::where('spt_id', $id)->update($finish);
-	
-				array_push($results['messages'], 'Perjalanan Dinas berhasil diselesaikan.');
-				$results['state_code'] = 200;
-				$results['success'] = true;
-			});
-		}
-		catch (\Exception $e) {
-			Log::channel('spderr')->info('spt_finish: '. json_encode($e->getMessage()));
-			array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
-		}
-		
 		return response()->json($results, $results['state_code']);
 	}
 
@@ -709,6 +621,15 @@ class SPTController extends Controller
 						]);
 					}
 				}
+				
+				//save to log
+				SPTLog::create([
+					'user_id' => auth('sanctum')->user()->id,
+					'username' => auth('sanctum')->user()->pegawai->full_name,
+					'reference_id' => $id,
+					'aksi' => 'Ubah SPT',
+					'success' => '1'
+				]);
 			});
 	
 			array_push($results['messages'], 'Berhasil mengubah SPT.');
@@ -732,7 +653,15 @@ class SPTController extends Controller
 					$detail = SPTDetail::where('spt_id', $id)->delete();
 					$header = SPT::find($id)->delete();
 				});
-	
+
+				//save to log
+				SPTLog::create([
+					'user_id' => auth('sanctum')->user()->id,
+					'username' => auth('sanctum')->user()->pegawai->full_name,
+					'reference_id' => $id,	
+					'aksi' => 'Hapus SPT',
+					'success' => '1'
+				]);
 				array_push($results['messages'], 'Berhasil menghapus data.');
 				$results['state_code'] = 200;
 				$results['success'] = true;
