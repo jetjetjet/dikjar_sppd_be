@@ -110,6 +110,22 @@ class SPTController extends Controller
 
 		return response()->json($results, $results['state_code']);
 	}
+
+	function strtocap($arg){
+		$finalStr = array();
+
+		$argX = explode(" ",$arg);
+		if(is_array($argX)){
+				foreach($argX as $v){
+					if($v == 'SD' || $v == 'SMP'|| $v == 'dan') {
+						$finalStr[] = $v;
+						continue;
+					}
+					$finalStr[] = ucfirst(strtolower($v));
+				}
+		}
+		return implode(" ",$finalStr);
+	}
 	
 	function mapSPT($db)
 	{
@@ -121,7 +137,8 @@ class SPTController extends Controller
 		$ui->tgl_spt = isset($db->tgl_spt) ? (new Carbon($db->tgl_spt))->isoFormat('D MMMM Y') : "";
 
 		$ui->daerah_asal = ucwords(strtolower($db->daerah_asal));
-		$ui->daerah_tujuan = ucwords(strtolower($db->daerah_tujuan));
+		//
+		$ui->daerah_tujuan = $this->strtocap($db->daerah_tujuan);
 		$ui->no_spt = isset($db->no_spt) ? $db->no_spt : "";
 		$ui->periode = isset($db->periode) ? $db->periode : "";
 		$ui->no_index = isset($db->no_index) ? $db->no_index : "";
