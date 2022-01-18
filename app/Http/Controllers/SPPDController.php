@@ -200,12 +200,8 @@ class SPPDController extends Controller
 				->select('nip', 'full_name as bendahara_name')
 				->first();
 				
-				// $bendahara = DB::table('pejabat_ttd as pt')
-				// ->join('pegawai as p', 'p.id', 'pt.pegawai_id')
-				// ->where('autorisasi', 'Bendahara')
-				// ->where('is_active', '1')
-				// ->select('nip', 'full_name as bendahara_name')
-				// ->first();
+				$role = auth('sanctum')->user()->roles->pluck('name')[0] ?? '';
+				$pembantu = $role == 'Staf Sekretariat' ? "Bendahara Pengeluaran," : "Pembantu Bendahara Pengeluaran,";
 				
 				$nameFile = "090_".$spt->no_index."_SPPD_PDK_2021_".$pegawai->nip;
 	
@@ -271,6 +267,7 @@ class SPPDController extends Controller
 					$template->setValue('daerah_tujuan', $spt->daerah_tujuan);
 					$template->setValue('nama_bendahara', $bendahara->bendahara_name);
 					$template->setValue('nip_bendahara', $bendahara->nip);
+					$template->setValue('bendahara', $pembantu);
 					$template->setValue('nama_penerima', $pegawai->pegawai_name);
 					$template->setValue('nip_penerima', $pegawai->nip);
 					$template->setValue('nama_kadin', $kadin->kadin_name);
@@ -492,6 +489,9 @@ class SPPDController extends Controller
 				->where('id', $spt->bendahara_id)
 				->select('nip', 'full_name')
 				->first();
+
+				$role = auth('sanctum')->user()->roles->pluck('name')[0] ?? '';
+				$pembantu = $role == 'Staf Sekretariat' ? "Bendahara Pengeluaran,<br>" : "Pembantu Bendahara Pengeluaran,";
 				
 				$ppk = DB::table('pegawai as p')
 				->where('id', $spt->pptk_id)
@@ -513,6 +513,7 @@ class SPPDController extends Controller
 				$template->setValue('nama_rekening', $spt->nama_rekening);
 				$template->setValue('nama_bendahara', $bendahara->full_name);
 				$template->setValue('nip_bendahara', $bendahara->nip);
+				$template->setValue('bendahara', $pembantu);
 				$template->setValue('total_biaya', number_format($totalBiaya));
 				$template->setValue('terbilang', $terbilang);
 				$template->setValue('maksud', $spt->dasar_pelaksana);
