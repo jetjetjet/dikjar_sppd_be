@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Anggaran;
 use App\Models\SPT;
+use Auth;
 use DB;
 
 class DashboardController extends Controller
@@ -12,13 +13,26 @@ class DashboardController extends Controller
 	public function pegawaiDinas()
 	{
 		$results = $this->responses;
+		
+		$role = Auth::user()->roles->pluck('name')[0] ?? null;
+		$isAdmin = Auth::user()->tokenCan('is_admin') ? true : false;
+
 		$q = SPT::join('spt_detail as sd', function($query){
 			$query->on('sd.spt_id', 'spt.id')
 			->whereNull('sd.deleted_at');
 		})->join('pegawai as p', 'p.id', 'sd.pegawai_id')
 		->whereNull('spt.settled_at')
-		->whereNull('sd.settled_at')
-		->select(
+		->whereNull('sd.settled_at');
+
+		$datas = Anggaran::leftJoinSub($q, 'r', function ($join) {
+			$join->on('anggaran.id', '=', 'r.anggaran_id');
+		})->where('anggaran.periode', date('Y'));
+
+		if(!$isAdmin){
+			$datas = $datas->where('bidang', $role);
+		}
+
+		$datas = $datas->select(
 			'full_name',
 			'jabatan',
 			'daerah_tujuan',
@@ -38,6 +52,8 @@ class DashboardController extends Controller
 	public function anggaran()
 	{
 		$results = $this->responses;
+		$role = Auth::user()->roles->pluck('name')[0] ?? null;
+		$isAdmin = Auth::user()->tokenCan('is_admin') ? true : false;
 
 		$realisasi = DB::table('spt as s')
 		->join('biaya as b', 'b.spt_id', 's.id')
@@ -47,10 +63,15 @@ class DashboardController extends Controller
 		->groupBy('s.anggaran_id')
 		->select('s.anggaran_id', DB::raw("sum(b.total_biaya) as realisasi"));
 
-		$anggaran = Anggaran::where('periode', date('Y'))
-		->leftJoinSub($realisasi, 'r', function ($join) {
+		$datas = Anggaran::leftJoinSub($realisasi, 'r', function ($join) {
 			$join->on('anggaran.id', '=', 'r.anggaran_id');
-		})->select(
+		})->where('periode', date('Y'));
+
+		if(!$isAdmin){
+			$datas = $datas->where('bidang', $role);
+		}
+
+		$anggaran = $datas->select(
 			'anggaran.id',
 			'kode_rekening',
 			'nama_rekening',

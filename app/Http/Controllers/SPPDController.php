@@ -33,7 +33,12 @@ class SPPDController extends Controller
 		$loginid = $user->id;
 		$canGenerate = $isAdmin == 1 || $user->tokenCan('sppd-generate') ? 1 : 0;
 
-		$header = SPT::where('id', $id)
+		$header = SPT::where('spt.id', $id)
+		->join('pegawai as b', 'b.id', 'bendahara_id')
+		->join('pegawai as pptk', 'pptk.id', 'pptk_id')
+		->join('pegawai as pttd', 'pttd.id', 'pttd_id')
+		->join('pegawai as pel', 'pel.id', 'pelaksana_id')
+		->join('anggaran as ang', 'ang.id', 'anggaran_id')
 		->select(
 			'no_spt',
 			DB::raw("to_char(tgl_berangkat, 'DD-MM-YYYY') as tgl_berangkat"),
@@ -46,6 +51,11 @@ class SPPDController extends Controller
 			'completed_at',
 			'saran',
 			'hasil',
+			'b.full_name as bendahara_name',
+			'pptk.full_name as pptk_name',
+			'pttd.full_name as pttd_name',
+			'pel.full_name as pelaksana_name',
+			'ang.nama_rekening as anggaran_name',
 			DB::raw("case when to_char(tgl_kembali, 'YYYY-MM-DD') <= to_char(now(), 'YYYY-MM-DD') and completed_at is null and proceed_at is not null then 1 else 0 end as can_finish"),
 			DB::raw("case when settled_at is null and completed_at is not null then 1 else 0 end as can_generate")
 		)->first();
@@ -107,6 +117,11 @@ class SPPDController extends Controller
 		$loginId = $user->id;
 
 		$results['data'] = SPT::join('spt_detail as sd', 'sd.spt_id', 'spt.id')
+		->join('pegawai as b', 'b.id', 'bendahara_id')
+		->join('pegawai as pptk', 'pptk.id', 'pptk_id')
+		->join('pegawai as pttd', 'pttd.id', 'pttd_id')
+		->join('pegawai as pel', 'pel.id', 'pelaksana_id')
+		->join('anggaran as ang', 'ang.id', 'anggaran_id')
 		->where('sd.id', $sptDetailId)
 		->select(
 			'no_spt',
@@ -118,6 +133,11 @@ class SPPDController extends Controller
 			'daerah_tujuan',
 			'transportasi',
 			'spt.settled_at',
+			'b.full_name as bendahara_name',
+			'pptk.full_name as pptk_name',
+			'pttd.full_name as pttd_name',
+			'pel.full_name as pelaksana_name',
+			'ang.nama_rekening as anggaran_name',
 			DB::raw("( select full_name from pegawai where id = {$pegawaiId} and deleted_at is null limit 1 ) as pegawai_text"),
 			DB::raw("( select id from biaya where spt_id = {$id} and pegawai_id = {$pegawaiId} and deleted_at is null limit 1 ) as biaya_id"),
 			DB::raw("( select total_biaya from biaya where spt_id = {$id} and pegawai_id = {$pegawaiId} and deleted_at is null limit 1 ) as total_biaya"),
@@ -159,13 +179,6 @@ class SPPDController extends Controller
 				$pegawai = Pegawai::where('id', $pegawaiId)
 				->select(DB::raw("coalesce(nip,'-') as nip"), 'full_name as pegawai_name')
 				->first();
-				
-				$bendahara = DB::table('pejabat_ttd as pt')
-				->join('pegawai as p', 'p.id', 'pt.pegawai_id')
-				->where('autorisasi', 'Bendahara')
-				->where('is_active', '1')
-				->select('nip', 'full_name as bendahara_name')
-				->first();
 	
 				$kadin = Pegawai::where('pegawai.id', 5)
 				->select('nip', 'full_name as kadin_name')
@@ -178,8 +191,21 @@ class SPPDController extends Controller
 					'no_spt',
 					'jumlah_hari',
 					'daerah_tujuan',
-					'no_index'
+					'no_index',
+					'bendahara_id'
 				)->first();
+
+				$bendahara = DB::table('pegawai as p')
+				->where('id', $spt->bendahara_id)
+				->select('nip', 'full_name as bendahara_name')
+				->first();
+				
+				// $bendahara = DB::table('pejabat_ttd as pt')
+				// ->join('pegawai as p', 'p.id', 'pt.pegawai_id')
+				// ->where('autorisasi', 'Bendahara')
+				// ->where('is_active', '1')
+				// ->select('nip', 'full_name as bendahara_name')
+				// ->first();
 				
 				$nameFile = "090_".$spt->no_index."_SPPD_PDK_2021_".$pegawai->nip;
 	
@@ -242,7 +268,7 @@ class SPPDController extends Controller
 					$template->setValue('no_spt', $spt->no_spt);
 					$template->setValue('tgl', $tgl);
 					$template->setValue('jml_hari', $spt->jumlah_hari);
-					$template->setValue('daerah_tujuan', ucwords(strtolower($spt->daerah_tujuan)));
+					$template->setValue('daerah_tujuan', $spt->daerah_tujuan);
 					$template->setValue('nama_bendahara', $bendahara->bendahara_name);
 					$template->setValue('nip_bendahara', $bendahara->nip);
 					$template->setValue('nama_penerima', $pegawai->pegawai_name);
