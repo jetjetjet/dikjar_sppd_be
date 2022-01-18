@@ -201,7 +201,7 @@ class SPPDController extends Controller
 				->first();
 				
 				$role = auth('sanctum')->user()->roles->pluck('name')[0] ?? '';
-				$pembantu = $role == 'Staf Sekretariat' ? "Bendahara Pengeluaran," : "Pembantu Bendahara Pengeluaran,";
+				$pembantu = $role == 'Staf Sekretariat' ? "Bendahara Pengeluaran," : "Bendahara Pengeluaran Pembantu,";
 				
 				$nameFile = "090_".$spt->no_index."_SPPD_PDK_2021_".$pegawai->nip;
 	
@@ -491,7 +491,7 @@ class SPPDController extends Controller
 				->first();
 
 				$role = auth('sanctum')->user()->roles->pluck('name')[0] ?? '';
-				$pembantu = $role == 'Staf Sekretariat' ? "Bendahara Pengeluaran,<br>" : "Pembantu Bendahara Pengeluaran,";
+				$pembantu = $role == 'Staf Sekretariat' ? "Bendahara Pengeluaran,<br>" : "Bendahara Pengeluaran Pembantu,";
 				
 				$ppk = DB::table('pegawai as p')
 				->where('id', $spt->pptk_id)
