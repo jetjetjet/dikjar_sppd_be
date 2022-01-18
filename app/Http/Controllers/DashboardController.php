@@ -21,10 +21,11 @@ class DashboardController extends Controller
 			$query->on('sd.spt_id', 'spt.id')
 			->whereNull('sd.deleted_at');
 		})->join('pegawai as p', 'p.id', 'sd.pegawai_id')
+		->whereNotNull('spt.proceed_at')
 		->whereNull('spt.settled_at')
 		->whereNull('sd.settled_at');
 
-		$datas = Anggaran::leftJoinSub($q, 'r', function ($join) {
+		$datas = Anggaran::joinSub($q, 'r', function ($join) {
 			$join->on('anggaran.id', '=', 'r.anggaran_id');
 		})->where('anggaran.periode', date('Y'));
 
@@ -32,17 +33,17 @@ class DashboardController extends Controller
 			$datas = $datas->where('bidang', $role);
 		}
 
-		$datas = $datas->select(
-			'full_name',
-			'jabatan',
-			'daerah_tujuan',
+		$get = $datas->select(
+			'r.full_name',
+			'r.jabatan',
+			'r.daerah_tujuan',
 			DB::raw("coalesce(path_foto, '/storage/profile/user.png') as path_foto"),
 			DB::raw("to_char(tgl_berangkat, 'DD/MM/YYYY') as tgl_berangkat"),
 			DB::raw("to_char(tgl_kembali, 'DD/MM/YYYY') as tgl_kembali"),
 		)->orderBy('tgl_berangkat', 'DESC')
 		->get();
 
-		$results['data'] = $q;
+		$results['data'] = $get;
 		$results['state_code'] = 200;
 		$results['success'] = true;
 
