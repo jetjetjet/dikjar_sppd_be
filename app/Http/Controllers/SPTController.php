@@ -149,16 +149,7 @@ class SPTController extends Controller
 
 			$checkFile = FaFile::exists($templatePath);
 			if ($checkFile){
-				$pejabat = Pegawai::where('pegawai.id', $spt->pttd_id)
-				->select(
-					'full_name',
-					'nip',
-					'jabatan',
-					'pangkat',
-					'golongan'
-				)->first();
-
-				$kadin = Pegawai::where('pegawai.id', $spt->pttd_id)
+				$pejabat = Pegawai::where('pegawai.id', 5)
 				->select(
 					'full_name',
 					'nip',
@@ -213,9 +204,9 @@ class SPTController extends Controller
 						$tempSppd->setValue('no_spt', $sptData->no_spt);
 
 						// KADIN
-						$tempSppd->setValue('nama_kadin', $kadin->full_name);
-						$tempSppd->setValue('nip_kadin', $kadin->nip);
-						$tempSppd->setValue('golongan_kadin', $kadin->pangkat);
+						$tempSppd->setValue('nama_kadin', $pejabat->full_name);
+						$tempSppd->setValue('nip_kadin', $pejabat->nip);
+						$tempSppd->setValue('golongan_kadin', $pejabat->pangkat);
 
 						$newFile = new \stdClass();
 						$newFile->dbPath ='/storage/spt/';

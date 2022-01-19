@@ -55,6 +55,8 @@ class SPPDController extends Controller
 			'pptk.full_name as pptk_name',
 			'pttd.full_name as pttd_name',
 			'pel.full_name as pelaksana_name',
+			'dasar_pelaksana',
+			'untuk',
 			'ang.nama_rekening as anggaran_name',
 			DB::raw("case when to_char(tgl_kembali, 'YYYY-MM-DD') <= to_char(now(), 'YYYY-MM-DD') and completed_at is null and proceed_at is not null then 1 else 0 end as can_finish"),
 			DB::raw("case when settled_at is null and completed_at is not null then 1 else 0 end as can_generate")
@@ -133,6 +135,8 @@ class SPPDController extends Controller
 			'daerah_tujuan',
 			'transportasi',
 			'spt.settled_at',
+			'dasar_pelaksana',
+			'untuk',
 			'b.full_name as bendahara_name',
 			'pptk.full_name as pptk_name',
 			'pttd.full_name as pttd_name',
@@ -192,7 +196,8 @@ class SPPDController extends Controller
 					'jumlah_hari',
 					'daerah_tujuan',
 					'no_index',
-					'bendahara_id'
+					'bendahara_id',
+					'anggaran_id'
 				)->first();
 
 				$bendahara = DB::table('pegawai as p')
@@ -200,8 +205,12 @@ class SPPDController extends Controller
 				->select('nip', 'full_name as bendahara_name')
 				->first();
 				
-				$role = auth('sanctum')->user()->roles->pluck('name')[0] ?? '';
-				$pembantu = $role == 'Staf Sekretariat' ? "Bendahara Pengeluaran," : "Bendahara Pengeluaran Pembantu,";
+				$anggaran = DB::table('anggaran')
+				->where('id', $spt->anggaran_id)
+				->select('bidang')
+				->first();
+
+				$pembantu = $anggaran->bidang == 'Staf Sekretariat' ? 'Bendahara Pengeluaran, </w:t><w:br/><w:t xml:space="preserve">' : "Bendahara Pengeluaran Pembantu,";
 				
 				$nameFile = "090_".$spt->no_index."_SPPD_PDK_2021_".$pegawai->nip;
 	
@@ -395,7 +404,7 @@ class SPPDController extends Controller
 				$template->setValue('no_spt', $updateSpt->no_spt);
 				$template->setValue('tgl_dinas', $tglAwal . ' s.d ' . $tglAkhir);
 				$template->setValue('tujuan', $updateSpt->untuk);
-				$template->setValue('maksud', $updateSpt->dasar_pelaksana);
+				$template->setValue('maksud', $updateSpt->untuk);
 				$template->setValue('saran', strip_tags($updateSpt->saran));
 
 				$tHasil = array();
@@ -479,7 +488,8 @@ class SPPDController extends Controller
 					'p.nip as nip_pengelenggara',
 					'no_index',
 					'pptk_id',
-					'bendahara_id'
+					'bendahara_id',
+					'anggaran_id'
 				)->first();
 	
 				$nameFile = "090_".$spt->index."_SPPD_PDK_2021";
@@ -490,8 +500,12 @@ class SPPDController extends Controller
 				->select('nip', 'full_name')
 				->first();
 
-				$role = auth('sanctum')->user()->roles->pluck('name')[0] ?? '';
-				$pembantu = $role == 'Staf Sekretariat' ? "Bendahara Pengeluaran,<br>" : "Bendahara Pengeluaran Pembantu,";
+				$anggaran = DB::table('anggaran')
+				->where('id', $spt->anggaran_id)
+				->select('bidang')
+				->first();
+
+				$pembantu = $anggaran->bidang == 'Staf Sekretariat' ? "Bendahara Pengeluaran, </w:t><w:br/><w:t>" : "Bendahara Pengeluaran Pembantu,";
 				
 				$ppk = DB::table('pegawai as p')
 				->where('id', $spt->pptk_id)
@@ -516,7 +530,7 @@ class SPPDController extends Controller
 				$template->setValue('bendahara', $pembantu);
 				$template->setValue('total_biaya', number_format($totalBiaya));
 				$template->setValue('terbilang', $terbilang);
-				$template->setValue('maksud', $spt->dasar_pelaksana);
+				$template->setValue('maksud', $spt->untuk);
 				$template->setValue('no_spt', $spt->no_spt);
 				$template->setValue('tgl_spt', $tgl);
 
