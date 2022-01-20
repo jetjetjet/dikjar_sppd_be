@@ -405,7 +405,7 @@ class SPTController extends Controller
 				if(Carbon::now()->format('d-m') == '01-01') {
 					$noMax = 1;
 				} else {
-					$noMax = SPT::max('no_index') + 1 ?? 1;
+					$noMax = SPT::whereNull('deleted_at')->max('no_index') + 1 ?? 1;
 				}
 				
 				$tahun = Carbon::now()->format('Y');
