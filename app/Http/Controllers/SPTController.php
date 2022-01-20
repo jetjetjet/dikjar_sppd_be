@@ -590,7 +590,7 @@ class SPTController extends Controller
 				->delete();
 
 				//check if is pelaksana null
-				$validasiPelaksana = SPTDetail::where('spt_id', $id)->where('is_pelaksana', '0')->first();
+				$validasiPelaksana = SPTDetail::where('spt_id', $id)->where('is_pelaksana', '1')->first();
 
 				if($validasiPelaksana == null) {
 					SPTDetail::create([
