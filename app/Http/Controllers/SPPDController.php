@@ -235,8 +235,9 @@ class SPPDController extends Controller
 					$transport = Transport::where('biaya_id', $biayaId)
 					->where('pegawai_id', $pegawaiId)
 					->groupBy('jenis_transport')
+					->groupBy('perjalanan')
 					->select(
-						'jenis_transport as pengeluaran',
+						DB::raw("jenis_transport || ' ' || perjalanan as pengeluaran"),
 						DB::raw("sum(1) as qty"),
 						DB::raw("sum(total_bayar) as harga"),
 						DB::raw("string_agg(catatan, ', ') as catatan")
