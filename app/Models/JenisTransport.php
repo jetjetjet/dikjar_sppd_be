@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\LogUser;
 
-class KategoriTransport extends Model
+class JenisTransport extends Model
 {
   use LogUser;
 	protected $table = 'kategori_transport';

@@ -3,21 +3,22 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\KategoriTransport;
+use App\Models\Kabupaten;
 use DB;
 use Validator;
 
-class KategoriTransportController extends Controller
+class TujuanLuarController extends Controller
 {
-  public function grid(Request $request)
+	public function grid(Request $request)
 	{
 		$results = $this->responses;
-		$results['data'] = KategoriTransport::select(
+		$results['data'] = Kabupaten::select(
 			'id',
 			'name',
 			DB::raw("to_char(created_at, 'DD-MM-YYYY HH:MI') as tgl_buat"),
 			DB::raw("to_char(updated_at, 'DD-MM-YYYY HH:MI') as tgl_ubah"),
 		)->get();
+		
 		$results['state_code'] = 200;
 		$results['success'] = true;
 
@@ -28,7 +29,7 @@ class KategoriTransportController extends Controller
 	{
 		$results = $this->responses;
 		
-		$results['data'] = KategoriTransport::all()->pluck('name');
+		$results['data'] = Kabupaten::all()->pluck('name');
 		$results['state_code'] = 200;
 		$results['success'] = true;
 		
@@ -51,11 +52,17 @@ class KategoriTransportController extends Controller
       return response()->json($results, 200);
     }
 		
-    KategoriTransport::create([
-      'name' => $inputs['name']
-    ]);
+		$upper = strtoupper($inputs['name']);
+    $kat = Kabupaten::whereRaw("upper(name) = '" . $upper . "'")->first();
+		
+		if($kat == null) {
+			Kabupaten::create([
+				'provinsi_id' => 0,
+				'name' => $inputs['name']
+			]);
+		}
 
-    array_push($results['messages'], 'Berhasil menambahkan Kategori Transportasi baru.');
+    array_push($results['messages'], 'Berhasil menambahkan Tujuan Luar Daerah baru.');
 
     $results['success'] = true;
     $results['state_code'] = 200;
@@ -66,7 +73,7 @@ class KategoriTransportController extends Controller
 	public function show($id)
 	{
 		$results = $this->responses;
-		$results['data'] = KategoriTransport::find($id);
+		$results['data'] = Kabupaten::find($id);
 
 		$results['state_code'] = 200;
 		$results['success'] = true;
@@ -90,12 +97,12 @@ class KategoriTransportController extends Controller
       return response()->json($results, $results['state_code']);
     }
     
-		$KategoriTransport = KategoriTransport::find($id);
-    $KategoriTransport->update([
+		$Kabupaten = Kabupaten::find($id);
+    $Kabupaten->update([
       'name' => $inputs['name']
     ]);
 
-    array_push($results['messages'], 'Berhasil mengubah Kategori Transportasi.');
+    array_push($results['messages'], 'Berhasil mengubah Tujuan Luar Daerah.');
 
     $results['success'] = true;
     $results['state_code'] = 200;
@@ -106,9 +113,9 @@ class KategoriTransportController extends Controller
 	public function destroy($id)
 	{
 		$results = $this->responses;
-		$role = KategoriTransport::destroy($id);
+		$role = Kabupaten::destroy($id);
 
-		array_push($results['messages'], 'Berhasil menghapus Kategori Transportasi.');
+		array_push($results['messages'], 'Berhasil menghapus Tujuan Luar Daerah.');
 		$results['state_code'] = 200;
 		$results['success'] = true;
 
