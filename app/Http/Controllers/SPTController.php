@@ -149,7 +149,9 @@ class SPTController extends Controller
 
 			$checkFile = FaFile::exists($templatePath);
 			if ($checkFile){
-				$pejabat = Pegawai::where('pegawai.id', 5)
+				$pejabatId = $spt->pttd_id == 2 || $spt->pttd_id == 3 || $spt->pttd_id == 4 ? $spt->pttd_id : 5;
+
+				$pejabat = Pegawai::where('pegawai.id', $pejabatId)
 				->select(
 					'full_name',
 					'nip',
