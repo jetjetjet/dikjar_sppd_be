@@ -344,7 +344,8 @@ class SPPDController extends Controller
 		$results = $this->responses;
 		$spt = SPT::find($id)->update([
 			'hasil' => $request->hasil ?? '',
-			'saran' => $request->saran ?? ''
+			'saran' => $request->saran ?? '',
+			'status' => 'SELESAI'
 		]);
 
 		$updateSpt = SPT::find($id);
@@ -466,151 +467,161 @@ class SPPDController extends Controller
 	{
 		$results = $this->responses;
 		$updateSpt = SPT::find($id);
-		if($updateSpt->kwitansi_file_id == null) {
-			$templatePath = base_path('public/storage/template/template_kwitansi.docx');
-			$checkFile = FaFile::exists($templatePath);
-			if($checkFile) {
-				$spt = SPT::join('anggaran as a', 'a.id', 'anggaran_id')
-				->join('pegawai as p', 'p.id', 'spt.pelaksana_id')
-				->where('spt.id', $id)
-				->select(
-					'kode_rekening',
-					'nama_rekening',
-					'spt.periode',
-					'dasar_pelaksana',
-					'daerah_asal',
-					'daerah_tujuan',
-					'tgl_berangkat',
-					'tgl_kembali',
-					'untuk',
-					'tgl_spt',
-					'no_spt',
-					'p.full_name as nama_penyelenggara',
-					'p.nip as nip_pengelenggara',
-					'no_index',
-					'pptk_id',
-					'bendahara_id',
-					'anggaran_id'
-				)->first();
+
+		//validasi kwitansi
+		$totalKwitansi = Biaya::where('spt_id', $id)->where('total_biaya', '<=', 0)->first();
+		if( $totalKwitansi == null ){
+			if($updateSpt->kwitansi_file_id == null) {
+				$templatePath = base_path('public/storage/template/template_kwitansi.docx');
+				$checkFile = FaFile::exists($templatePath);
+				if($checkFile) {
+					$spt = SPT::join('anggaran as a', 'a.id', 'anggaran_id')
+					->join('pegawai as p', 'p.id', 'spt.pelaksana_id')
+					->where('spt.id', $id)
+					->select(
+						'kode_rekening',
+						'nama_rekening',
+						'spt.periode',
+						'dasar_pelaksana',
+						'daerah_asal',
+						'daerah_tujuan',
+						'tgl_berangkat',
+						'tgl_kembali',
+						'untuk',
+						'tgl_spt',
+						'no_spt',
+						'p.full_name as nama_penyelenggara',
+						'p.nip as nip_pengelenggara',
+						'no_index',
+						'pptk_id',
+						'bendahara_id',
+						'anggaran_id'
+					)->first();
+		
+					$nameFile = "090_".$spt->index."_SPPD_PDK_2021";
+					$totalBiaya = Biaya::where('spt_id', $id)->sum('total_biaya');
+					
+					$bendahara = DB::table('pegawai as p')
+					->where('id', $spt->bendahara_id)
+					->select('nip', 'full_name')
+					->first();
 	
-				$nameFile = "090_".$spt->index."_SPPD_PDK_2021";
-				$totalBiaya = Biaya::where('spt_id', $id)->sum('total_biaya');
-				
-				$bendahara = DB::table('pegawai as p')
-				->where('id', $spt->bendahara_id)
-				->select('nip', 'full_name')
-				->first();
-
-				$anggaran = DB::table('anggaran')
-				->where('id', $spt->anggaran_id)
-				->select('bidang')
-				->first();
-
-				$pembantu = $anggaran->bidang == 'Staf Sekretariat' ? "Bendahara Pengeluaran, </w:t><w:br/><w:t>" : "Bendahara Pengeluaran Pembantu,";
-				
-				$ppk = DB::table('pegawai as p')
-				->where('id', $spt->pptk_id)
-				->select('nip', 'full_name')
-				->first();
-
-				$kadin = Pegawai::where('pegawai.id', 5)
-				->select('nip', 'full_name')
-				->first();
-
-				$totalBiaya = Biaya::where('spt_id', $id)->sum('total_biaya');
-				$terbilang = Utils::rupiahTeks($totalBiaya);
-				$tgl = (new Carbon($spt->tgl_spt))->isoFormat('D MMMM Y');
-				
-				$template = new TemplateProcessor($templatePath);
-
-				$template->setValue('tahun_anggaran', $spt->periode);
-				$template->setValue('kode_rekening', $spt->kode_rekening);
-				$template->setValue('nama_rekening', $spt->nama_rekening);
-				$template->setValue('nama_bendahara', $bendahara->full_name);
-				$template->setValue('nip_bendahara', $bendahara->nip);
-				$template->setValue('bendahara', $pembantu);
-				$template->setValue('total_biaya', number_format($totalBiaya));
-				$template->setValue('terbilang', $terbilang);
-				$template->setValue('maksud', $spt->untuk);
-				$template->setValue('no_spt', $spt->no_spt);
-				$template->setValue('tgl_spt', $tgl);
-
-				$template->setValue('nama_kadin', $kadin->full_name);
-				$template->setValue('nip_kadin', $kadin->nip);
-
-				$template->setValue('nama_pptk', $ppk->full_name);
-				$template->setValue('nip_pptk', $ppk->nip);
-				
-				$template->setValue('nama_penerima', $spt->nama_penyelenggara);
-				$template->setValue('nip_penerima', $spt->nip_pengelenggara);
-				
-				$newFile = new \stdClass();
-				$newFile->dbPath ='/storage/kwitansi/';
-				$newFile->ext = '.pdf';
-				$newFile->originalName = "kwitansi_" . $nameFile;
-				$newFile->newName = $newFile->originalName;
-				
-				$path = base_path('/public');
-				$template->saveAs($path . $newFile->dbPath . $newFile->newName . ".docx", TRUE);
-				
-				$docPath = $path . $newFile->dbPath . $newFile->newName . ".docx";
-				$converter = new OfficeConverter($docPath);
-				$converter->convertTo($newFile->newName.".pdf");
-
-				if(FaFile::exists($path . $newFile->dbPath . $newFile->newName . ".docx")) {
-					FaFile::delete($path . $newFile->dbPath . $newFile->newName . ".docx");
-				}
-					
-				try{
-					// Start Transaction
-					DB::beginTransaction();
-					
-					//upload to table
-					$file = Utils::saveFile($newFile);
-
-					//save to report
-					$this->saveReport($id, $spt);
-
-					$loginId = auth('sanctum')->user()->id;
-					$updateSpt->update([
-						'settled_at' => DB::raw("now()"),
-						'settled_by' => $loginId,
-						'kwitansi_file_id' => $file
-					]);
-
-					$updateSPPD = SPTDetail::where('spt_id', $id)
-					->update([
-						'settled_at' => now()->toDateTimeString(),
-						'settled_by' => $loginId
-					]);
-
-					//save to log
-					SPTLog::create([
-						'user_id' => auth('sanctum')->user()->id,
-						'username' => auth('sanctum')->user()->pegawai->full_name,
-						'reference_id' => $id,						
-						'aksi' => 'Cetak Kwitansi',
-						'success' => '1'
-					]);
-					
-					DB::commit();
-					$results['success'] = true;
-					$results['state_code'] = 200;
-					$results['data'] = $newFile->dbPath . $newFile->newName . ".pdf";
-				} catch (\Exception $e) {
-					DB::rollBack();
-					Log::channel('spderr')->info('spt_cetak_err: '. json_encode($e->getMessage()));
-					array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
-				}
+					$anggaran = DB::table('anggaran')
+					->where('id', $spt->anggaran_id)
+					->select('bidang')
+					->first();
 	
+					$pembantu = $anggaran->bidang == 'Staf Sekretariat' ? "Bendahara Pengeluaran, </w:t><w:br/><w:t>" : "Bendahara Pengeluaran Pembantu,";
+					
+					$ppk = DB::table('pegawai as p')
+					->where('id', $spt->pptk_id)
+					->select('nip', 'full_name')
+					->first();
+	
+					$kadin = Pegawai::where('pegawai.id', 5)
+					->select('nip', 'full_name')
+					->first();
+	
+					$totalBiaya = Biaya::where('spt_id', $id)->sum('total_biaya');
+					$terbilang = Utils::rupiahTeks($totalBiaya);
+					$tgl = (new Carbon($spt->tgl_spt))->isoFormat('D MMMM Y');
+					
+					$template = new TemplateProcessor($templatePath);
+	
+					$template->setValue('tahun_anggaran', $spt->periode);
+					$template->setValue('kode_rekening', $spt->kode_rekening);
+					$template->setValue('nama_rekening', $spt->nama_rekening);
+					$template->setValue('nama_bendahara', $bendahara->full_name);
+					$template->setValue('nip_bendahara', $bendahara->nip);
+					$template->setValue('bendahara', $pembantu);
+					$template->setValue('total_biaya', number_format($totalBiaya));
+					$template->setValue('terbilang', $terbilang);
+					$template->setValue('maksud', $spt->untuk);
+					$template->setValue('no_spt', $spt->no_spt);
+					$template->setValue('tgl_spt', $tgl);
+	
+					$template->setValue('nama_kadin', $kadin->full_name);
+					$template->setValue('nip_kadin', $kadin->nip);
+	
+					$template->setValue('nama_pptk', $ppk->full_name);
+					$template->setValue('nip_pptk', $ppk->nip);
+					
+					$template->setValue('nama_penerima', $spt->nama_penyelenggara);
+					$template->setValue('nip_penerima', $spt->nip_pengelenggara);
+					
+					$newFile = new \stdClass();
+					$newFile->dbPath ='/storage/kwitansi/';
+					$newFile->ext = '.pdf';
+					$newFile->originalName = "kwitansi_" . $nameFile;
+					$newFile->newName = $newFile->originalName;
+					
+					$path = base_path('/public');
+					$template->saveAs($path . $newFile->dbPath . $newFile->newName . ".docx", TRUE);
+					
+					$docPath = $path . $newFile->dbPath . $newFile->newName . ".docx";
+					$converter = new OfficeConverter($docPath);
+					$converter->convertTo($newFile->newName.".pdf");
+	
+					if(FaFile::exists($path . $newFile->dbPath . $newFile->newName . ".docx")) {
+						FaFile::delete($path . $newFile->dbPath . $newFile->newName . ".docx");
+					}
+						
+					try{
+						// Start Transaction
+						DB::beginTransaction();
+						
+						//upload to table
+						$file = Utils::saveFile($newFile);
+	
+						//save to report
+						$this->saveReport($id, $spt);
+	
+						$loginId = auth('sanctum')->user()->id;
+						$updateSpt->update([
+							'settled_at' => DB::raw("now()"),
+							'settled_by' => $loginId,
+							'kwitansi_file_id' => $file,
+							'status' => 'KWITANSI'
+						]);
+	
+						$updateSPPD = SPTDetail::where('spt_id', $id)
+						->update([
+							'settled_at' => now()->toDateTimeString(),
+							'settled_by' => $loginId
+						]);
+	
+						//save to log
+						SPTLog::create([
+							'user_id' => auth('sanctum')->user()->id,
+							'username' => auth('sanctum')->user()->pegawai->full_name,
+							'reference_id' => $id,						
+							'aksi' => 'Cetak Kwitansi',
+							'success' => '1'
+						]);
+						
+						DB::commit();
+						$results['success'] = true;
+						$results['state_code'] = 200;
+						$results['data'] = $newFile->dbPath . $newFile->newName . ".pdf";
+					} catch (\Exception $e) {
+						DB::rollBack();
+						Log::channel('spderr')->info('spt_kwitansi: '. json_encode($e->getMessage()));
+						array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
+					}
+		
+				} else {
+					array_push($results['messages'], 'Template SPT tidak ditemukan.');
+				}
 			} else {
-				array_push($results['messages'], 'Template SPT tidak ditemukan.');
+				$file = DB::table('files')->where('id', $updateSpt->kwitansi_file_id)->first();
+				$results['data'] = $file->file_path . $file->file_name. ".pdf";
+				$results['success'] = true;
+				$results['state_code'] = 200;
 			}
 		} else {
-			$file = DB::table('files')->where('id', $updateSpt->kwitansi_file_id)->first();
-			$results['data'] = $file->file_path . $file->file_name. ".pdf";
-			$results['success'] = true;
-			$results['state_code'] = 200;
+			$results['success'] = false;
+			$results['state_code'] = 500;
+			$results['messages'] = ['Tidak dapat mencetak, kwitansi belum lengkap!'];
 		}
 		
 		return response()->json($results, $results['state_code']);

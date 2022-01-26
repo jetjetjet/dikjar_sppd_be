@@ -72,12 +72,12 @@ class ReportController extends Controller
     }
 
 		if(isset($inputs['status'])) {
-			if ($inputs['status'] == "DRAFT") {
-				$q = $q->where('spt.status', "DRAFT");
-			} else if ($inputs['status'] == "INPROGRESS") {
-				$q = $q->whereNotIn('spt.status', ["DRAFT"])
+			if ($inputs['status'] == "KONSEP") {
+				$q = $q->where('spt.status', "KONSEP");
+			} else if ($inputs['status'] == "PROSES") {
+				$q = $q->whereNotIn('spt.status', ["KONSEP"])
 					->whereNull('spt.settled_at');
-			} else if ($inputs['status'] == "FINISH") {
+			} else if ($inputs['status'] == "SELESAI") {
 				$q = $q->whereNotNull('spt.settled_at');
 			} else {
 				// surpress
@@ -93,8 +93,8 @@ class ReportController extends Controller
 			'tgl_berangkat',
 			'tgl_kembali',
 			DB::raw("to_char(b.total_biaya, 'FM999,999,999,999') as jml_biaya"),
-			DB::raw("case when spt.status = 'DRAFT' then 'Draf'
-				when spt.status not in ('DRAFT') and spt.completed_at is null then 'Proses'
+			DB::raw("case when spt.status = 'KONSEP' then 'Draf'
+				when spt.status not in ('KONSEP') and spt.completed_at is null then 'Proses'
 				when spt.completed_at is not null and spt.settled_at is null then 'Kembali'
 				when spt.settled_at is not null then 'Selesai' else '' end as status")
 		)->get();

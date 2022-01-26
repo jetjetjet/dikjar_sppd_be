@@ -71,7 +71,8 @@ class SPTController extends Controller
 			'proceed_at',
 			'u.name',
 			DB::raw($canGenerate . " as can_generate")
-		)->orderBy('tgl_spt', 'DESC');
+		)->orderBy('periode', 'DESC')
+		->orderBy('no_index', 'DESC');
 
 		$results['data'] = $q->get();
 
@@ -327,7 +328,7 @@ class SPTController extends Controller
 						'spt_file_id' => $file,
 						'spt_generated_at' => DB::raw("now()"),
 						'spt_generated_by' => $loginId,
-						'status' => 'PROCEED'
+						'status' => 'PROSES'
 					]);
 
 					//save to log
@@ -431,7 +432,7 @@ class SPTController extends Controller
 					'tgl_kembali' => $inputs['tgl_kembali'],
 					'jumlah_hari' => $jumlahHari + 1,
 					'tgl_spt' => $inputs['tgl_spt'],
-					'status' => 'DRAFT',
+					'status' => 'KONSEP',
 					'periode' => date('Y')
 				]);
 
@@ -475,7 +476,8 @@ class SPTController extends Controller
 		$results = $this->responses;
 		$finish = array(
 			'completed_at' => DB::raw("now()"),
-			'completed_by' => auth('sanctum')->user()->id
+			'completed_by' => auth('sanctum')->user()->id,
+			'status' => 'KEMBALI'
 		);
 
 		$spt = SPT::where('id', $id)->first();
@@ -639,7 +641,7 @@ class SPTController extends Controller
 	{
 		$results = $this->responses;
 		$header = SPT::find($id);
-		if ($header->status == 'DRAFT'){
+		if ($header->status == 'KONSEP'){
 			try{
 				DB::transaction(function () use ($id) {
 					$detail = SPTDetail::where('spt_id', $id)->delete();

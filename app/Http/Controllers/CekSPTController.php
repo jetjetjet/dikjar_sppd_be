@@ -41,9 +41,10 @@ class CekSPTController extends Controller
 			DB::raw("to_char(tgl_berangkat, 'DD/MM/YYYY') as tgl_berangkat"),
 			DB::raw("to_char(tgl_kembali, 'DD/MM/YYYY') as tgl_kembali"),
 			'transportasi',
-			DB::raw("case when proceed_at is not null and completed_at is null then 'Dalam perjalanan dinas'
-				when completed_at is not null and settled_at is null then 'Sudah kembali dari perjalanan dinas'
-				when settled_at is not null then 'Proses kwitansi'
+			DB::raw("case when status = 'PROSES' then 'Dalam perjalanan dinas'
+				when status = 'KEMBALI' then 'Sudah kembali dari perjalanan dinas'
+				when status = 'KWITANSI' then 'Proses kwitansi'
+				when status = 'SELESAI' then 'Selesai'
 				else '-' end as status")
 		)->first();
 
