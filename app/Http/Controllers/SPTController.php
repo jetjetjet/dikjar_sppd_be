@@ -144,8 +144,10 @@ class SPTController extends Controller
 				$templatePath = base_path('public/storage/template/template_spt_bupati.docx');
 			} else if ($spt->pttd_id == 4) {
 				$templatePath = base_path('public/storage/template/template_spt_sekda.docx');
-			} else {
+			} else if ($spt->pttd_id == 5) {
 				$templatePath = base_path('public/storage/template/template_spt.docx');
+			} else {
+				$templatePath = base_path('public/storage/template/template_spt_an.docx');
 			}
 
 			$checkFile = FaFile::exists($templatePath);
