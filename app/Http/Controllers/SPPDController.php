@@ -210,7 +210,7 @@ class SPPDController extends Controller
 				->select('bidang')
 				->first();
 
-				$pembantu = $anggaran->bidang == 'Staf Sekretariat' ? 'Bendahara Pengeluaran, </w:t><w:br/><w:t xml:space="preserve">' : "Bendahara Pengeluaran Pembantu,";
+				$pembantu = $anggaran->bidang == 'Staf Sekretariat' ? 'Bendahara Pengeluaran,' : "Bendahara Pengeluaran Pembantu,";
 				
 				$nameFile = "090_".$spt->no_index."_SPPD_PDK_2021_".$pegawai->pegawai_name;
 	
