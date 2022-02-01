@@ -573,9 +573,6 @@ class SPPDController extends Controller
 						//upload to table
 						$file = Utils::saveFile($newFile);
 	
-						//save to report
-						$this->saveReport($id, $spt);
-	
 						$loginId = auth('sanctum')->user()->id;
 						$updateSpt->update([
 							'settled_at' => DB::raw("now()"),
@@ -589,6 +586,9 @@ class SPPDController extends Controller
 							'settled_at' => now()->toDateTimeString(),
 							'settled_by' => $loginId
 						]);
+						
+						//save to report
+						$this->saveReport($id, $spt);
 	
 						//save to log
 						SPTLog::create([
@@ -670,8 +670,8 @@ class SPPDController extends Controller
 			->where('jenis_transport', 'Pesawat')
 			->first();
 
-			$asal = ucwords(strtolower($spt->daerah_asal));
-			$tujuan = ucwords(strtolower($spt->daerah_tujuan));
+			$asal = $spt->daerah_asal;
+			$tujuan = $spt->daerah_tujuan;
 			$checkin = $inap->tgl_checkin ?? null;
 			$checkout = $inap->tgl_checkout ?? null;
 
@@ -689,6 +689,7 @@ class SPPDController extends Controller
 				'no_spt' => $spt->no_spt,
 				'no_sppd' => null,
 				'kegiatan' => $spt->untuk,
+				'jml_hari' => $spt->jumlah_hari,
 				'penyelenggara' => 'SD Dalam Kab. Kerinci',
 				'lok_asal'=> $asal,
 				'lok_tujuan' => $tujuan,

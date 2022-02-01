@@ -19,6 +19,7 @@ class ReportSPPD extends Model
 		'no_pku',
 		'no_spt',
 		'no_sppd',
+		'jml_hari',
 		'kegiatan',
 		'penyelenggara',
 		'lok_asal',

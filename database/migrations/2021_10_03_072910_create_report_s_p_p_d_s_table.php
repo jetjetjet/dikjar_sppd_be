@@ -30,6 +30,7 @@ class CreateReportSPPDSTable extends Migration
             $table->string('lok_tujuan');
             $table->date('tgl_berangkat');
             $table->date('tgl_kembali');
+            $table->integer('jml_hari');
             $table->decimal('uang_saku', 16,0)->nullable();
             $table->decimal('uang_makan', 16,0)->nullable();
             $table->decimal('uang_representasi', 16,0)->nullable();
