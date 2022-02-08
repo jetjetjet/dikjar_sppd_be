@@ -95,7 +95,10 @@ class AnggaranController extends Controller
 	
 			$datas = Anggaran::leftJoinSub($realisasi, 'r', function ($join) {
 				$join->on('anggaran.id', '=', 'r.anggaran_id');
-			})->where('periode', date('Y'));
+			})->join('pegawai as bdh', 'bdh.id', 'anggaran.bendahara_id')
+			->join('pegawai as pgn', 'pgn.id', 'anggaran.pengguna_id')
+			->join('pegawai as pptk', 'pptk.id', 'anggaran.pptk_id')
+			->where('periode', date('Y'));
 
 			if(!$isAdmin){
 				$datas = $datas->where('bidang', $role);
@@ -107,6 +110,13 @@ class AnggaranController extends Controller
 				'nama_rekening',
 				'uraian',
 				'pagu',
+				'pptk.full_name as pptk_name',
+				'pptk.id as pptk_id',
+				'bdh.full_name as bendahara_name',
+				'bdh.id as bendahara_id',
+				'pgn.full_name as pengguna_name',
+				'pgn.id as pengguna_id',
+				
 				DB::raw("pagu - coalesce(realisasi,0) as sisa")
 			)->get();
 			foreach($datas as $dt){
@@ -116,7 +126,13 @@ class AnggaranController extends Controller
 					'nama_rekening' => $dt->nama_rekening,
 					'uraian' => $dt->uraian,
 					'pagu' => 'Rp ' . number_format($dt->pagu),
-					'sisa' => 'Rp ' . number_format($dt->sisa)
+					'sisa' => 'Rp ' . number_format($dt->sisa),
+					'pptk_name' => $dt->pptk_name,
+					'pptk_id' => $dt->pptk_id,
+					'bendahara_name' => $dt->bendahara_name,
+					'bendahara_id' => $dt->bendahara_id,
+					'pengguna_name' => $dt->pengguna_name,
+					'pengguna_id' => $dt->pengguna_id
 				);
 			
 				array_push($results['data'], $ui);
@@ -145,9 +161,10 @@ class AnggaranController extends Controller
 			'nama_rekening' => 'required',
       'periode' => 'required|numeric|min:'.$year.'|max:'.$year1,
       'pagu' => 'required|numeric|min:1000000|max:999999999999',
-      'pejabat_pptk' => 'required',
+      'pptk_id' => 'required',
 			'bidang' => 'required',
-			'bendahara' => 'required'
+			'bendahara_id' => 'required',
+      'pengguna_id' => 'required'
 		);
 
 		$validator = Validator::make($inputs, $rules);
@@ -158,39 +175,18 @@ class AnggaranController extends Controller
     }
 
 		try {
-			DB::beginTransaction();
-
 			$anggaran = Anggaran::create([
 				'kode_rekening' => $inputs['kode_rekening'],
 				'nama_rekening' => $inputs['nama_rekening'],
 				'bidang' => $inputs['bidang'],
 				'uraian' => $inputs['uraian'],
 				'pagu' => $inputs['pagu'],
-				'periode' => $inputs['periode']
+				'periode' => $inputs['periode'],
+				'bendahara_id' => $inputs['bendahara_id'],
+				'pptk_id' => $inputs['pptk_id'],
+				'pengguna_id' => $inputs['pengguna_id']
 			]);
-
-			$pejabat = [
-				[
-					'anggaran_id' => $anggaran->id,
-					'pegawai_id' => $inputs['pejabat_pptk'],
-					'autorisasi' => 'Pejabat Pelaksana Teknis Kegiatan',
-					'autorisasi_code' => 'PPTK',
-					'is_active' => '1'
-				],
-				[
-					'anggaran_id' => $anggaran->id,
-					'pegawai_id' => $inputs['bendahara'],
-					'autorisasi' => 'Bendahara',
-					'autorisasi_code' => 'BENDAHARA',
-					'is_active' => '1'
-				]
-			];
-
-			PejabatTtd::insert($pejabat);
-
-			DB::commit();
 		} catch (\Exception $e) {
-			DB::rollBack();
 			Log::channel('spderr')->info('anggaran_save: '. json_encode($e->getMessage()));
 			array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
 		}
@@ -206,21 +202,7 @@ class AnggaranController extends Controller
 	public function show($id)
 	{
 		$results = $this->responses;
-		$q = Anggaran::join('pejabat_ttd as pt', function ($q){
-			$q->on('anggaran.id', 'pt.anggaran_id');
-			$q->where('pt.autorisasi_code', 'PPTK');
-		})
-		->join('pejabat_ttd as be', function ($q){
-			$q->on('anggaran.id', 'be.anggaran_id');
-			$q->where('be.autorisasi_code', 'BENDAHARA');
-		})
-		->where('anggaran.id', $id)
-		->select('anggaran.*',
-		'pt.pegawai_id as pejabat_pptk',
-		'be.pegawai_id as bendahara')
-		->first();
-
-		$results['data'] = $q;
+		$results['data'] = Anggaran::find($id);
 
 		$results['state_code'] = 200;
 		$results['success'] = true;
@@ -240,8 +222,9 @@ class AnggaranController extends Controller
 			'nama_rekening' => 'required',
       'periode' => 'required|numeric|min:'.$year.'|max:'.$year1,
       'pagu' => 'required|numeric|min:1000000|max:999999999999',
-      'pejabat_pptk' => 'required',
-			'bendahara' => 'required'
+      'pptk_id' => 'required',
+			'bendahara_id' => 'required',
+      'pengguna_id' => 'required'
 		);
 
 		$validator = Validator::make($request->all(), $rules);
@@ -252,8 +235,6 @@ class AnggaranController extends Controller
     }
     
 		try {
-			DB::beginTransaction();
-
 			$anggaran = Anggaran::find($id);
 			$anggaran->update([
 				'kode_rekening' => $inputs['kode_rekening'],
@@ -261,47 +242,13 @@ class AnggaranController extends Controller
 				'bidang' => $inputs['bidang'],
 				'uraian' => $inputs['uraian'],
 				'pagu' => $inputs['pagu'],
-				'periode' => $inputs['periode']
+				'periode' => $inputs['periode'],
+				'bendahara_id' => $inputs['bendahara_id'],
+				'pptk_id' => $inputs['pptk_id'],
+				'pengguna_id' => $inputs['pengguna_id']
 			]);
 
-			//delete missing pegawai
-			PejabatTtd::where('anggaran_id', $id)
-			->whereNotIn('pegawai_id', [$inputs['pejabat_pptk'], $inputs['bendahara']])
-			->delete();
-
-			$cekPptk = PejabatTtd::where('is_active', '1')
-			->where('anggaran_id', $id)
-			->where('pegawai_id', $inputs['pejabat_pptk'])
-			->first();
-
-			if($cekPptk == null) {
-				PejabatTtd::create([
-					'anggaran_id' => $id,
-					'pegawai_id' => $inputs['pejabat_pptk'],
-					'autorisasi' => 'Pejabat Pelaksana Teknis Kegiatan',
-					'autorisasi_code' => 'PPTK',
-					'is_active' => '1'
-				]);
-			}
-
-			$cekBendahara = PejabatTtd::where('is_active', '1')
-			->where('anggaran_id', $id)
-			->where('pegawai_id', $inputs['bendahara'])
-			->first();
-	
-			if($cekBendahara == null) {
-				PejabatTtd::create([
-					'anggaran_id' => $id,
-					'pegawai_id' => $inputs['bendahara'],
-					'autorisasi' => 'Bendahara',
-					'autorisasi_code' => 'BENDAHARA',
-					'is_active' => '1'
-				]);
-			}
-
-			DB::commit();
 		} catch (\Exception $e) {
-			DB::rollBack();
 			Log::channel('spderr')->info('anggaran_save: '. json_encode($e->getMessage()));
 			array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
 		}
@@ -325,8 +272,7 @@ class AnggaranController extends Controller
 			return response()->json($results, $results['state_code']);
 		}
 
-		$role = Anggaran::destroy($id);
-		$pejabat = PejabatTtd::where('anggaran_id', $id)->delete();
+		$anggaran = Anggaran::destroy($id);
 
 		array_push($results['messages'], 'Berhasil menghapus anggaran.');
 		$results['state_code'] = 200;

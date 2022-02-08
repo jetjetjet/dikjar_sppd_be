@@ -35,6 +35,7 @@ class SPT extends Model
 		'hasil',
 		'saran',
 		'laporan_file_id',
+		'pengguna_anggaran_id',
 		'created_by',
 		'updated_by',
 		'deleted_at',
@@ -45,6 +46,8 @@ class SPT extends Model
 		'proceed_by',
 		'settled_at',
 		'settled_by',
-		'kwitansi_file_id'
+		'kwitansi_file_id',
+		'finished_at', 
+		'finished_by'
 	];
 }

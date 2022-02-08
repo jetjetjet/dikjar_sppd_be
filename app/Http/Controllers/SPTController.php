@@ -389,7 +389,8 @@ class SPTController extends Controller
       'tgl_berangkat' => 'required',
       'tgl_kembali' => 'required',
 			'daerah_asal' => 'required',
-			'daerah_tujuan' => 'required'
+			'daerah_tujuan' => 'required',
+			'pengguna_anggaran_id' => 'required'
 		);
 
 		$validator = Validator::make($inputs, $rules);
@@ -423,6 +424,7 @@ class SPTController extends Controller
 					'pptk_id' => $inputs['pptk_id'],
 					'pelaksana_id' => $inputs['pelaksana_id'],
 					'bendahara_id' => $inputs['bendahara_id'],
+					'pengguna_anggaran_id' => $inputs['pengguna_anggaran_id'],
 					'dasar_pelaksana' => $inputs['dasar_pelaksana'],
 					'untuk' => $inputs['untuk'],
 					'transportasi' => $inputs['transportasi'],
@@ -504,10 +506,16 @@ class SPTController extends Controller
 	{
 		$results = $this->responses;
 		$data = SPT::join('anggaran as ag', 'ag.id', 'anggaran_id')
+		->join('pegawai as bdh', 'bdh.id', 'spt.bendahara_id')
+		->join('pegawai as pgn', 'pgn.id', 'spt.pengguna_anggaran_id')
+		->join('pegawai as pptk', 'pptk.id', 'spt.pptk_id')
 		->where('spt.id', $id)
 		->select(
 			'spt.*',
-			'ag.kode_rekening as anggaran_text'
+			'ag.kode_rekening as anggaran_text',
+			'pgn.full_name as pengguna_anggaran_text',
+			'bdh.full_name as bendahara_text',
+			'pptk.full_name as pptk_text',
 		)->first();
 
 		$data->pegawai_id = SPTDetail::where('spt_id', $id)->where('is_pelaksana', '0')->get()->pluck('pegawai_id');
@@ -550,7 +558,9 @@ class SPTController extends Controller
       'transportasi' => 'required',
 			'pelaksana_id' => 'required',
       'tgl_berangkat' => 'required',
-      'tgl_kembali' => 'required'
+      'tgl_kembali' => 'required',
+			'pengguna_anggaran_id' => 'required',
+			'bendahara_id' => 'required',
 		);
 
 		$validator = Validator::make($inputs, $rules);
@@ -575,6 +585,7 @@ class SPTController extends Controller
 					'pptk_id' => $inputs['pptk_id'],
 					'pelaksana_id' => $inputs['pelaksana_id'],
 					'bendahara_id' => $inputs['bendahara_id'],
+					'pengguna_anggaran_id' => $inputs['pengguna_anggaran_id'],
 					'dasar_pelaksana' => $inputs['dasar_pelaksana'],
 					'untuk' => $inputs['untuk'],
 					'transportasi' => $inputs['transportasi'],

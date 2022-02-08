@@ -32,7 +32,8 @@ class ReportController extends Controller
 	public function reportByFinishedSPT(Request $request)
 	{
 		$results = $this->responses;
-		$results['data'] = ReportSPPD::all();
+		$results['data'] = ReportSPPD::orderBy('id', 'DESC')
+		->get();
 		$results['state_code'] = 200;
 		$results['success'] = true;
 
@@ -64,8 +65,7 @@ class ReportController extends Controller
 			$on->on('b.spt_id', 'spt.id');
 			$on->where('b.pegawai_id', $inputs['pegawai_id']);
 			$on->whereNull('b.deleted_at');
-		})
-		->where('p.id', $inputs['pegawai_id']);
+		})->where('p.id', $inputs['pegawai_id']);
 
 		if(isset($inputs['tgl_berangkat']) && isset($inputs['tgl_kembali'])){
 			$q = $q->whereRaw("tgl_berangkat::date >= '". $inputs['tgl_berangkat'] . "'::date and tgl_kembali::date <= '" . $inputs['tgl_kembali'] . "'::date");

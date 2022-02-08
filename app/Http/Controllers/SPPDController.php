@@ -189,6 +189,8 @@ class SPPDController extends Controller
 				->first();
 	
 				$spt = SPT::join('anggaran as a', 'a.id', 'anggaran_id')
+				->join('pegawai as bdh', 'bdh.id', 'spt.bendahara_id')
+				->join('pegawai as pgn', 'pgn.id', 'spt.pengguna_anggaran_id')
 				->where('spt.id', $id)
 				->select(
 					'tgl_spt',
@@ -196,22 +198,16 @@ class SPPDController extends Controller
 					'jumlah_hari',
 					'daerah_tujuan',
 					'no_index',
-					'bendahara_id',
-					'anggaran_id'
+					'pgn.full_name as pengguna_name',
+					'pgn.nip as pengguna_nip',
+					'bdh.full_name as bendahara_name',
+					'bdh.nip as bendahara_nip',
+					'anggaran_id',
+					'a.bidang'
 				)->first();
 
-				$bendahara = DB::table('pegawai as p')
-				->where('id', $spt->bendahara_id)
-				->select('nip', 'full_name as bendahara_name')
-				->first();
-				
-				$anggaran = DB::table('anggaran')
-				->where('id', $spt->anggaran_id)
-				->select('bidang')
-				->first();
-
-				$pembantu = $anggaran->bidang == 'Staf Sekretariat' ? 'Bendahara Pengeluaran,' : "Bendahara Pengeluaran Pembantu,";
-				
+				$pembantu = $spt->bidang == 'Staf Sekretariat' ? 'Bendahara Pengeluaran,' : "Bendahara Pengeluaran Pembantu,";
+				$labelPengguna = $spt->bidang == 'Staf Sekretariat' ? 'Pengguna Anggaran,' : 'Kuasa Pengguna Anggaran,' ;
 				$nameFile = "090_".$spt->no_index."_SPPD_PDK_2021_".$pegawai->pegawai_name;
 	
 				try {
@@ -275,13 +271,14 @@ class SPPDController extends Controller
 					$template->setValue('tgl', $tgl);
 					$template->setValue('jml_hari', $spt->jumlah_hari);
 					$template->setValue('daerah_tujuan', $spt->daerah_tujuan);
-					$template->setValue('nama_bendahara', $bendahara->bendahara_name);
-					$template->setValue('nip_bendahara', $bendahara->nip);
+					$template->setValue('nama_bendahara', $spt->bendahara_name);
+					$template->setValue('nip_bendahara', $spt->bendahara_nip);
+					$template->setValue('nama_pengguna', $spt->pengguna_name);
+					$template->setValue('nip_pengguna', $spt->pengguna_nip);
 					$template->setValue('bendahara', $pembantu);
+					$template->setValue('label_pengguna', $labelPengguna);
 					$template->setValue('nama_penerima', $pegawai->pegawai_name);
 					$template->setValue('nip_penerima', $pegawai->nip);
-					$template->setValue('nama_kadin', $kadin->kadin_name);
-					$template->setValue('nip_kadin', $kadin->nip);
 					$template->cloneRowAndSetValues('pengeluaran', $biayaTb);
 					
 					$newFile = new \stdClass();
@@ -342,11 +339,23 @@ class SPPDController extends Controller
 	public function cetakLaporan(Request $request, $id)
 	{
 		$results = $this->responses;
-		$spt = SPT::find($id)->update([
-			'hasil' => $request->hasil ?? '',
-			'saran' => $request->saran ?? '',
-			'status' => 'SELESAI'
-		]);
+		$spt = SPT::find($id);
+		if($spt->finished_at == null) {
+			$updateData = array(
+				'finished_at' => now()->toDateTimeString(),
+				'finished_by' => auth('sanctum')->user()->id ?? 0,
+				'hasil' => $request->hasil ?? '',
+				'saran' => $request->saran ?? '',
+				'status' => 'SELESAI'
+			);
+		} else {
+			$updateData = array(
+				'hasil' => $request->hasil ?? '',
+				'saran' => $request->saran ?? ''
+			);
+		}
+		// update
+		$spt->update($updateData);
 
 		$updateSpt = SPT::find($id);
 		if(true) { 
@@ -405,7 +414,7 @@ class SPPDController extends Controller
 				$template->setValue('jabatan_pelaksana', $pelaksana->jabatan);
 				$template->setValue('no_spt', $updateSpt->no_spt);
 				$template->setValue('tgl_dinas', $tglAwal . ' s.d ' . $tglAkhir);
-				$template->setValue('tujuan', $updateSpt->untuk);
+				$template->setValue('tujuan', $updateSpt->daerah_tujuan);
 				$template->setValue('maksud', $updateSpt->untuk);
 				$template->setValue('saran', strip_tags($updateSpt->saran));
 
@@ -477,6 +486,9 @@ class SPPDController extends Controller
 				if($checkFile) {
 					$spt = SPT::join('anggaran as a', 'a.id', 'anggaran_id')
 					->join('pegawai as p', 'p.id', 'spt.pelaksana_id')
+					->join('pegawai as bdh', 'bdh.id', 'spt.bendahara_id')
+					->join('pegawai as pgn', 'pgn.id', 'spt.pengguna_anggaran_id')
+					->join('pegawai as pptk', 'pptk.id', 'spt.pptk_id')
 					->where('spt.id', $id)
 					->select(
 						'kode_rekening',
@@ -493,34 +505,21 @@ class SPPDController extends Controller
 						'p.full_name as nama_penyelenggara',
 						'p.nip as nip_pengelenggara',
 						'no_index',
-						'pptk_id',
-						'bendahara_id',
-						'anggaran_id'
+						'pgn.full_name as pengguna_name',
+						'pgn.nip as pengguna_nip',
+						'bdh.full_name as bendahara_name',
+						'bdh.nip as bendahara_nip',
+						'pptk.full_name as pptk_name',
+						'pptk.nip as pptk_nip',
+						'a.bidang'
 					)->first();
 		
-					$nameFile = "090_".$spt->index."_SPPD_PDK_2021";
+					$nameFile = "090_".$spt->no_index."_SPPD_PDK_202X";
 					$totalBiaya = Biaya::where('spt_id', $id)->sum('total_biaya');
-					
-					$bendahara = DB::table('pegawai as p')
-					->where('id', $spt->bendahara_id)
-					->select('nip', 'full_name')
-					->first();
-	
-					$anggaran = DB::table('anggaran')
-					->where('id', $spt->anggaran_id)
-					->select('bidang')
-					->first();
-	
-					$pembantu = $anggaran->bidang == 'Staf Sekretariat' ? "Bendahara Pengeluaran, </w:t><w:br/><w:t>" : "Bendahara Pengeluaran Pembantu,";
-					
-					$ppk = DB::table('pegawai as p')
-					->where('id', $spt->pptk_id)
-					->select('nip', 'full_name')
-					->first();
-	
-					$kadin = Pegawai::where('pegawai.id', 5)
-					->select('nip', 'full_name')
-					->first();
+
+					//
+					$labelPengguna = $spt->bidang == 'Staf Sekretariat' ? 'Pengguna Anggaran,' : 'Kuasa Pengguna Anggaran,' ;
+					$pembantu = $spt->bidang == 'Staf Sekretariat' ? "Bendahara Pengeluaran, </w:t><w:br/><w:t>" : "Bendahara Pengeluaran Pembantu,";
 	
 					$totalBiaya = Biaya::where('spt_id', $id)->sum('total_biaya');
 					$terbilang = Utils::rupiahTeks($totalBiaya);
@@ -531,8 +530,8 @@ class SPPDController extends Controller
 					$template->setValue('tahun_anggaran', $spt->periode);
 					$template->setValue('kode_rekening', $spt->kode_rekening);
 					$template->setValue('nama_rekening', $spt->nama_rekening);
-					$template->setValue('nama_bendahara', $bendahara->full_name);
-					$template->setValue('nip_bendahara', $bendahara->nip);
+					$template->setValue('nama_bendahara', $spt->bendahara_name);
+					$template->setValue('nip_bendahara', $spt->bendahara_nip);
 					$template->setValue('bendahara', $pembantu);
 					$template->setValue('total_biaya', number_format($totalBiaya));
 					$template->setValue('terbilang', $terbilang);
@@ -540,11 +539,12 @@ class SPPDController extends Controller
 					$template->setValue('no_spt', $spt->no_spt);
 					$template->setValue('tgl_spt', $tgl);
 	
-					$template->setValue('nama_kadin', $kadin->full_name);
-					$template->setValue('nip_kadin', $kadin->nip);
+					$template->setValue('label_pengguna', $labelPengguna);
+					$template->setValue('nama_pengguna', $spt->pengguna_name);
+					$template->setValue('nip_pengguna', $spt->pengguna_nip);
 	
-					$template->setValue('nama_pptk', $ppk->full_name);
-					$template->setValue('nip_pptk', $ppk->nip);
+					$template->setValue('nama_pptk', $spt->pptk_name);
+					$template->setValue('nip_pptk', $spt->pptk_nip);
 					
 					$template->setValue('nama_penerima', $spt->nama_penyelenggara);
 					$template->setValue('nip_penerima', $spt->nip_pengelenggara);

@@ -33,7 +33,7 @@ class PegawaiController extends Controller
 			if($request->filter == 'all'){
 				//
 			} else if($request->filter == 'spt'){
-				$q = $q->whereRaw("id not in ( select pegawai_id from spt_detail where deleted_at is null and settled_at is null )")
+				$q = $q->whereRaw("id not in ( select pegawai_id from spt_detail sd join spt on spt.id = sd.spt_id where spt.proceed_at is not null and spt.deleted_at is null and sd.deleted_at is null and spt.finished_at is null )")
 					->where('pegawai_app', '1');
 			} else if($request->filter == 'spt_edit' && isset($request->id)){
 				$q = $q->whereRaw("id not in ( select pegawai_id from spt_detail where deleted_at is null and settled_at is null and spt_id not in ( ". $request->id ." ) )")

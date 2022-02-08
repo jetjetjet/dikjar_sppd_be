@@ -17,6 +17,9 @@ class Anggaran extends Model
 		'uraian',
 		'pagu',
 		'periode',
+		'bendahara_id',
+		'pptk_id',
+		'pengguna_id',
 		'created_by',
 		'updated_by',
 		'deleted_by'
