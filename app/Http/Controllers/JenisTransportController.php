@@ -50,15 +50,21 @@ class JenisTransportController extends Controller
       $results['messages'] = Array($validator->messages()->first());
       return response()->json($results, 200);
     }
+
+		$upper = strtoupper($inputs['name']);
+    $kat = JenisTransport::whereRaw("upper(name) = '" . $upper . "'")->first();
 		
-    JenisTransport::create([
-      'name' => $inputs['name']
-    ]);
-
-    array_push($results['messages'], 'Berhasil menambahkan Jenis Transportasi baru.');
-
-    $results['success'] = true;
-    $results['state_code'] = 200;
+		if($kat == null) {
+			JenisTransport::create([
+				'name' => $inputs['name']
+			]);
+			$results['success'] = true;
+			$results['state_code'] = 200;
+			array_push($results['messages'], 'Berhasil menambahkan Jenis Transportasi baru.');
+		} else {
+			$results['state_code'] = 400;
+			array_push($results['messages'], 'Jenis Transportasi Sudah Ada!');
+		}
 
 		return response()->json($results, $results['state_code']);
 	}

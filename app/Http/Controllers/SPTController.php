@@ -137,7 +137,10 @@ class SPTController extends Controller
 		$results = $this->responses;
 		$spt = SPT::find($id);
 
-		if($spt->proceed_at == null) {
+		//
+		$isAdmin = Auth::user()->tokenCan('is_admin') ? true : false;
+
+		if(($spt->proceed_at == null || $isAdmin) && $spt->completed_at == null) {
 			// $labelDoc = 
 			$templatePath = base_path('public/storage/template/template_spt.docx');
 			if($spt->pttd_id == 2 || $spt->pttd_id == 3) {
@@ -185,6 +188,9 @@ class SPTController extends Controller
 
 					//Begin Transaction
 					DB::beginTransaction();
+					
+					//Delete kalau sudah ada
+					Biaya::where('spt_id', $id)->delete();
 
 					$tempUserValue = array();
 					foreach($users as $user){
@@ -205,11 +211,6 @@ class SPTController extends Controller
 						// $template->setValue('tgl_kembali_minus', $kembaliMinus->isoFormat('D MMMM Y'));
 						$tempSppd->setValue('tgl_sppd', $sptData->tgl_spt);
 						$tempSppd->setValue('no_spt', $sptData->no_spt);
-
-						// KADIN
-						// $tempSppd->setValue('nama_kadin', $pejabat->full_name);
-						// $tempSppd->setValue('nip_kadin', $pejabat->nip);
-						// $tempSppd->setValue('golongan_kadin', $pejabat->pangkat);
 
 						$newFile = new \stdClass();
 						$newFile->dbPath ='/storage/spt/';
@@ -505,6 +506,9 @@ class SPTController extends Controller
 	public function show($id)
 	{
 		$results = $this->responses;
+
+		$isAdmin = Auth::user()->tokenCan('is_admin') ? true : false;
+
 		$data = SPT::join('anggaran as ag', 'ag.id', 'anggaran_id')
 		->join('pegawai as bdh', 'bdh.id', 'spt.bendahara_id')
 		->join('pegawai as pgn', 'pgn.id', 'spt.pengguna_anggaran_id')
@@ -516,6 +520,8 @@ class SPTController extends Controller
 			'pgn.full_name as pengguna_anggaran_text',
 			'bdh.full_name as bendahara_text',
 			'pptk.full_name as pptk_text',
+			DB::raw("case when (proceed_at is null or 1 = " . $isAdmin . ") and completed_at is null then 1 else 0 end as can_edit"),
+			DB::raw("case when proceed_at is not null and 1 = " . $isAdmin . " and completed_at is null then 1 else 0 end as can_edit_proses")
 		)->first();
 
 		$data->pegawai_id = SPTDetail::where('spt_id', $id)->where('is_pelaksana', '0')->get()->pluck('pegawai_id');
@@ -570,79 +576,85 @@ class SPTController extends Controller
       return response()->json($results, 409);
     }
 
-		try {
-			DB::transaction(function () use ($inputs, $id) {
-				$spt = SPT::find($id);
-				
-				$brgkt = new Carbon($inputs['tgl_berangkat']);
-				$kembali = new Carbon($inputs['tgl_kembali']);
-				$jumlahHari = $brgkt->diff($kembali)->days;
-
-				$updateSpt = $spt->update([
-					'jenis_dinas' => $inputs['jenis_dinas'],
-					'anggaran_id' => $inputs['anggaran_id'],
-					'pttd_id' => $inputs['pttd_id'],
-					'pptk_id' => $inputs['pptk_id'],
-					'pelaksana_id' => $inputs['pelaksana_id'],
-					'bendahara_id' => $inputs['bendahara_id'],
-					'pengguna_anggaran_id' => $inputs['pengguna_anggaran_id'],
-					'dasar_pelaksana' => $inputs['dasar_pelaksana'],
-					'untuk' => $inputs['untuk'],
-					'transportasi' => $inputs['transportasi'],
-					'daerah_asal' => $inputs['daerah_asal'],
-					'daerah_tujuan' => $inputs['daerah_tujuan'],
-					'tgl_berangkat' => $inputs['tgl_berangkat'],
-					'tgl_kembali' => $inputs['tgl_kembali'],
-					'jumlah_hari' => $jumlahHari + 1,
-					'tgl_spt' => $inputs['tgl_spt'],
-				]);
-
-				//Delete Missing Pegawai Id
-				array_push($inputs['pegawai_id'], $inputs['pelaksana_id']);
-				$data = SPTDetail::where('spt_id', $id)
-				->whereNotIn('pegawai_id', $inputs['pegawai_id'])
-				// ->where('is_pelaksana', '0')
-				->delete();
-
-				//check if is pelaksana null
-				$validasiPelaksana = SPTDetail::where('spt_id', $id)->where('is_pelaksana', '1')->first();
-
-				if($validasiPelaksana == null) {
-					SPTDetail::create([
-						'spt_id' => $spt->id,
-						'pegawai_id' => $inputs['pelaksana_id'],
-						'is_pelaksana' => '1'
+		$isAdmin = Auth::user()->tokenCan('is_admin') ? true : false;
+		$spt = SPT::find($id);
+		if(($spt->proceed_at == null || $isAdmin) && $spt->completed_at == null){
+			try {
+				DB::transaction(function () use ($inputs,$spt, $id) {
+					
+					$brgkt = new Carbon($inputs['tgl_berangkat']);
+					$kembali = new Carbon($inputs['tgl_kembali']);
+					$jumlahHari = $brgkt->diff($kembali)->days;
+	
+					$updateSpt = $spt->update([
+						'jenis_dinas' => $inputs['jenis_dinas'],
+						'anggaran_id' => $inputs['anggaran_id'],
+						'pttd_id' => $inputs['pttd_id'],
+						'pptk_id' => $inputs['pptk_id'],
+						'pelaksana_id' => $inputs['pelaksana_id'],
+						'bendahara_id' => $inputs['bendahara_id'],
+						'pengguna_anggaran_id' => $inputs['pengguna_anggaran_id'],
+						'dasar_pelaksana' => $inputs['dasar_pelaksana'],
+						'untuk' => $inputs['untuk'],
+						'transportasi' => $inputs['transportasi'],
+						'daerah_asal' => $inputs['daerah_asal'],
+						'daerah_tujuan' => $inputs['daerah_tujuan'],
+						'tgl_berangkat' => $inputs['tgl_berangkat'],
+						'tgl_kembali' => $inputs['tgl_kembali'],
+						'jumlah_hari' => $jumlahHari + 1,
+						'tgl_spt' => $inputs['tgl_spt'],
 					]);
-				}
-
-				//Insert new or skip
-				foreach($inputs['pegawai_id'] as $pegawaiId){
-					$detailSPT = SPTDetail::where('pegawai_id', $pegawaiId)->where('spt_id', $id)->first();
-					if ($detailSPT == null ){
-						$detail = SPTDetail::create([
-							'spt_id' => $id,
-							'pegawai_id' => $pegawaiId,
-							'is_pelaksana' => '0'
+	
+					//Delete Missing Pegawai Id
+					array_push($inputs['pegawai_id'], $inputs['pelaksana_id']);
+					$data = SPTDetail::where('spt_id', $id)
+					->whereNotIn('pegawai_id', $inputs['pegawai_id'])
+					// ->where('is_pelaksana', '0')
+					->delete();
+	
+					//check if is pelaksana null
+					$validasiPelaksana = SPTDetail::where('spt_id', $id)->where('is_pelaksana', '1')->first();
+	
+					if($validasiPelaksana == null) {
+						SPTDetail::create([
+							'spt_id' => $spt->id,
+							'pegawai_id' => $inputs['pelaksana_id'],
+							'is_pelaksana' => '1'
 						]);
 					}
-				}
-				
-				//save to log
-				SPTLog::create([
-					'user_id' => auth('sanctum')->user()->id,
-					'username' => auth('sanctum')->user()->pegawai->full_name,
-					'reference_id' => $id,
-					'aksi' => 'Ubah SPT',
-					'success' => '1'
-				]);
-			});
 	
-			array_push($results['messages'], 'Berhasil mengubah SPT.');
-			$results['success'] = true;
-			$results['state_code'] = 200;
-		} catch(\Exception $e){
-			Log::channel('spderr')->info('spt_update_err: '. json_encode($e->getMessage()));
-			array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
+					//Insert new or skip
+					foreach($inputs['pegawai_id'] as $pegawaiId){
+						$detailSPT = SPTDetail::where('pegawai_id', $pegawaiId)->where('spt_id', $id)->first();
+						if ($detailSPT == null ){
+							$detail = SPTDetail::create([
+								'spt_id' => $id,
+								'pegawai_id' => $pegawaiId,
+								'is_pelaksana' => '0'
+							]);
+						}
+					}
+					
+					//save to log
+					SPTLog::create([
+						'user_id' => auth('sanctum')->user()->id,
+						'username' => auth('sanctum')->user()->pegawai->full_name,
+						'reference_id' => $id,
+						'aksi' => 'Ubah SPT',
+						'success' => '1'
+					]);
+				});
+		
+				array_push($results['messages'], 'Berhasil mengubah SPT.');
+				$results['success'] = true;
+				$results['state_code'] = 200;
+			} catch(\Exception $e){
+				Log::channel('spderr')->info('spt_update_err: '. json_encode($e->getMessage()));
+				array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
+			}
+		} else {
+			$results['state_code'] = 400;
+			array_push($results['messages'], 'Kesalahan! Tidak dapat mengubah SPT!');
 		}
 
 		return response()->json($results, $results['state_code']);
@@ -652,7 +664,7 @@ class SPTController extends Controller
 	{
 		$results = $this->responses;
 		$header = SPT::find($id);
-		if ($header->status == 'KONSEP'){
+		if ($header->proceed_at == null){
 			try{
 				DB::transaction(function () use ($id) {
 					$detail = SPTDetail::where('spt_id', $id)->delete();

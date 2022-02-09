@@ -61,7 +61,7 @@ class KategoriPengeluaranController extends Controller
 			]);
 		}
 
-    array_push($results['messages'], 'Berhasil menambahkan Kategori Transportasi baru.');
+    array_push($results['messages'], 'Berhasil menambahkan Kategori Pengeluaran Baru.');
 
     $results['success'] = true;
     $results['state_code'] = 200;
@@ -101,7 +101,7 @@ class KategoriPengeluaranController extends Controller
       'name' => $inputs['name']
     ]);
 
-    array_push($results['messages'], 'Berhasil mengubah Kategori Transportasi.');
+    array_push($results['messages'], 'Berhasil mengubah Kategori Pengeluaran.');
 
     $results['success'] = true;
     $results['state_code'] = 200;
@@ -114,7 +114,7 @@ class KategoriPengeluaranController extends Controller
 		$results = $this->responses;
 		$role = KategoriPengeluaran::destroy($id);
 
-		array_push($results['messages'], 'Berhasil menghapus Kategori Transportasi.');
+		array_push($results['messages'], 'Berhasil menghapus Kategori Pengeluaran.');
 		$results['state_code'] = 200;
 		$results['success'] = true;
 

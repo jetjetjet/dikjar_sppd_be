@@ -59,11 +59,13 @@ class SPPDController extends Controller
 			'untuk',
 			'ang.nama_rekening as anggaran_name',
 			DB::raw("case when to_char(tgl_kembali, 'YYYY-MM-DD') <= to_char(now(), 'YYYY-MM-DD') and completed_at is null and proceed_at is not null then 1 else 0 end as can_finish"),
-			DB::raw("case when settled_at is null and completed_at is not null then 1 else 0 end as can_generate")
+			DB::raw("case when settled_at is null and completed_at is not null then 1 else 0 end as can_generate"),
+			DB::raw("case when (proceed_at is null or 1 = " . $isAdmin . ") and completed_at is null then 1 else 0 end as can_edit")
 		)->first();
 		
 		$child = [];
 		if ($header != null){
+
 			$biaya = DB::table('biaya')->whereNull('deleted_at')
 			->select('pegawai_id', 'spt_id', 'total_biaya');
 
