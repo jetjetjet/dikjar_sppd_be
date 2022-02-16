@@ -68,17 +68,10 @@ class TransportController extends Controller
 				->first();
 
 				$totalBiaya = $biaya->total_biaya + $inputs['total_bayar'];
-				if($inputs['jenis_transport'] == 'Pesawat') {
-					$biaya->update([
-						'total_biaya_pesawat' => ( $biaya->total_biaya_pesawat ?? 0 ) +  $inputs['total_bayar'],
-						'total_biaya' => $totalBiaya
-					]);
-				} else {
-					$biaya->update([
-						'total_biaya_travel' => ($biaya->total_biaya_travel ?? 0) + $inputs['total_bayar'],
-						'total_biaya' => $totalBiaya
-					]);
-				}
+				$biaya->update([
+					'total_biaya_transport' => ( $biaya->total_biaya_transport ?? 0 ) +  $inputs['total_bayar'],
+					'total_biaya' => $totalBiaya
+				]);
 		
 				$results['data'] = ['total' => $totalBiaya];
 			});
@@ -126,7 +119,6 @@ class TransportController extends Controller
 			DB::transaction(function () use ($inputs, $transport, &$results) {
 
 				$total_bayar = $transport->total_bayar - $inputs['total_bayar'];
-				$jenis_transport = $transport->jenis_transport;
 
 				$biaya = Biaya::where('id', $inputs['biaya_id'])
 				->where('pegawai_id', $inputs['pegawai_id'])
@@ -145,17 +137,10 @@ class TransportController extends Controller
 				]);
 				
 				$totalBiaya = $biaya->total_biaya - ($total_bayar);
-				if($jenis_transport == 'Pesawat') {
-					$biaya->update([
-						'total_biaya_pesawat' => $biaya->total_biaya_pesawat -  ($total_bayar),
-						'total_biaya' => $totalBiaya
-					]);
-				} else {
-					$biaya->update([
-						'total_biaya_travel' => $biaya->total_biaya_travel - ($total_bayar),
-						'total_biaya' => $totalBiaya
-					]);
-				}
+				$biaya->update([
+					'total_biaya_transport' => $biaya->total_biaya_transport -  ($total_bayar),
+					'total_biaya' => $totalBiaya
+				]);
 				
 				$results['data'] = ['total' => $totalBiaya];
 			});
@@ -221,24 +206,16 @@ class TransportController extends Controller
 		try{
 			DB::transaction(function () use ($transport, $biayaId, $pegawaiId, &$results) {
 				$total_bayar = $transport->total_bayar;
-				$jenis_transport = $transport->jenis_transport;
 		
 				$biaya = Biaya::where('id', $biayaId)
 				->where('pegawai_id', $pegawaiId)
 				->first();
 		
 				$totalBiaya = $biaya->total_biaya - $total_bayar;
-				if($jenis_transport == 'Pesawat') {
-					$biaya->update([
-						'total_biaya_pesawat' => $biaya->total_biaya_pesawat -  $total_bayar,
-						'total_biaya' => $totalBiaya
-					]);
-				} else {
-					$biaya->update([
-						'total_biaya_travel' => $biaya->total_biaya_travel - $total_bayar,
-						'total_biaya' => $totalBiaya
-					]);
-				}
+				$biaya->update([
+					'total_biaya_transport' => $biaya->total_biaya_transport - $total_bayar,
+					'total_biaya' => $totalBiaya
+				]);
 				
 				$results['data'] = ['total' => $totalBiaya];
 				//delete

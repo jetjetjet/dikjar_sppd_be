@@ -12,6 +12,7 @@ use App\Models\Biaya;
 use App\Models\Pengeluaran;
 use App\Models\ReportSPPD;
 use App\Models\SPTLog;
+use App\Models\Anggaran;
 use DB;
 use Validator;
 use Carbon\Carbon;
@@ -522,6 +523,7 @@ class SPPDController extends Controller
 					//
 					$labelPengguna = $spt->bidang == 'Staf Sekretariat' ? 'Pengguna Anggaran,' : 'Kuasa Pengguna Anggaran,' ;
 					$pembantu = $spt->bidang == 'Staf Sekretariat' ? "Bendahara Pengeluaran, </w:t><w:br/><w:t>" : "Bendahara Pengeluaran Pembantu,";
+					$bendaharaJbtn = $spt->bidang == 'Staf Sekretariat' ? "Bendahara Pengeluaran" : "Bendahara Pengeluaran Pembantu";
 	
 					$totalBiaya = Biaya::where('spt_id', $id)->sum('total_biaya');
 					$terbilang = Utils::rupiahTeks($totalBiaya);
@@ -532,7 +534,7 @@ class SPPDController extends Controller
 					$template->setValue('tahun_anggaran', $spt->periode);
 					$template->setValue('kode_rekening', $spt->kode_rekening);
 					$template->setValue('nama_rekening', $spt->nama_rekening);
-					$template->setValue('nama_bendahara', $spt->bendahara_name);
+					$template->setValue('bendahara_terima', $bendaharaJbtn);
 					$template->setValue('nip_bendahara', $spt->bendahara_nip);
 					$template->setValue('bendahara', $pembantu);
 					$template->setValue('total_biaya', number_format($totalBiaya));
@@ -642,6 +644,10 @@ class SPPDController extends Controller
 				'jabatan'
 			)->first();
 
+			$anggaran = Anggaran::where('id', $spt->anggaran_id)
+			->select('kode_rekening', 'nama_rekening')
+			->first();
+
 			$inap = Inap::where('biaya_id', $biaya->id)
 			->where('pegawai_id', $dtl->pegawai_id)->first();
 
@@ -658,6 +664,19 @@ class SPPDController extends Controller
 			$uangRepresentasi = Pengeluaran::where('biaya_id', $biaya->id)
 			->where('pegawai_id', $dtl->pegawai_id)
 			->whereRaw("UPPER(kategori) like '%UANG REPRESENTASI%'")
+			->sum('total');
+
+			$uangDinasDalam = Pengeluaran::where('biaya_id', $biaya->id)
+			->where('pegawai_id', $dtl->pegawai_id)
+			->whereRaw("UPPER(kategori) like '%UANG PERJALANAN DINAS DALAM KOTA%'")
+			->sum('total');
+
+			$uangLain = Pengeluaran::where('biaya_id', $biaya->id)
+			->where('pegawai_id', $dtl->pegawai_id)
+			->whereRaw("UPPER(kategori) not like '%UANG PERJALANAN DINAS DALAM KOTA%'")
+			->whereRaw("UPPER(kategori) not like '%UANG REPRESENTASI%'")
+			->whereRaw("UPPER(kategori) not like '%UANG SAKU%'")
+			->whereRaw("UPPER(kategori) not like '%UANG MAKAN%'")
 			->sum('total');
 
 			$pesawatBrgkt = Transport::where('biaya_id', $biaya->id)
@@ -685,6 +704,8 @@ class SPPDController extends Controller
 				'spt_id' => $id,
 				'spt_detail_id' => $dtl->id,
 				'biaya_id' => $biaya->id,
+				'nama_rekening' => $anggaran->nama_rekening ?? null,
+				'kode_rekening' => $$anggaran->kode_rekening ?? null,
 				'nama_pelaksana' => $userJbtn->full_name,
 				'jabatan' => $userJbtn->jabatan,
 				'no_pku' => null,
@@ -700,8 +721,10 @@ class SPPDController extends Controller
 				'uang_saku' => $uangSaku ?? null,
 				'uang_makan' => $uangMakan ?? null,
 				'uang_representasi' => $uangRepresentasi ?? null,
+				'uang_lain' => $uangLain ?? null,
+				'uang_dinas_dlm' => $uangDinasDalam ?? null,
 				'uang_penginapan'  => $biaya->total_biaya_inap ?? null,
-				'uang_travel' => $biaya->total_biaya_travel ?? null,
+				'uang_transport' => $biaya->total_biaya_transport ?? null,
 				'uang_total' => $biaya->total_biaya ?? null,
 				'uang_pesawat' => $biaya->total_biaya_pesawat ?? null,
 				'inap_hotel' => $inap->hotel ?? null,

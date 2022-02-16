@@ -30,7 +30,8 @@ class ReportSPPD extends Model
 		'uang_makan',
 		'uang_representasi',
 		'uang_penginapan',
-		'uang_travel',
+		'uang_transport',
+		'uang_lain',
 		'uang_pesawat',
 		'uang_total',
 		'inap_hotel',
@@ -51,6 +52,10 @@ class ReportSPPD extends Model
 		'peskmbl_kode_booking',
 		'peskmbl_no_penerbangan',
 		'peskmbl_tgl',
-		'peskmbl_jumlah'
+		'peskmbl_jumlah',
+		'uang_dinas_dlm',
+		'uang_dinas_luar',
+		'nama_rekening',
+		'kode_rekening'
 	];
 }

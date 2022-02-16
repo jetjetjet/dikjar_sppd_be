@@ -15,7 +15,7 @@ class Biaya extends Model
 		'pegawai_id',
 		'total_biaya_lainnya',
 		'total_biaya_inap',
-		'total_biaya_travel',
+		'total_biaya_transport',
 		'total_biaya_pesawat',
 		'total_biaya',
 		'uang_pesawat',

@@ -196,7 +196,6 @@ class SPTController extends Controller
 					foreach($users as $user){
 						$tempSppd = new TemplateProcessor($templateSppdPath);
 
-						// $template->setValue('dasar_pelaksana', $spt->dasar_pelaksana);
 						$tempSppd->setValue('nama_pegawai', $user->nama_pegawai);
 						$tempSppd->setValue('jabatan_pegawai', $user->jabatan_pegawai);
 						$tempSppd->setValue('golongan_pegawai', str_replace("- -","-", $user->golongan_pegawai));
@@ -207,8 +206,6 @@ class SPTController extends Controller
 						$tempSppd->setValue('daerah_tujuan', $sptData->daerah_tujuan);
 						$tempSppd->setValue('tgl_berangkat', $sptData->tgl_berangkat);
 						$tempSppd->setValue('tgl_kembali', $sptData->tgl_kembali);
-						// $template->setValue('tgl_berangkat_plus', $brgktPlus->isoFormat('D MMMM Y'));
-						// $template->setValue('tgl_kembali_minus', $kembaliMinus->isoFormat('D MMMM Y'));
 						$tempSppd->setValue('tgl_sppd', $sptData->tgl_spt);
 						$tempSppd->setValue('no_spt', $sptData->no_spt);
 
@@ -251,7 +248,7 @@ class SPTController extends Controller
 							'pegawai_id' => $user->pegawai_id,
 							'total_biaya_lainnya' => 0,
 							'total_biaya_inap' => 0,
-							'total_biaya_travel' => 0,
+							'total_biaya_transport' => 0,
 							'total_biaya' => 0,
 						]);
 						

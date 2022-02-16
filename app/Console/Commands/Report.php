@@ -12,7 +12,8 @@ use App\Models\{
     Transport,
     SPT,
     SPTDetail,
-    Pegawai
+    Pegawai,
+    Anggaran
 };
 
 class Report extends Command
@@ -75,6 +76,23 @@ class Report extends Command
                 ->whereRaw("UPPER(kategori) like '%UANG REPRESENTASI%'")
                 ->sum('total');
 
+                $anggaran = Anggaran::where('id', $spt->anggaran_id)
+                ->select('kode_rekening', 'nama_rekening')
+                ->first();
+
+                $uangDinasDalam = Pengeluaran::where('biaya_id', $biaya->id)
+                ->where('pegawai_id', $dtl->pegawai_id)
+                ->whereRaw("UPPER(kategori) like '%UANG PERJALANAN DINAS DALAM KOTA%'")
+                ->sum('total');
+
+                $uangLain = Pengeluaran::where('biaya_id', $biaya->id)
+                ->where('pegawai_id', $dtl->pegawai_id)
+                ->whereRaw("UPPER(kategori) not like '%UANG PERJALANAN DINAS DALAM KOTA%'")
+                ->whereRaw("UPPER(kategori) not like '%UANG REPRESENTASI%'")
+                ->whereRaw("UPPER(kategori) not like '%UANG SAKU%'")
+                ->whereRaw("UPPER(kategori) not like '%UANG MAKAN%'")
+                ->sum('total');
+
                 $pesawatBrgkt = Transport::where('biaya_id', $biaya->id)
                 ->where('pegawai_id', $dtl->pegawai_id)
                 ->where('perjalanan', 'Berangkat')
@@ -100,6 +118,8 @@ class Report extends Command
                     'spt_id' => $spt->id,
                     'spt_detail_id' => $dtl->id,
                     'biaya_id' => $biaya->id,
+                    'nama_rekening' => $anggaran->nama_rekening ?? null,
+                    'kode_rekening' => $$anggaran->kode_rekening ?? null,
                     'nama_pelaksana' => $userJbtn->full_name,
                     'jabatan' => $userJbtn->jabatan,
                     'no_pku' => null,
@@ -115,8 +135,10 @@ class Report extends Command
                     'uang_saku' => $uangSaku ?? null,
                     'uang_makan' => $uangMakan ?? null,
                     'uang_representasi' => $uangRepresentasi ?? null,
+                    'uang_lain' => $uangLain ?? null,
+                    'uang_dinas_dlm' => $uangDinasDalam ?? null,
                     'uang_penginapan'  => $biaya->total_biaya_inap ?? null,
-                    'uang_travel' => $biaya->total_biaya_travel ?? null,
+                    'uang_transport' => $biaya->total_biaya_transport ?? null,
                     'uang_total' => $biaya->total_biaya ?? null,
                     'uang_pesawat' => $biaya->total_biaya_pesawat ?? null,
                     'inap_hotel' => $inap->hotel ?? null,
