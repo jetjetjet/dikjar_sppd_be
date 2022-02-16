@@ -535,6 +535,7 @@ class SPPDController extends Controller
 					$template->setValue('kode_rekening', $spt->kode_rekening);
 					$template->setValue('nama_rekening', $spt->nama_rekening);
 					$template->setValue('bendahara_terima', $bendaharaJbtn);
+					$template->setValue('nama_bendahara', $spt->bendahara_name);
 					$template->setValue('nip_bendahara', $spt->bendahara_nip);
 					$template->setValue('bendahara', $pembantu);
 					$template->setValue('total_biaya', number_format($totalBiaya));
