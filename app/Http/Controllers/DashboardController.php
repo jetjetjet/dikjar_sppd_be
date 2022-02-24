@@ -34,13 +34,21 @@ class DashboardController extends Controller
 		}
 
 		$get = $datas->select(
+			'no_spt',
+			'r.spt_id',
 			'r.full_name',
 			'r.jabatan',
 			'r.daerah_tujuan',
+			DB::raw("INITCAP(status) as status"),
+			DB::raw("case when status = 'KONSEP' then 'badge badge-secondary' when status = 'PROSES' then 'badge badge-primary'
+				when status = 'KEMBALI' then 'badge badge-info' when status = 'KWITANSI' then 'badge badge-warning'
+				when status = 'SELESAI' then 'badge badge-success' else 'badge badge-dark' end as badge
+			"),
+			DB::raw("case when now()::date - tgl_kembali::date > 1 and proceed_at is not null and finished_at is null then 'Telat ' || now()::date - tgl_kembali::date || ' hari' else '' end as keterangan"),
 			DB::raw("coalesce(path_foto, '/storage/profile/user.png') as path_foto"),
 			DB::raw("to_char(tgl_berangkat, 'DD/MM/YYYY') as tgl_berangkat"),
 			DB::raw("to_char(tgl_kembali, 'DD/MM/YYYY') as tgl_kembali"),
-		)->orderBy('tgl_berangkat', 'DESC')
+		)->orderBy('no_spt', 'DESC')
 		->get();
 
 		$results['data'] = $get;

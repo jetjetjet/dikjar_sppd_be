@@ -70,6 +70,12 @@ class SPTController extends Controller
 			'settled_at',
 			'proceed_at',
 			'u.name',
+			DB::raw("INITCAP(status) as status"),
+			DB::raw("case when status = 'KONSEP' then 'badge badge-secondary' when status = 'PROSES' then 'badge badge-primary'
+				when status = 'KEMBALI' then 'badge badge-info' when status = 'KWITANSI' then 'badge badge-warning'
+				when status = 'SELESAI' then 'badge badge-success' else 'badge badge-dark' end as badge
+			"),
+			DB::raw("case when now()::date - tgl_kembali::date > 1 and proceed_at is not null and finished_at is null then 'Telat ' || now()::date - tgl_kembali::date || ' hari' else '' end as keterangan"),
 			DB::raw($canGenerate . " as can_generate")
 		)->orderBy('periode', 'DESC')
 		->orderBy('no_index', 'DESC');

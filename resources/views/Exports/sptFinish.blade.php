@@ -1,16 +1,16 @@
 <table>
   <thead>
     <tr>
-      <th colspan=40> REKAPITULASI PERJALANAN DINAS LUAR DAERAH DAN DALAM DAERAH (LUAR KABUPATEN KERINCI) </th>
+      <th colspan=39> REKAPITULASI PERJALANAN DINAS LUAR DAERAH DAN DALAM DAERAH (LUAR KABUPATEN KERINCI) </th>
     </tr>
     <tr>
-      <th colspan=40> PERIODE: {{ $startDate }} S.D {{ $endDate }} </th>
+      <th colspan=39> PERIODE: {{ $startDate }} S.D {{ $endDate }} </th>
     </tr>
     <tr>
-      <th colspan=40> PADA BADAN KEPEGAWAIAN DAN PENGEMBANGAN SUMBER DAYA MANUSIA DAERAH </th>
+      <th colspan=39> PADA BADAN KEPEGAWAIAN DAN PENGEMBANGAN SUMBER DAYA MANUSIA DAERAH </th>
     </tr>
     <tr>
-      <th colspan=40> </th>
+      <th colspan=39> </th>
     </tr>
     <tr> 
       <th class="align-middle" rowspan=2> No. </th>
@@ -39,8 +39,7 @@
       <th class="align-middle"> Uang Makan </th>
       <th class="align-middle"> Uang Representasi </th>
       <th class="align-middle"> Uang Penginapan </th>
-      <th class="align-middle"> Taksi/Travel </th>
-      <th class="align-middle"> Tiket Pesawat </th>
+      <th class="align-middle"> Uang Transport </th>
       <th class="align-middle"> Lain-lain </th>
       <th class="align-middle"> Jumlah Dibayarkan </th>
       <th class="align-middle"> Hotel </th>
@@ -64,7 +63,7 @@
       <th class="align-middle"> Jumlah Dibayarkan </th>
     </tr>
     <tr>
-    @for ($i = 1; $i <= 40; $i++)
+    @for ($i = 1; $i <= 39; $i++)
       <th> ({{ $i }}) </th>
     @endfor
     </tr>
@@ -89,9 +88,8 @@
         <td>{{ $dt->uang_makan }}</td>
         <td>{{ $dt->uang_representasi }}</td>
         <td>{{ $dt->uang_penginapan }}</td>
-        <td>{{ $dt->uang_travel }}</td>
-        <td>{{ $dt->uang_pesawat }}</td>
-        <td>-</td>
+        <td>{{ $dt->uang_transport }}</td>
+        <td>{{ $dt->uang_lain }}</td>
         <td>{{ $dt->uang_total }}</td>
         <td>{{ $dt->inap_hotel }}</td>
         <td>{{ $dt->inap_room }}</td>

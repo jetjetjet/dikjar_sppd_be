@@ -29,6 +29,8 @@ use App\Http\Controllers\SPPDController;
 use App\Http\Controllers\SPTLogController;
 use App\Http\Controllers\CekSPTController;
 
+use App\Http\Controllers\NotifController;
+
 use App\Http\Controllers\ReportController;
 
 /*
@@ -197,8 +199,11 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::get('/report/spt/selesai', [ReportController::class, 'reportByFinishedSPT'])->middleware('can:laporan-tahunan');
 	Route::post('/report/spt/pegawai', [ReportController::class, 'reportByPegawai'])->middleware('can:laporan-pegawai');
 	
-	
 	Route::get('/spt/{id}/kwitansi', [SPPDController::class, 'cetakKwitansi']);
 	Route::put('/spt/{id}/laporan', [SPPDController::class, 'cetakLaporan']);
 	Route::get('/spt/{id}/biaya/{biayaId}/rumming/{pegawaiId}', [SPPDController::class, 'cetakRumming']);
+	
+	Route::get('/notif', [NotifController::class, 'notif']);
+	Route::get('/notif/view', [NotifController::class, 'viewNotif']);
+	Route::get('/notif/grid', [NotifController::class, 'listNotif']);
 });

@@ -48,6 +48,7 @@ class SPPDController extends Controller
 			'daerah_tujuan',
 			'transportasi',
 			'settled_at',
+			'finished_at',
 			'proceed_at',
 			'completed_at',
 			'saran',
