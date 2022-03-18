@@ -387,6 +387,7 @@ class SPPDController extends Controller
 					'is_pelaksana',
 					'full_name as nama_pegawai')
 				->orderBy('is_pelaksana', 'DESC')
+				->orderBy('nip')
 				->orderBy('full_name')
 				->get();
 				$tempUserValue = array();
@@ -748,6 +749,7 @@ class SPPDController extends Controller
 				'peskmbl_no_penerbangan' => $pesawatPlg->no_penerbangan ?? null,
 				'peskmbl_tgl' => $peskmbl_tgl,
 				'peskmbl_jumlah' => $pesawatPlg->total_bayar ?? null
+				// 'jenis_dinas' => $spt->jenis_dinas
 			]);
 		}
 	}
