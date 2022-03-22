@@ -510,28 +510,33 @@ class SPTController extends Controller
 	{
 		$results = $this->responses;
 
-		$isAdmin = Auth::user()->tokenCan('is_admin') ? true : false;
+		try{
+			$isAdmin = Auth::user()->tokenCan('is_admin') ? 1 : 0;
 
-		$data = SPT::join('anggaran as ag', 'ag.id', 'anggaran_id')
-		->join('pegawai as bdh', 'bdh.id', 'spt.bendahara_id')
-		->join('pegawai as pgn', 'pgn.id', 'spt.pengguna_anggaran_id')
-		->join('pegawai as pptk', 'pptk.id', 'spt.pptk_id')
-		->where('spt.id', $id)
-		->select(
-			'spt.*',
-			'ag.kode_rekening as anggaran_text',
-			'pgn.full_name as pengguna_anggaran_text',
-			'bdh.full_name as bendahara_text',
-			'pptk.full_name as pptk_text',
-			DB::raw("case when (proceed_at is null or 1 = " . $isAdmin . ") and completed_at is null then 1 else 0 end as can_edit"),
-			DB::raw("case when proceed_at is not null and 1 = " . $isAdmin . " and completed_at is null then 1 else 0 end as can_edit_proses")
-		)->first();
+			$data = SPT::join('anggaran as ag', 'ag.id', 'anggaran_id')
+			->join('pegawai as bdh', 'bdh.id', 'spt.bendahara_id')
+			->join('pegawai as pgn', 'pgn.id', 'spt.pengguna_anggaran_id')
+			->join('pegawai as pptk', 'pptk.id', 'spt.pptk_id')
+			->where('spt.id', $id)
+			->select(
+				'spt.*',
+				'ag.kode_rekening as anggaran_text',
+				'pgn.full_name as pengguna_anggaran_text',
+				'bdh.full_name as bendahara_text',
+				'pptk.full_name as pptk_text',
+				DB::raw("case when (proceed_at is null or 1 = " . $isAdmin . ") and completed_at is null then 1 else 0 end as can_edit"),
+				DB::raw("case when proceed_at is not null and 1 = " . $isAdmin . " and completed_at is null then 1 else 0 end as can_edit_proses")
+			)->first();
 
-		$data->pegawai_id = SPTDetail::where('spt_id', $id)->where('is_pelaksana', '0')->get()->pluck('pegawai_id');
-		$results['data'] = $data;
+			$data->pegawai_id = SPTDetail::where('spt_id', $id)->where('is_pelaksana', '0')->get()->pluck('pegawai_id');
+			$results['data'] = $data;
 
-		$results['state_code'] = 200;
-		$results['success'] = true;
+			$results['state_code'] = 200;
+			$results['success'] = true;
+		} catch (\Exception $e) {
+			Log::channel('spderr')->info('spt_view: '. json_encode($e->getMessage()));
+			array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
+		}
 		
 		return response()->json($results, $results['state_code']);
 	}
