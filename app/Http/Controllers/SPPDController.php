@@ -375,7 +375,7 @@ class SPPDController extends Controller
 					DB::raw("pangkat || ' ' || golongan as pangkat"))
 				->first();
 
-				$nameFile = "laporan_090_".$updateSpt->index."_SPPD_PDK_2021";
+				$nameFile = time()."_lprn_090_".$updateSpt->index;
 
 				$tgl_cetak = (new Carbon())->isoFormat('D MMMM Y');
 				$tglAwal = (new Carbon($updateSpt->tgl_berangkat))->isoFormat('D MMMM Y');
@@ -519,7 +519,7 @@ class SPPDController extends Controller
 						'a.bidang'
 					)->first();
 		
-					$nameFile = "090_".$spt->no_index."_SPPD_PDK_202X";
+					$nameFile = time()."_090_".$spt->no_index;
 					$totalBiaya = Biaya::where('spt_id', $id)->sum('total_biaya');
 
 					//
