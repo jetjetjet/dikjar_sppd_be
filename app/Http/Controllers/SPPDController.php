@@ -236,8 +236,9 @@ class SPPDController extends Controller
 					->where('pegawai_id', $pegawaiId)
 					->groupBy('jenis_transport')
 					->groupBy('perjalanan')
+					->groupBy('agen')
 					->select(
-						DB::raw("jenis_transport || ' ' || perjalanan as pengeluaran"),
+						DB::raw("jenis_transport || ' ' || perjalanan || ' ' || agen as pengeluaran"),
 						DB::raw("sum(1) as qty"),
 						DB::raw("sum(total_bayar) as harga"),
 						DB::raw("string_agg(catatan, ', ') as catatan")
@@ -748,8 +749,9 @@ class SPPDController extends Controller
 				'peskmbl_kode_booking' => $pesawatPlg->kode_booking ?? null,
 				'peskmbl_no_penerbangan' => $pesawatPlg->no_penerbangan ?? null,
 				'peskmbl_tgl' => $peskmbl_tgl,
-				'peskmbl_jumlah' => $pesawatPlg->total_bayar ?? null
-				// 'jenis_dinas' => $spt->jenis_dinas
+				'peskmbl_jumlah' => $pesawatPlg->total_bayar ?? null,
+				// 'jenis_dinas' => $spt->jenis_dinas,
+				// 'periode' => $spt->periode,
 			]);
 		}
 	}
