@@ -146,13 +146,18 @@ class GenerateSurat extends Command
                             $newFile->newName = $newFile->newName.".pdf";
     
                             //upload to table
-                            $file = Utils::saveFile($newFile);
+                            $file = FileModel::create([
+                                'file_name' => $newFile->newName,
+                                'original_name' =>  $newFile->originalName,
+                                'file_path' => $newFile->dbPath,
+                                'ext' => $newFile->ext,
+                            ]);
     
                             // update table spt
                             SPTDetail::where('spt_id', $id)
                             ->where('pegawai_id', $user->pegawai_id)
                             ->update([
-                                'sppd_file_id' => $file,
+                                'sppd_file_id' => $file->id,
                             ]);
                         }
                         
@@ -222,10 +227,16 @@ class GenerateSurat extends Command
                     $newFile->newName = $newFile->newName.".pdf";
                     
                     //save to table
-                    $file = Utils::saveFile($newFile);
+                    $file = FileModel::create([
+                        'file_name' => $newFile->newName,
+                        'original_name' =>  $newFile->originalName,
+                        'file_path' => $newFile->dbPath,
+                        'ext' => $newFile->ext,
+                    ]);
+                    // Utils::saveFile($newFile);
                     // update
                     $spt->update([
-                        'spt_file_id' => $file,
+                        'spt_file_id' => $file->id,
                         'spt_generated_at' => DB::raw("now()"),
                         'spt_generated_by' => 0
                     ]);
