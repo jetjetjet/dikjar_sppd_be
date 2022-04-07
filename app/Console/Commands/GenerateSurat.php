@@ -152,8 +152,8 @@ class GenerateSurat extends Command
                                 'original_name' =>  $newFile->originalName,
                                 'file_path' => $newFile->dbPath,
                                 'ext' => $newFile->ext,
-                                'created_by' => 0,
-                                'created_at' => DB::raw("now()")
+                                // 'created_by' => 0,
+                                // 'created_at' => DB::raw("now()")
                             ]);
     
                             // update table spt
@@ -235,8 +235,8 @@ class GenerateSurat extends Command
                         'original_name' =>  $newFile->originalName,
                         'file_path' => $newFile->dbPath,
                         'ext' => $newFile->ext,
-                        'created_by' => 0,
-                        'created_at' => DB::raw("now()")
+                        // 'created_by' => 0,
+                        // 'created_at' => DB::raw("now()")
                     ]);
                     // Utils::saveFile($newFile);
                     // update
