@@ -142,7 +142,6 @@ class SPTController extends Controller
 	{
 		$results = $this->responses;
 		$spt = SPT::find($id);
-
 		//
 		$isAdmin = Auth::user()->tokenCan('is_admin') ? true : false;
 
@@ -351,6 +350,7 @@ class SPTController extends Controller
 					$results['success'] = true;
 					$results['state_code'] = 200;
 				} catch (\Exception $e) {
+					dd($e->getMessage());
 					DB::rollBack();
 					Log::channel('spderr')->info('spt_proses: '. json_encode($e->getMessage()));
 					array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
@@ -512,20 +512,30 @@ class SPTController extends Controller
 
 		try{
 			$isAdmin = Auth::user()->tokenCan('is_admin') ? 1 : 0;
+			$canVoid = Auth::user()->tokenCan('spt-void') ? 1 : 0;
 
 			$data = SPT::join('anggaran as ag', 'ag.id', 'anggaran_id')
 			->join('pegawai as bdh', 'bdh.id', 'spt.bendahara_id')
 			->join('pegawai as pgn', 'pgn.id', 'spt.pengguna_anggaran_id')
 			->join('pegawai as pptk', 'pptk.id', 'spt.pptk_id')
+			->join('pegawai as pttd', 'pttd.id', 'pttd_id')
+			->join('pegawai as pel', 'pel.id', 'pelaksana_id')
 			->where('spt.id', $id)
 			->select(
 				'spt.*',
 				'ag.kode_rekening as anggaran_text',
+				'ag.nama_rekening as anggaran_name',
 				'pgn.full_name as pengguna_anggaran_text',
 				'bdh.full_name as bendahara_text',
 				'pptk.full_name as pptk_text',
+				'pttd.full_name as pttd_text',
+				'pel.full_name as pelaksana_text',
+				DB::raw("case when to_char(tgl_kembali, 'YYYY-MM-DD') <= to_char(now(), 'YYYY-MM-DD') and completed_at is null and proceed_at is not null then 1 else 0 end as can_finish"),
 				DB::raw("case when (proceed_at is null or 1 = " . $isAdmin . ") and completed_at is null then 1 else 0 end as can_edit"),
-				DB::raw("case when proceed_at is not null and 1 = " . $isAdmin . " and completed_at is null then 1 else 0 end as can_edit_proses")
+				DB::raw("case when proceed_at is not null and 1 = " . $isAdmin . " and completed_at is null then 1 else 0 end as can_edit_proses"),
+				DB::raw("case when (proceed_at is null or 1 = " . $isAdmin . ") and completed_at is null then 1 else 0 end as can_edit"),
+				DB::raw("case when (1 = " . $canVoid ." or 1 = " . $isAdmin . ") and proceed_at is not null and finished_at is null and voided_at is null then 1 else 0 end as can_void"),
+				DB::raw("case when settled_at is null and completed_at is not null then 1 else 0 end as can_generate"),
 			)->first();
 
 			$data->pegawai_id = SPTDetail::where('spt_id', $id)->where('is_pelaksana', '0')->get()->pluck('pegawai_id');
@@ -697,6 +707,53 @@ class SPTController extends Controller
 		} else {
 			array_push($results['messages'], 'SPT tidak dapat dihapus!');
 		}
+
+		return response()->json($results, $results['state_code']);
+	}
+
+	public function void(Request $request, $id)
+	{
+		$results = $this->responses;
+
+		$inputs = $request->all();
+		$rules = array(
+			'void_remark' => 'required',
+		);
+
+		$validator = Validator::make($inputs, $rules);
+		// Validation fails?
+		if ($validator->fails()){
+      $results['messages'] = Array($validator->messages()->first());
+      return response()->json($results, 409);
+    }
+
+		$isAdmin = Auth::user()->tokenCan('is_admin') ? true : false;
+		$spt = SPT::find($id);
+		
+		if ($spt->finished_at == null  && $spt->proceed_at != null) {
+
+			$spt->update([
+				'voided_at' => now()->toDateTimeString(),
+				'voided_by' => auth('sanctum')->user()->id ?? 0,
+				'void_remark' => $inputs['void_remark'],
+				'status' => 'VOID'
+			]);
+
+			SPTLog::create([
+				'user_id' => auth('sanctum')->user()->id,
+				'username' => auth('sanctum')->user()->pegawai->full_name,
+				'reference_id' => $id,						
+				'aksi' => 'VOID SPT',
+				'success' => '1'
+			]);
+
+			array_push($results['messages'], 'Berhasil mengubah status SPT menjadi VOID.');
+			$results['success'] = true;
+			$results['state_code'] = 200;
+			return response()->json($results, $results['state_code']);
+		}
+
+		array_push($results['messages'], 'SPT tidak dapat diubah menjadi VOID.');
 
 		return response()->json($results, $results['state_code']);
 	}

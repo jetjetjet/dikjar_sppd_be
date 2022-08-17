@@ -26,71 +26,45 @@ use NcJoes\OfficeConverter\OfficeConverter;
 
 class SPPDController extends Controller
 {
+
 	public function grid(Request $request, $id)
 	{
 		$results = $this->responses;
 		$user = $request->user();
 		$isAdmin = $user->tokenCan('is_admin') ? 1 : 0;
 		$loginid = $user->id;
-		$canGenerate = $isAdmin == 1 || $user->tokenCan('sppd-generate') ? 1 : 0;
 
-		$header = SPT::where('spt.id', $id)
-		->join('pegawai as b', 'b.id', 'bendahara_id')
-		->join('pegawai as pptk', 'pptk.id', 'pptk_id')
-		->join('pegawai as pttd', 'pttd.id', 'pttd_id')
-		->join('pegawai as pel', 'pel.id', 'pelaksana_id')
-		->join('anggaran as ang', 'ang.id', 'anggaran_id')
+		$biaya = DB::table('biaya')->whereNull('deleted_at')
+		->select('pegawai_id', 'spt_id', 'total_biaya');
+
+		$details = SPTDetail::join('pegawai as p', 'p.id', 'spt_detail.pegawai_id')
+		->leftJoinSub($biaya, 'biaya', function ($join) {
+				$join->on('spt_detail.spt_id', 'biaya.spt_id')
+				->on('spt_detail.pegawai_id', 'biaya.pegawai_id');
+		})->where('spt_detail.spt_id', $id)
 		->select(
-			'no_spt',
-			DB::raw("to_char(tgl_berangkat, 'DD-MM-YYYY') as tgl_berangkat"),
-			DB::raw("to_char(tgl_kembali, 'DD-MM-YYYY') as tgl_kembali"),
-			'daerah_asal',
-			'daerah_tujuan',
-			'transportasi',
-			'settled_at',
-			'finished_at',
-			'proceed_at',
-			'completed_at',
-			'saran',
-			'hasil',
-			'b.full_name as bendahara_name',
-			'pptk.full_name as pptk_name',
-			'pttd.full_name as pttd_name',
-			'pel.full_name as pelaksana_name',
-			'dasar_pelaksana',
-			'untuk',
-			'ang.nama_rekening as anggaran_name',
-			DB::raw("case when to_char(tgl_kembali, 'YYYY-MM-DD') <= to_char(now(), 'YYYY-MM-DD') and completed_at is null and proceed_at is not null then 1 else 0 end as can_finish"),
-			DB::raw("case when settled_at is null and completed_at is not null then 1 else 0 end as can_generate"),
-			DB::raw("case when (proceed_at is null or 1 = " . $isAdmin . ") and completed_at is null then 1 else 0 end as can_edit")
-		)->first();
-		
-		$child = [];
-		if ($header != null){
+			'spt_detail.id',
+			'sppd_file_id',
+			'p.id as pegawai_id',
+			'full_name',
+			'nip',
+			DB::raw("coalesce(total_biaya,0) as total_biaya"),
+			DB::raw("case when 1 = {$isAdmin} or spt_detail.created_by = {$loginid} then true else false end as can_edit")
+		)->orderBy('is_pelaksana', 'DESC')
+		->orderBy('nip')
+		->orderBy('full_name')
+		->get();
 
-			$biaya = DB::table('biaya')->whereNull('deleted_at')
-			->select('pegawai_id', 'spt_id', 'total_biaya');
-
-			$child = SPTDetail::join('pegawai as p', 'p.id', 'spt_detail.pegawai_id')
-			->leftJoinSub($biaya, 'biaya', function ($join) {
-					$join->on('spt_detail.spt_id', 'biaya.spt_id')
-					->on('spt_detail.pegawai_id', 'biaya.pegawai_id');
-			})->where('spt_detail.spt_id', $id)
-			->select(
-				'spt_detail.id',
-				'sppd_file_id',
-				'p.id as pegawai_id',
-				'full_name',
-				'nip',
-				DB::raw("coalesce(total_biaya,0) as total_biaya"),
-				DB::raw("case when 1 = {$isAdmin} or spt_detail.created_by = {$loginid} then true else false end as can_edit")
-			)->orderBy('is_pelaksana', 'DESC')
-			->orderBy('nip')
-			->orderBy('full_name')
-			->get();
+		$total = 0;
+		foreach ($details as $detail) {
+			$total += $detail->total_biaya;
 		}
 
-		$results['data']  = array( 'header' => $header, 'child' => $child);
+		$results['data'][]  = [
+			'children' => $details,
+			'total_biaya' => $total,
+			'nip' => 'Total Keseluruhan'
+		];
 
 		$results['state_code'] = 200;
 		$results['success'] = true;
@@ -146,6 +120,9 @@ class SPPDController extends Controller
 			'pttd.full_name as pttd_name',
 			'pel.full_name as pelaksana_name',
 			'ang.nama_rekening as anggaran_name',
+			'voided_at',
+			'void_remark',
+			'status',
 			DB::raw("( select full_name from pegawai where id = {$pegawaiId} and deleted_at is null limit 1 ) as pegawai_text"),
 			DB::raw("( select id from biaya where spt_id = {$id} and pegawai_id = {$pegawaiId} and deleted_at is null limit 1 ) as biaya_id"),
 			DB::raw("( select total_biaya from biaya where spt_id = {$id} and pegawai_id = {$pegawaiId} and deleted_at is null limit 1 ) as total_biaya"),
@@ -219,6 +196,7 @@ class SPPDController extends Controller
 					$pengeluaran = Pengeluaran::where('biaya_id', $biayaId)
 					->where('pegawai_id', $pegawaiId)
 					->groupBy('kategori')
+					->groupBy('catatan')
 					->select(
 						'kategori as pengeluaran',
 						DB::raw("sum(jml) as qty"),
@@ -612,6 +590,7 @@ class SPPDController extends Controller
 						$results['state_code'] = 200;
 						$results['data'] = $newFile->dbPath . $newFile->newName . ".pdf";
 					} catch (\Exception $e) {
+						dd($e);
 						DB::rollBack();
 						Log::channel('spderr')->info('spt_kwitansi: '. json_encode($e->getMessage()));
 						array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');

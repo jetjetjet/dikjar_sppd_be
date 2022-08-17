@@ -113,7 +113,7 @@ class RoleSeeder extends Seeder
 			[
 				'name'       => 'spt',
 				'guard_name' => 'sanctum',
-				'action'     => ['view', 'add', 'edit', 'delete', 'finish', 'proses', 'generate', 'kwitansi','log', 'cetak'],
+				'action'     => ['view', 'add', 'edit', 'delete', 'finish', 'proses', 'generate', 'kwitansi','log', 'cetak', 'void'],
 			],
 			[
 				'name'       => 'sppd',

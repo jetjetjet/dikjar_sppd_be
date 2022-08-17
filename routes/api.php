@@ -158,6 +158,7 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::get('/spt/{id}/lihat', [SPTController::class, 'getSPT'])->middleware('can:spt-view');
 	Route::get('/spt/{id}/cetak', [SPTController::class, 'cetakSPT'])->middleware('can:spt-generate');
 	Route::post('/spt', [SPTController::class, 'store'])->middleware('can:spt-add');
+	Route::post('/spt/{id}/void', [SPTController::class, 'void'])->middleware('can:spt-void');
 	Route::put('/spt/{id}', [SPTController::class, 'update'])->middleware('can:spt-edit');
 	Route::patch('/spt/{id}/selesai', [SPTController::class, 'finish'])->middleware('can:spt-finish');
 	Route::patch('/spt/{id}/proses', [SPTController::class, 'proses'])->middleware('can:spt-edit');

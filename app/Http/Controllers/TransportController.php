@@ -69,7 +69,7 @@ class TransportController extends Controller
 
 				$totalBiaya = $biaya->total_biaya + $inputs['total_bayar'];
 				$biaya->update([
-					'total_biaya_transport' => ( $biaya->total_biaya_transport ?? 0 ) +  $inputs['total_bayar'],
+					'total_biaya_transport' => ( $biaya->total_biaya_transport ?? 0 ) + $inputs['total_bayar'],
 					'total_biaya' => $totalBiaya
 				]);
 		
@@ -138,7 +138,7 @@ class TransportController extends Controller
 				
 				$totalBiaya = $biaya->total_biaya - ($total_bayar);
 				$biaya->update([
-					'total_biaya_transport' => $biaya->total_biaya_transport -  ($total_bayar),
+					'total_biaya_transport' => $biaya->total_biaya_transport - ($total_bayar),
 					'total_biaya' => $totalBiaya
 				]);
 				

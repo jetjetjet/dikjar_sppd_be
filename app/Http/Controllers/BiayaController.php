@@ -14,7 +14,18 @@ class BiayaController extends Controller
 	{
 		$results = $this->responses;
 
-		$results['data'] = DB::select("select * from biaya_grid({$id}, {$pegawaiId})");
+		$biaya = DB::select("select * from biaya_grid({$id}, {$pegawaiId})");
+
+		$total = 0;
+		foreach ($biaya as $b) {
+			$total += $b->biaya;
+		}
+
+		$results['data'][] = [
+			'tipe' => 'Total Pengeluaran',
+			'biaya' => $total,
+			'children' => $biaya
+		];
 		$results['state_code'] = 200;
 		$results['success'] = true;
 

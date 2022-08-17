@@ -25,6 +25,7 @@ class AnggaranController extends Controller
 			->join('biaya as b', 'b.spt_id', 's.id')
 			->whereNull('b.deleted_at')
 			->whereNull('s.deleted_at')
+			->whereNull('s.voided_at')
 			->whereNotNull('s.settled_at')
 			->groupBy('s.anggaran_id')
 			->select('s.anggaran_id', DB::raw("sum(b.total_biaya) as realisasi"));
@@ -90,6 +91,7 @@ class AnggaranController extends Controller
 			->whereNull('b.deleted_at')
 			->whereNull('s.deleted_at')
 			->whereNotNull('s.settled_at')
+			->whereNull('s.voided_at')
 			->groupBy('s.anggaran_id')
 			->select('s.anggaran_id', DB::raw("sum(b.total_biaya) as realisasi"));
 	

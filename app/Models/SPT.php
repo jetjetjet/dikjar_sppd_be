@@ -48,6 +48,9 @@ class SPT extends Model
 		'settled_by',
 		'kwitansi_file_id',
 		'finished_at', 
-		'finished_by'
+		'finished_by',
+		'void_remark',
+		'voided_by',
+		'voided_at'
 	];
 }
