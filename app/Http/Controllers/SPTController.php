@@ -350,7 +350,6 @@ class SPTController extends Controller
 					$results['success'] = true;
 					$results['state_code'] = 200;
 				} catch (\Exception $e) {
-					dd($e->getMessage());
 					DB::rollBack();
 					Log::channel('spderr')->info('spt_proses: '. json_encode($e->getMessage()));
 					array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
