@@ -406,6 +406,7 @@ class SPPDController extends Controller
 				$hasil = explode("<li>",$updateSpt->hasil);
 				$ctr = 1;
 				foreach($hasil as $hsl) {
+					$hsl = (html_entity_decode($hsl, ENT_COMPAT, 'UTF-8'));
 					$vHsl = strip_tags($hsl);
 					if(!empty($vHsl)){
 						$tmpHsl = array (
