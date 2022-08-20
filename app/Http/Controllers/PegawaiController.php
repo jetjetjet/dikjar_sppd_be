@@ -33,10 +33,10 @@ class PegawaiController extends Controller
 			if($request->filter == 'all'){
 				//
 			} else if($request->filter == 'spt'){
-				$q = $q->whereRaw("id not in ( select pegawai_id from spt_detail sd join spt on spt.id = sd.spt_id where status in ('KONSEP', 'PROSES', 'KWITANSI', 'KEMBALI') and spt.deleted_at is null )")
+				$q = $q->whereRaw("id not in ( select pegawai_id from spt_detail sd join spt on spt.id = sd.spt_id where status in ('KONSEP', 'PROSES', 'KWITANSI', 'KEMBALI') and spt.deleted_at is null and sd.deleted_at is null )")
 					->where('pegawai_app', '1');
 			} else if($request->filter == 'spt_edit' && isset($request->id)){
-				$q = $q->whereRaw("id not in ( select pegawai_id from spt_detail sd join spt on spt.id = sd.spt_id where status in ('KONSEP', 'PROSES', 'KWITANSI', 'KEMBALI') and spt.deleted_at is null and spt_id != ". $request->id ." )")
+				$q = $q->whereRaw("id not in ( select pegawai_id from spt_detail sd join spt on spt.id = sd.spt_id where status in ('KONSEP', 'PROSES', 'KWITANSI', 'KEMBALI') and spt.deleted_at is null and sd.deleted_at is null and spt_id != ". $request->id ." )")
 					->where('pegawai_app', '1');
 			} else if($request->filter == 'user'){
 				$q = Pegawai::select('pegawai.email as code', 'full_name as label')

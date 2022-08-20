@@ -341,7 +341,7 @@ class SPPDController extends Controller
 		$spt->update($updateData);
 
 		$updateSpt = SPT::find($id);
-		if(true) { 
+		try { 
 			$templatePath = base_path('public/storage/template/template_laporan.docx');
 			$checkFile = FaFile::exists($templatePath);
 			if($checkFile) {
@@ -446,11 +446,9 @@ class SPPDController extends Controller
 			} else {
 				array_push($results['messages'], 'Template Laporan SPT tidak ditemukan.');
 			}
-		} else {
-			$file = DB::table('files')->where('id', $updateSpt->laporan_file_id)->first();
-			$results['data'] = $file->file_path . $file->file_name. ".pdf";
-			$results['success'] = true;
-			$results['state_code'] = 200;
+		} catch (\Exception $e) {
+			array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
+			Log::channel('spderr')->info('spt_kwitansi: '. json_encode($e->getMessage()));
 		}
 		
 		return response()->json($results, $results['state_code']);
@@ -590,7 +588,6 @@ class SPPDController extends Controller
 						$results['state_code'] = 200;
 						$results['data'] = $newFile->dbPath . $newFile->newName . ".pdf";
 					} catch (\Exception $e) {
-						dd($e);
 						DB::rollBack();
 						Log::channel('spderr')->info('spt_kwitansi: '. json_encode($e->getMessage()));
 						array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
