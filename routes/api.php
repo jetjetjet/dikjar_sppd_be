@@ -110,7 +110,7 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	
 	Route::get('/pegawai-grid', [PegawaiController::class, 'grid'])->middleware('can:pegawai-view');
 	Route::get('/pegawai-search', [PegawaiController::class, 'search']);
-	Route::get('/pegawai/{id}', [PegawaiController::class, 'show'])->middleware('can:pegawai-view');
+	Route::get('/pegawai/{id}', [PegawaiController::class, 'show']);
 	Route::post('/pegawai', [PegawaiController::class, 'store'])->middleware('can:pegawai-add');
 	Route::put('/pegawai/{id}', [PegawaiController::class, 'update'])->middleware('can:pegawai-edit');
 	Route::put('/pegawai/{id}/change-password', [PegawaiController::class, 'changePassword'])->middleware('can:pegawai-edit');
