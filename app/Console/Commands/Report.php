@@ -51,7 +51,7 @@ class Report extends Command
     {
         ReportSPPD::truncate();
 
-        $sptAll = SPT::orderBy('no_index')->whereNotNull('settled_at')->get();
+        $sptAll = SPT::orderBy('no_index')->whereNotNull('settled_at')->whereNull('voided_at')->get();
         foreach($sptAll as $spt) {
             $sppd = SPTDetail::where('spt_id', $spt->id)->get();
             foreach($sppd as $dtl) {
