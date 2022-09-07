@@ -23,7 +23,7 @@
       <th class="align-middle" colspan=2> Lokasi </th>
       <th class="align-middle" colspan=2> Tanggal </th>
       <th class="align-middle" rowspan=2> Jmlh Hari </th>
-      <th class="align-middle" colspan=8> Biaya Perjalanan Dinas </th>
+      <th class="align-middle" colspan=7> Biaya Perjalanan Dinas </th>
       <th class="align-middle" colspan=7> Penginapan </th>
       <th class="align-middle" colspan=6> Pesawat Berangkat </th>
       <th class="align-middle" colspan=6> Pesawat Pulang </th>
@@ -102,11 +102,13 @@
         <td>{{ $dt->pesbrgkt_no_tiket }}</td>
         <td>{{ $dt->pesbrgkt_kode_booking }}</td>
         <td>{{ $dt->pesbrgkt_no_penerbangan }}</td>
+        <td>{{ $dt->pesbrgkt_tgl }}</td>
         <td>-</td>
         <td>{{ $dt->peskmbl_maskapai }}</td>
         <td>{{ $dt->peskmbl_no_tiket }}</td>
         <td>{{ $dt->peskmbl_kode_booking }}</td>
         <td>{{ $dt->peskmbl_no_penerbangan }}</td>
+        <td>{{ $dt->peskmbl_tgl }}</td>
         <td>-</td>
       </tr>
     @endforeach

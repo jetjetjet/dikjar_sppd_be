@@ -32,8 +32,28 @@ class ReportController extends Controller
 	public function reportByFinishedSPT(Request $request)
 	{
 		$results = $this->responses;
-		$results['data'] = ReportSPPD::orderBy('id', 'DESC')
-		->get();
+		$inputs = $request->all();
+		$rules = array(
+			'jenis_dinas' => 'required',
+			'tahun_laporan' => 'required',
+		);
+
+		$validator = Validator::make($request->all(), $rules);
+		// Validation fails?
+		if ($validator->fails()){
+      $results['messages'] = Array($validator->messages()->first());
+      return response()->json($results, $results['state_code']);
+    }
+
+		$q = ReportSPPD::orderBy('id', 'DESC');
+
+		if ($inputs['jenis_dinas'] == 'Dalam Daerah') {
+			$q = $q->where('lok_asal', '!=' , 'Kabupaten Kerinci');
+		} else if ($inputs['jenis_dinas'] == 'Luar Daerah') {
+			$q = $q->where('lok_asal', 'Kabupaten Kerinci');
+		}
+
+		$results['data'] = $q->get();
 		$results['state_code'] = 200;
 		$results['success'] = true;
 
@@ -106,8 +126,9 @@ class ReportController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
-	public function exportFinishedSPT()
+	public function exportFinishedSPT(Request $request)
 	{
-		return Excel::download(new SPTFinish, 'Report_Tahunan_Perjalanan_Dinas.xlsx');
+		$inputs = $request->all();
+		return Excel::download(new SPTFinish($inputs['jenis_dinas'], $inputs['tahun']), 'Report_Tahunan_Perjalanan_Dinas.xlsx');
 	}
 }

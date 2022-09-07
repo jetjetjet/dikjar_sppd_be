@@ -197,7 +197,7 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::put('/pengeluaran/{id}/upload', [PengeluaranController::class, 'uploadFile']);
 	Route::delete('/pengeluaran/{id}/{biayaId}/{pegawaiId}', [PengeluaranController::class, 'destroy']);
 
-	Route::get('/report/spt/selesai', [ReportController::class, 'reportByFinishedSPT'])->middleware('can:laporan-tahunan');
+	Route::post('/report/spt/selesai', [ReportController::class, 'reportByFinishedSPT'])->middleware('can:laporan-tahunan');
 	Route::post('/report/spt/pegawai', [ReportController::class, 'reportByPegawai'])->middleware('can:laporan-pegawai');
 	
 	Route::get('/spt/{id}/kwitansi', [SPPDController::class, 'cetakKwitansi']);
