@@ -61,6 +61,7 @@
       <th class="align-middle"> Nomor Penerbangan </th>
       <th class="align-middle"> Tanggal </th>
       <th class="align-middle"> Jumlah Dibayarkan </th>
+      <th class="align-middle"> Nama Rekening </th>
     </tr>
     <tr>
     @for ($i = 1; $i <= 39; $i++)
@@ -103,13 +104,14 @@
         <td>{{ $dt->pesbrgkt_kode_booking }}</td>
         <td>{{ $dt->pesbrgkt_no_penerbangan }}</td>
         <td>{{ $dt->pesbrgkt_tgl }}</td>
-        <td>-</td>
+        <td>{{ $dt->pesbrgkt_jumlah }}</td>
         <td>{{ $dt->peskmbl_maskapai }}</td>
         <td>{{ $dt->peskmbl_no_tiket }}</td>
         <td>{{ $dt->peskmbl_kode_booking }}</td>
         <td>{{ $dt->peskmbl_no_penerbangan }}</td>
         <td>{{ $dt->peskmbl_tgl }}</td>
-        <td>-</td>
+        <td>{{ $dt->peskmbl_jumlah }}</td>
+        <td>{{ $dt->nama_rekening }}</td>
       </tr>
     @endforeach
   </tbody>
