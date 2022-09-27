@@ -736,12 +736,12 @@ class SPPDController extends Controller
 	public function mapBiaya($db)
 	{
 		$ui = new \stdClass();
-		$ui->pengeluaran = isset($db->pengeluaran) ? $db->pengeluaran : null;
-		$ui->j = isset($db->qty) ? $db->qty : null;
-		$ui->biaya = isset($db->harga) ? number_format($db->harga) : null;
-		$ui->total = isset($db->harga) && isset($db->qty) ? number_format($db->harga * $db->qty) : null;
-		$ui->totalRaw = isset($db->harga) && isset($db->qty) ? $db->harga * $db->qty : null;
-		$ui->cttn = isset($db->catatan) ? $db->catatan : null;
+		$ui->pengeluaran = isset($db->pengeluaran) ? $db->pengeluaran : "";
+		$ui->j = isset($db->qty) ? $db->qty : "";
+		$ui->biaya = isset($db->harga) ? number_format($db->harga) : "";
+		$ui->total = isset($db->harga) && isset($db->qty) ? number_format($db->harga * $db->qty) : "";
+		$ui->totalRaw = isset($db->harga) && isset($db->qty) ? $db->harga * $db->qty : "";
+		$ui->cttn = isset($db->catatan) ? $db->catatan : "";
 
 		return $ui;
 	}
