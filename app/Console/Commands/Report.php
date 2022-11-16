@@ -119,7 +119,7 @@ class Report extends Command
                     'spt_detail_id' => $dtl->id,
                     'biaya_id' => $biaya->id,
                     'nama_rekening' => $anggaran->nama_rekening ?? null,
-                    'kode_rekening' => $$anggaran->kode_rekening ?? null,
+                    'kode_rekening' => $anggaran->kode_rekening ?? null,
                     'nama_pelaksana' => $userJbtn->full_name,
                     'jabatan' => $userJbtn->jabatan,
                     'no_pku' => null,
