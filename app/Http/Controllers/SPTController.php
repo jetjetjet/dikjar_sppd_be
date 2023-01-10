@@ -34,7 +34,7 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class SPTController extends Controller
 {
-  public function grid(Request $request)
+  	public function grid(Request $request)
 	{
 		$results = $this->responses;
 
@@ -408,14 +408,14 @@ class SPTController extends Controller
 				$brgkt = new Carbon($inputs['tgl_berangkat']);
 				$kembali = new Carbon($inputs['tgl_kembali']);
 				$jumlahHari = $brgkt->diff($kembali)->days;
+				$tahun = Carbon::now()->format('Y');
 
 				if(Carbon::now()->format('d-m') == '01-01') {
 					$noMax = 1;
 				} else {
-					$noMax = SPT::whereNull('deleted_at')->max('no_index') + 1 ?? 1;
+					$noMax = SPT::whereNull('deleted_at')->where('periode', $tahun)->max('no_index') + 1 ?? 1;
 				}
 				
-				$tahun = Carbon::now()->format('Y');
 				$noSpt = '090/'. str_pad($noMax, 3, '0', STR_PAD_LEFT) . '/SPT/PDK/' . $tahun ;
 				$spt = SPT::create([
 					'no_index' => $noMax,
