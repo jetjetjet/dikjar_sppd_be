@@ -189,7 +189,7 @@ class SPPDController extends Controller
 
 				$pembantu = $spt->bidang == 'Staf Sekretariat' ? 'Bendahara Pengeluaran,' : "Bendahara Pengeluaran Pembantu,";
 				$labelPengguna = $spt->bidang == 'Staf Sekretariat' ? 'Pengguna Anggaran,' : 'Kuasa Pengguna Anggaran,' ;
-				$nameFile = "090_".$spt->no_index."_SPPD_PDK_2021_".$pegawai->pegawai_name;
+				$nameFile = "090_".$spt->no_index."_SPPD_PDK_".$pegawaiId;
 	
 				try {
 					$biayaTb = array();
