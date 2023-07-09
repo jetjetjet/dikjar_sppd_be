@@ -461,8 +461,8 @@ class SPPDController extends Controller
 		$updateSpt = SPT::find($id);
 
 		//validasi kwitansi
-		$totalKwitansi = Biaya::where('spt_id', $id)->where('total_biaya', '<=', 0)->first();
-		if( $totalKwitansi == null ){
+		// $totalKwitansi = Biaya::where('spt_id', $id)->where('total_biaya', '<=', 0)->first();
+		// if( $totalKwitansi == null ){
 			if($updateSpt->kwitansi_file_id == null) {
 				$templatePath = base_path('public/storage/template/template_kwitansi.docx');
 				$checkFile = FaFile::exists($templatePath);
@@ -603,11 +603,11 @@ class SPPDController extends Controller
 				$results['success'] = true;
 				$results['state_code'] = 200;
 			}
-		} else {
-			$results['success'] = false;
-			$results['state_code'] = 500;
-			$results['messages'] = ['Tidak dapat mencetak, kwitansi belum lengkap!'];
-		}
+		// } else {
+		// 	$results['success'] = false;
+		// 	$results['state_code'] = 500;
+		// 	$results['messages'] = ['Tidak dapat mencetak, kwitansi belum lengkap!'];
+		// }
 		
 		return response()->json($results, $results['state_code']);
 	}
