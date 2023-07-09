@@ -37,7 +37,7 @@ class TransportController extends Controller
       'agen' => 'required',
       'no_tiket' => 'required',
       'tgl' => 'required',
-      'total_bayar' => 'required'
+      'total_bayar' => 'nullable'
 		);
 
 		$validator = Validator::make($inputs, $rules);
@@ -60,7 +60,7 @@ class TransportController extends Controller
 					'kode_booking' => $inputs['kode_booking'],
 					'no_penerbangan' => $inputs['no_penerbangan'],
 					'tgl' => $inputs['tgl'],
-					'total_bayar' => $inputs['total_bayar']
+					'total_bayar' => $inputs['total_bayar'] == null ? 0 : $inputs['total_bayar'],
 				]);
 		
 				$biaya = Biaya::where('id', $inputs['biaya_id'])
@@ -100,7 +100,7 @@ class TransportController extends Controller
       'agen' => 'required',
       'no_tiket' => 'required',
       'tgl' => 'required',
-      'total_bayar' => 'required'
+      'total_bayar' => 'nullable'
 		);
 
 		$validator = Validator::make($inputs, $rules);
@@ -110,6 +110,7 @@ class TransportController extends Controller
       return response()->json($results, 200);
     }
 		
+	$inputs['total_bayar'] = $inputs['total_bayar'] == null ? 0 : $inputs['total_bayar'];
 		$transport = Transport::where('id',$id)
 		->where('pegawai_id', $inputs['pegawai_id'])
 		->where('biaya_id', $inputs['biaya_id'])
