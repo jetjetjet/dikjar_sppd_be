@@ -52,7 +52,10 @@ class Report extends Command
         ReportSPPD::truncate();
 
         $sptAll = SPT::orderBy('no_index')->whereNotNull('settled_at')->whereNull('voided_at')->get();
+        $bar = $this->output->createProgressBar(count($sptAll));
+        $bar->start();
         foreach($sptAll as $spt) {
+            $this->performTask($spt);
             $sppd = SPTDetail::where('spt_id', $spt->id)->get();
             foreach($sppd as $dtl) {
                 $userJbtn = Pegawai::where('pegawai.id', $dtl->pegawai_id)->select( 'full_name', 'jabatan')->first();
@@ -162,6 +165,8 @@ class Report extends Command
                     'peskmbl_jumlah' => $pesawatPlg->total_bayar ?? null
                 ]);
             }
+            $bar->advance();
         }
+        $bar->finish();
     }
 }
