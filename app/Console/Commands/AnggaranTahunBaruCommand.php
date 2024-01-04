@@ -66,7 +66,7 @@ class AnggaranTahunBaruCommand extends Command
             }
             $bar->finish();
         } catch (\Throwable $th) {
-            // dd($th);
+            dd($th);
         }
     }
 }
