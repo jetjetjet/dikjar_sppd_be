@@ -55,7 +55,7 @@ class Report extends Command
         $bar = $this->output->createProgressBar(count($sptAll));
         $bar->start();
         foreach($sptAll as $spt) {
-            $this->performTask($spt);
+            // $this->performTask($spt);
             $sppd = SPTDetail::where('spt_id', $spt->id)->get();
             foreach($sppd as $dtl) {
                 $userJbtn = Pegawai::where('pegawai.id', $dtl->pegawai_id)->select( 'full_name', 'jabatan')->first();

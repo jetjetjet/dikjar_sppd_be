@@ -48,7 +48,7 @@ class AnggaranTahunBaruCommand extends Command
             $bar->start();
 
             foreach ($anggarans as $anggaran) {
-                $this->performTask($anggaran);
+                // $this->performTask($anggaran);
                 Anggaran::create([
                     'kode_rekening' => $anggaran->kode_rekening,
                     'nama_rekening' => $anggaran->nama_rekening,
