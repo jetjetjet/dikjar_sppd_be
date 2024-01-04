@@ -44,7 +44,7 @@ class AnggaranTahunBaruCommand extends Command
             $date = new Carbon('01-01-' . $year_param);
             $tahun = (int) $date->addYear()->format('Y');
             $anggarans = Anggaran::where('periode', $year_param)->get();
-            $bar = $this->output->createProgressBar(count($anggaran));
+            $bar = $this->output->createProgressBar(count($anggarans));
             $bar->start();
 
             foreach ($anggarans as $anggaran) {
