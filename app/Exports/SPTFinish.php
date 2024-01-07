@@ -42,9 +42,9 @@ class SPTFinish implements FromView, ShouldAutoSize, WithStyles
 
   public function view(): View
   {
-    $date = Carbon::now();
+    $date = Carbon::parse('01-01-' . $this->tahun);
 
-    $startOfYear = ($date->copy()->startOfYear())->isoFormat('D MMMM Y');
+    $startOfYear = ($date->copy())->isoFormat('D MMMM Y');
     $endOfYear   = ($date->copy()->endOfYear())->isoFormat('D MMMM Y');
 
     $q = ReportSPPD::orderBy('id', 'DESC');

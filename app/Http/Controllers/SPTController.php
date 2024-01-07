@@ -37,12 +37,13 @@ class SPTController extends Controller
   	public function grid(Request $request)
 	{
 		$results = $this->responses;
-
+		$tahun = $request->tahun;
 		$user = $request->user();
 		$isAdmin = $user->tokenCan('is_admin') ? 1 : 0;
 		$canGenerate = $user->tokenCan('spt_generate') || $isAdmin == 1 ? 1 : 0;
 
 		$pegawai = SPTDetail::join('pegawai as p', 'p.id', 'spt_detail.pegawai_id')
+		->where('spt.periode', $tahun)
 		->join('spt', 'spt.id', 'spt_detail.spt_id')
 		->groupBy('spt_detail.spt_id')
 		->select(
@@ -250,6 +251,7 @@ class SPTController extends Controller
 						//create biaya awal
 						Biaya::create([
 							'spt_id' => $id,
+							'anggaran_id' => $spt->anggaran_id,
 							'pegawai_id' => $user->pegawai_id,
 							'total_biaya_lainnya' => 0,
 							'total_biaya_inap' => 0,

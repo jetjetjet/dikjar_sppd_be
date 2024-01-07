@@ -88,15 +88,14 @@ class SPPDController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
-  public function show(Request $request, $id, $sptDetailId, $pegawaiId)
-  {
+	public function show(Request $request, $id, $sptDetailId, $pegawaiId)
+	{
 		$results = $this->responses;
-
 		$user = $request->user();
 		$isAdmin = $user->tokenCan('is_admin') ? 1 : 0;
 		$loginId = $user->id;
 
-		$results['data'] = SPT::join('spt_detail as sd', 'sd.spt_id', 'spt.id')
+		$spt = SPT::join('spt_detail as sd', 'sd.spt_id', 'spt.id')
 		->join('pegawai as b', 'b.id', 'bendahara_id')
 		->join('pegawai as pptk', 'pptk.id', 'pptk_id')
 		->join('pegawai as pttd', 'pttd.id', 'pttd_id')
@@ -104,6 +103,7 @@ class SPPDController extends Controller
 		->join('anggaran as ang', 'ang.id', 'anggaran_id')
 		->where('sd.id', $sptDetailId)
 		->select(
+			'spt.anggaran_id',
 			'no_spt',
 			'tgl_berangkat',
 			'tgl_kembali',
@@ -128,14 +128,20 @@ class SPPDController extends Controller
 			DB::raw("( select total_biaya from biaya where spt_id = {$id} and pegawai_id = {$pegawaiId} and deleted_at is null limit 1 ) as total_biaya"),
 			DB::raw("( select sppd_file_id from spt_detail as sd where spt.id = spt_id and deleted_at is null and pegawai_id = {$pegawaiId} limit 1 ) as sppd_file_id"),
 			DB::raw(" case when spt.created_by = {$loginId} or {$isAdmin} = 1 then 1 else 0 end as can_kwitansi"),
-			
 		)->first();
-		
+
+		$biaya = Biaya::where('anggaran_id', $spt->anggaran_id)
+			->groupBy('anggaran_id')
+			->sum('total_biaya');
+		$anggaran = Anggaran::where('id', $spt->anggaran_id)->first();
+		$spt->anggaran_ready = 'Rp ' . number_format($anggaran->pagu - $biaya);
+
+		$results['data'] = $spt;
 		$results['state_code'] = 200;
 		$results['success'] = true;
 
 		return response()->json($results, $results['state_code']);
-  }
+	}
 
 	public function cetakSPPD($id)
 	{
@@ -728,7 +734,7 @@ class SPPDController extends Controller
 				'peskmbl_tgl' => $peskmbl_tgl,
 				'peskmbl_jumlah' => $pesawatPlg->total_bayar ?? null,
 				// 'jenis_dinas' => $spt->jenis_dinas,
-				// 'periode' => $spt->periode,
+				'periode' => $spt->periode,
 			]);
 		}
 	}

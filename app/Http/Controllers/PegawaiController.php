@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PegawaiRequest;
+Use App\Services\PegawaiService;
 use Illuminate\Http\Request;
 use App\Models\Pegawai;
 use App\Models\User;
@@ -12,16 +14,21 @@ use App\Helpers\Utils;
 
 class PegawaiController extends Controller
 {
+	/**
+	 * 
+	 */
+	public function __construct(protected PegawaiService $service)
+	{
+		//
+	}
+
 	public function grid(Request $request)
 	{
-		$results = $this->responses;
+		$results = $this->service->getAll();
+		// $data = Pegawai::select('pegawai.id', 'nip', 'full_name', 'golongan', 'pangkat', 'jabatan', 'status_pegawai')
+		// ->orderBy('pegawai.id')->get();
 
-		$results['data'] = Pegawai::select('pegawai.id', 'nip', 'full_name', 'golongan', 'pangkat', 'jabatan')
-		->orderBy('pegawai.id')->get();
-		$results['state_code'] = 200;
-		$results['success'] = true;
-
-		return response()->json($results, $results['state_code']);
+		return $this->response($results, true, [], 200);
 	}
 
 	public function search(Request $request)
@@ -46,7 +53,7 @@ class PegawaiController extends Controller
 			} 
 		}
 
-		$results['data'] = $q->get();
+		$results['data'] = $q->aktif()->get();
 		$results['state_code'] = 200;
 		$results['success'] = true;
 		
@@ -68,15 +75,16 @@ class PegawaiController extends Controller
 			// 'golongan' => 'required',
 			'jenis_kelamin' => 'required',
 			'phone' => 'max:15',
+			'status_pegawai' => 'required',
 			// 'file' => 'mimes:jpeg,bmp,png,gif'
 		);
 
 		$validator = Validator::make($inputs, $rules);
 		// Validation fails?
 		if ($validator->fails()){
-      $results['messages'] = Array($validator->messages()->first());
-      return response()->json($results, $results['state_code']);
-    }
+			$results['messages'] = Array($validator->messages()->first());
+			return response()->json($results, $results['state_code']);
+		}
 		
 		try{
 			DB::beginTransaction();
@@ -89,6 +97,7 @@ class PegawaiController extends Controller
 				'golongan' => $inputs['golongan'] == 'null' ? null : $inputs['golongan'],
 				'email' => $inputs['email'],
 				'jenis_kelamin' => $inputs['jenis_kelamin'],
+				'status_pegawai' => $inputs['status_pegawai'],
 				'address' => $inputs['address'] == 'null' ? null : $inputs['address'],
 				'phone' => $inputs['phone'] == 'null' ? null : $inputs['phone'],
 				'tgl_lahir' => json_decode($inputs['tgl_lahir']) ?? null,
@@ -141,6 +150,7 @@ class PegawaiController extends Controller
 			// 'nip' => 'required',
 			// 'golongan' => 'required',
 			// 'pangkat' => 'required',
+			'status_pegawai' => 'required',
 			'jabatan' => 'required',
 			'email' => 'required',
 			'full_name' => 'required',
@@ -150,9 +160,9 @@ class PegawaiController extends Controller
 		$validator = Validator::make($request->all(), $rules);
 		// Validation fails?
 		if ($validator->fails()){
-      $results['messages'] = Array($validator->messages()->first());
-      return response()->json($results, $results['state_code']);
-    }
+			$results['messages'] = Array($validator->messages()->first());
+			return response()->json($results, $results['state_code']);
+		}
 		
 		$pegawai = Pegawai::find($id);
 		$pegawai->update([
@@ -165,7 +175,8 @@ class PegawaiController extends Controller
 			'jabatan' => $inputs['jabatan'],
 			'address' => $inputs['address'] ?? null,
 			'phone' => $inputs['phone'] ?? null,
-			'tgl_lahir' => $inputs['tgl_lahir'] ?? null
+			'tgl_lahir' => $inputs['tgl_lahir'] ?? null,
+			'status_pegawai' => $inputs['status_pegawai'],
 		]);
 
 		$results['success'] = true;

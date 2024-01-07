@@ -162,7 +162,8 @@ class Report extends Command
                     'peskmbl_kode_booking' => $pesawatPlg->kode_booking ?? null,
                     'peskmbl_no_penerbangan' => $pesawatPlg->no_penerbangan ?? null,
                     'peskmbl_tgl' => $peskmbl_tgl,
-                    'peskmbl_jumlah' => $pesawatPlg->total_bayar ?? null
+                    'peskmbl_jumlah' => $pesawatPlg->total_bayar ?? null,
+                    'periode' => $spt->periode,
                 ]);
             }
             $bar->advance();

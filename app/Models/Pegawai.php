@@ -27,7 +27,13 @@ class Pegawai extends Model
 		,'active'
 		,'created_by'
 		,'updated_by'
+		,'status_pegawai'
 	];
+
+	public function scopeAktif($query)
+	{
+		return $query->where('status_pegawai', 'aktif');
+	}
 
 	public function user()
 	{

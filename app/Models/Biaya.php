@@ -22,6 +22,7 @@ class Biaya extends Model
 		'jml_biaya',
 		'created_by',
 		'updated_by',
-		'deleted_by'
+		'deleted_by',
+		'anggaran_id',
 	];
 }
