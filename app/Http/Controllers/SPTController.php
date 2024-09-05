@@ -214,6 +214,10 @@ class SPTController extends Controller
 						$tempSppd->setValue('tgl_kembali', $sptData->tgl_kembali);
 						$tempSppd->setValue('tgl_sppd', $sptData->tgl_spt);
 						$tempSppd->setValue('no_spt', $sptData->no_spt);
+						$tempSppd->setValue('nip_pejabat', $pejabat->nip);
+						$tempSppd->setValue('jabatan_pejabat', strtoupper($pejabat->jabatan));
+						$tempSppd->setValue('golongan_pejabat', $pejabat->pangkat);
+						
 
 						$newFile = new \stdClass();
 						$newFile->dbPath ='/storage/spt/';
