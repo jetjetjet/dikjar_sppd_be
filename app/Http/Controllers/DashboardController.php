@@ -22,6 +22,7 @@ class DashboardController extends Controller
 			->whereNull('sd.deleted_at');
 		})->join('pegawai as p', 'p.id', 'sd.pegawai_id')
 		->whereNotNull('spt.proceed_at')
+		->whereNull('spt.voided_at')
 		->whereNull('spt.settled_at')
 		->whereNull('sd.settled_at');
 

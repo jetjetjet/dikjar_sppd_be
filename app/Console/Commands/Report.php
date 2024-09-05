@@ -51,8 +51,11 @@ class Report extends Command
     {
         ReportSPPD::truncate();
 
-        $sptAll = SPT::orderBy('no_index')->whereNotNull('settled_at')->get();
+        $sptAll = SPT::orderBy('no_index')->whereNotNull('settled_at')->whereNull('voided_at')->get();
+        $bar = $this->output->createProgressBar(count($sptAll));
+        $bar->start();
         foreach($sptAll as $spt) {
+            // $this->performTask($spt);
             $sppd = SPTDetail::where('spt_id', $spt->id)->get();
             foreach($sppd as $dtl) {
                 $userJbtn = Pegawai::where('pegawai.id', $dtl->pegawai_id)->select( 'full_name', 'jabatan')->first();
@@ -119,7 +122,7 @@ class Report extends Command
                     'spt_detail_id' => $dtl->id,
                     'biaya_id' => $biaya->id,
                     'nama_rekening' => $anggaran->nama_rekening ?? null,
-                    'kode_rekening' => $$anggaran->kode_rekening ?? null,
+                    'kode_rekening' => $anggaran->kode_rekening ?? null,
                     'nama_pelaksana' => $userJbtn->full_name,
                     'jabatan' => $userJbtn->jabatan,
                     'no_pku' => null,
@@ -159,9 +162,12 @@ class Report extends Command
                     'peskmbl_kode_booking' => $pesawatPlg->kode_booking ?? null,
                     'peskmbl_no_penerbangan' => $pesawatPlg->no_penerbangan ?? null,
                     'peskmbl_tgl' => $peskmbl_tgl,
-                    'peskmbl_jumlah' => $pesawatPlg->total_bayar ?? null
+                    'peskmbl_jumlah' => $pesawatPlg->total_bayar ?? null,
+                    'periode' => $spt->periode,
                 ]);
             }
+            $bar->advance();
         }
+        $bar->finish();
     }
 }

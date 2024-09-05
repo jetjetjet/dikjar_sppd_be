@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 
 class Controller extends BaseController
@@ -82,5 +83,21 @@ class Controller extends BaseController
     
     // Log::info(json_encode($filter));
     return $filter;
+  }
+
+  protected function response($data = null, bool $success = true, array $messages = [], int $stateCode = 200): JsonResponse
+  {
+    // array('state_code' => 202, 'success' => false, 'messages' => array(), 'data' => Array());
+      $response['success'] = $success;
+      $response['messages'] = $messages;
+      if ($success) {
+          if ($data != false || !is_null($data)) {
+              $response['data'] = $data;
+          }
+      } else {
+          $response['error'] = $messages;
+      }
+
+      return response()->json($response, $stateCode);
   }
 }

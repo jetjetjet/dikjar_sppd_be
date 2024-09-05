@@ -26,71 +26,45 @@ use NcJoes\OfficeConverter\OfficeConverter;
 
 class SPPDController extends Controller
 {
+
 	public function grid(Request $request, $id)
 	{
 		$results = $this->responses;
 		$user = $request->user();
 		$isAdmin = $user->tokenCan('is_admin') ? 1 : 0;
 		$loginid = $user->id;
-		$canGenerate = $isAdmin == 1 || $user->tokenCan('sppd-generate') ? 1 : 0;
 
-		$header = SPT::where('spt.id', $id)
-		->join('pegawai as b', 'b.id', 'bendahara_id')
-		->join('pegawai as pptk', 'pptk.id', 'pptk_id')
-		->join('pegawai as pttd', 'pttd.id', 'pttd_id')
-		->join('pegawai as pel', 'pel.id', 'pelaksana_id')
-		->join('anggaran as ang', 'ang.id', 'anggaran_id')
+		$biaya = DB::table('biaya')->whereNull('deleted_at')
+		->select('pegawai_id', 'spt_id', 'total_biaya');
+
+		$details = SPTDetail::join('pegawai as p', 'p.id', 'spt_detail.pegawai_id')
+		->leftJoinSub($biaya, 'biaya', function ($join) {
+				$join->on('spt_detail.spt_id', 'biaya.spt_id')
+				->on('spt_detail.pegawai_id', 'biaya.pegawai_id');
+		})->where('spt_detail.spt_id', $id)
 		->select(
-			'no_spt',
-			DB::raw("to_char(tgl_berangkat, 'DD-MM-YYYY') as tgl_berangkat"),
-			DB::raw("to_char(tgl_kembali, 'DD-MM-YYYY') as tgl_kembali"),
-			'daerah_asal',
-			'daerah_tujuan',
-			'transportasi',
-			'settled_at',
-			'finished_at',
-			'proceed_at',
-			'completed_at',
-			'saran',
-			'hasil',
-			'b.full_name as bendahara_name',
-			'pptk.full_name as pptk_name',
-			'pttd.full_name as pttd_name',
-			'pel.full_name as pelaksana_name',
-			'dasar_pelaksana',
-			'untuk',
-			'ang.nama_rekening as anggaran_name',
-			DB::raw("case when to_char(tgl_kembali, 'YYYY-MM-DD') <= to_char(now(), 'YYYY-MM-DD') and completed_at is null and proceed_at is not null then 1 else 0 end as can_finish"),
-			DB::raw("case when settled_at is null and completed_at is not null then 1 else 0 end as can_generate"),
-			DB::raw("case when (proceed_at is null or 1 = " . $isAdmin . ") and completed_at is null then 1 else 0 end as can_edit")
-		)->first();
-		
-		$child = [];
-		if ($header != null){
+			'spt_detail.id',
+			'sppd_file_id',
+			'p.id as pegawai_id',
+			'full_name',
+			'nip',
+			DB::raw("coalesce(total_biaya,0) as total_biaya"),
+			DB::raw("case when 1 = {$isAdmin} or spt_detail.created_by = {$loginid} then true else false end as can_edit")
+		)->orderBy('is_pelaksana', 'DESC')
+		->orderBy('nip')
+		->orderBy('full_name')
+		->get();
 
-			$biaya = DB::table('biaya')->whereNull('deleted_at')
-			->select('pegawai_id', 'spt_id', 'total_biaya');
-
-			$child = SPTDetail::join('pegawai as p', 'p.id', 'spt_detail.pegawai_id')
-			->leftJoinSub($biaya, 'biaya', function ($join) {
-					$join->on('spt_detail.spt_id', 'biaya.spt_id')
-					->on('spt_detail.pegawai_id', 'biaya.pegawai_id');
-			})->where('spt_detail.spt_id', $id)
-			->select(
-				'spt_detail.id',
-				'sppd_file_id',
-				'p.id as pegawai_id',
-				'full_name',
-				'nip',
-				DB::raw("coalesce(total_biaya,0) as total_biaya"),
-				DB::raw("case when 1 = {$isAdmin} or spt_detail.created_by = {$loginid} then true else false end as can_edit")
-			)->orderBy('is_pelaksana', 'DESC')
-			->orderBy('nip')
-			->orderBy('full_name')
-			->get();
+		$total = 0;
+		foreach ($details as $detail) {
+			$total += $detail->total_biaya;
 		}
 
-		$results['data']  = array( 'header' => $header, 'child' => $child);
+		$results['data'][]  = [
+			'children' => $details,
+			'total_biaya' => $total,
+			'nip' => 'Total Keseluruhan'
+		];
 
 		$results['state_code'] = 200;
 		$results['success'] = true;
@@ -114,15 +88,14 @@ class SPPDController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
-  public function show(Request $request, $id, $sptDetailId, $pegawaiId)
-  {
+	public function show(Request $request, $id, $sptDetailId, $pegawaiId)
+	{
 		$results = $this->responses;
-
 		$user = $request->user();
 		$isAdmin = $user->tokenCan('is_admin') ? 1 : 0;
 		$loginId = $user->id;
 
-		$results['data'] = SPT::join('spt_detail as sd', 'sd.spt_id', 'spt.id')
+		$spt = SPT::join('spt_detail as sd', 'sd.spt_id', 'spt.id')
 		->join('pegawai as b', 'b.id', 'bendahara_id')
 		->join('pegawai as pptk', 'pptk.id', 'pptk_id')
 		->join('pegawai as pttd', 'pttd.id', 'pttd_id')
@@ -130,6 +103,7 @@ class SPPDController extends Controller
 		->join('anggaran as ang', 'ang.id', 'anggaran_id')
 		->where('sd.id', $sptDetailId)
 		->select(
+			'spt.anggaran_id',
 			'no_spt',
 			'tgl_berangkat',
 			'tgl_kembali',
@@ -146,19 +120,28 @@ class SPPDController extends Controller
 			'pttd.full_name as pttd_name',
 			'pel.full_name as pelaksana_name',
 			'ang.nama_rekening as anggaran_name',
+			'voided_at',
+			'void_remark',
+			'status',
 			DB::raw("( select full_name from pegawai where id = {$pegawaiId} and deleted_at is null limit 1 ) as pegawai_text"),
 			DB::raw("( select id from biaya where spt_id = {$id} and pegawai_id = {$pegawaiId} and deleted_at is null limit 1 ) as biaya_id"),
 			DB::raw("( select total_biaya from biaya where spt_id = {$id} and pegawai_id = {$pegawaiId} and deleted_at is null limit 1 ) as total_biaya"),
 			DB::raw("( select sppd_file_id from spt_detail as sd where spt.id = spt_id and deleted_at is null and pegawai_id = {$pegawaiId} limit 1 ) as sppd_file_id"),
 			DB::raw(" case when spt.created_by = {$loginId} or {$isAdmin} = 1 then 1 else 0 end as can_kwitansi"),
-			
 		)->first();
-		
+
+		$biaya = Biaya::where('anggaran_id', $spt->anggaran_id)
+			->groupBy('anggaran_id')
+			->sum('total_biaya');
+		$anggaran = Anggaran::where('id', $spt->anggaran_id)->first();
+		$spt->anggaran_ready = 'Rp ' . number_format($anggaran->pagu - $biaya);
+
+		$results['data'] = $spt;
 		$results['state_code'] = 200;
 		$results['success'] = true;
 
 		return response()->json($results, $results['state_code']);
-  }
+	}
 
 	public function cetakSPPD($id)
 	{
@@ -212,13 +195,14 @@ class SPPDController extends Controller
 
 				$pembantu = $spt->bidang == 'Staf Sekretariat' ? 'Bendahara Pengeluaran,' : "Bendahara Pengeluaran Pembantu,";
 				$labelPengguna = $spt->bidang == 'Staf Sekretariat' ? 'Pengguna Anggaran,' : 'Kuasa Pengguna Anggaran,' ;
-				$nameFile = "090_".$spt->no_index."_SPPD_PDK_2021_".$pegawai->pegawai_name;
+				$nameFile = "090_".$spt->no_index."_SPPD_PDK_".$pegawaiId;
 	
 				try {
 					$biayaTb = array();
 					$pengeluaran = Pengeluaran::where('biaya_id', $biayaId)
 					->where('pegawai_id', $pegawaiId)
 					->groupBy('kategori')
+					->groupBy('catatan')
 					->select(
 						'kategori as pengeluaran',
 						DB::raw("sum(jml) as qty"),
@@ -363,7 +347,7 @@ class SPPDController extends Controller
 		$spt->update($updateData);
 
 		$updateSpt = SPT::find($id);
-		if(true) { 
+		try { 
 			$templatePath = base_path('public/storage/template/template_laporan.docx');
 			$checkFile = FaFile::exists($templatePath);
 			if($checkFile) {
@@ -428,6 +412,7 @@ class SPPDController extends Controller
 				$hasil = explode("<li>",$updateSpt->hasil);
 				$ctr = 1;
 				foreach($hasil as $hsl) {
+					$hsl = (html_entity_decode($hsl, ENT_COMPAT, 'UTF-8'));
 					$vHsl = strip_tags($hsl);
 					if(!empty($vHsl)){
 						$tmpHsl = array (
@@ -468,11 +453,9 @@ class SPPDController extends Controller
 			} else {
 				array_push($results['messages'], 'Template Laporan SPT tidak ditemukan.');
 			}
-		} else {
-			$file = DB::table('files')->where('id', $updateSpt->laporan_file_id)->first();
-			$results['data'] = $file->file_path . $file->file_name. ".pdf";
-			$results['success'] = true;
-			$results['state_code'] = 200;
+		} catch (\Exception $e) {
+			array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
+			Log::channel('spderr')->info('spt_kwitansi: '. json_encode($e->getMessage()));
 		}
 		
 		return response()->json($results, $results['state_code']);
@@ -484,8 +467,8 @@ class SPPDController extends Controller
 		$updateSpt = SPT::find($id);
 
 		//validasi kwitansi
-		$totalKwitansi = Biaya::where('spt_id', $id)->where('total_biaya', '<=', 0)->first();
-		if( $totalKwitansi == null ){
+		// $totalKwitansi = Biaya::where('spt_id', $id)->where('total_biaya', '<=', 0)->first();
+		// if( $totalKwitansi == null ){
 			if($updateSpt->kwitansi_file_id == null) {
 				$templatePath = base_path('public/storage/template/template_kwitansi.docx');
 				$checkFile = FaFile::exists($templatePath);
@@ -626,11 +609,11 @@ class SPPDController extends Controller
 				$results['success'] = true;
 				$results['state_code'] = 200;
 			}
-		} else {
-			$results['success'] = false;
-			$results['state_code'] = 500;
-			$results['messages'] = ['Tidak dapat mencetak, kwitansi belum lengkap!'];
-		}
+		// } else {
+		// 	$results['success'] = false;
+		// 	$results['state_code'] = 500;
+		// 	$results['messages'] = ['Tidak dapat mencetak, kwitansi belum lengkap!'];
+		// }
 		
 		return response()->json($results, $results['state_code']);
 	}
@@ -709,7 +692,7 @@ class SPPDController extends Controller
 				'spt_detail_id' => $dtl->id,
 				'biaya_id' => $biaya->id,
 				'nama_rekening' => $anggaran->nama_rekening ?? null,
-				'kode_rekening' => $$anggaran->kode_rekening ?? null,
+				'kode_rekening' => $anggaran->kode_rekening ?? null,
 				'nama_pelaksana' => $userJbtn->full_name,
 				'jabatan' => $userJbtn->jabatan,
 				'no_pku' => null,
@@ -751,7 +734,7 @@ class SPPDController extends Controller
 				'peskmbl_tgl' => $peskmbl_tgl,
 				'peskmbl_jumlah' => $pesawatPlg->total_bayar ?? null,
 				// 'jenis_dinas' => $spt->jenis_dinas,
-				// 'periode' => $spt->periode,
+				'periode' => $spt->periode,
 			]);
 		}
 	}
@@ -759,12 +742,12 @@ class SPPDController extends Controller
 	public function mapBiaya($db)
 	{
 		$ui = new \stdClass();
-		$ui->pengeluaran = isset($db->pengeluaran) ? $db->pengeluaran : null;
-		$ui->j = isset($db->qty) ? $db->qty : null;
-		$ui->biaya = isset($db->harga) ? number_format($db->harga) : null;
-		$ui->total = isset($db->harga) && isset($db->qty) ? number_format($db->harga * $db->qty) : null;
-		$ui->totalRaw = isset($db->harga) && isset($db->qty) ? $db->harga * $db->qty : null;
-		$ui->cttn = isset($db->catatan) ? $db->catatan : null;
+		$ui->pengeluaran = isset($db->pengeluaran) ? $db->pengeluaran : "";
+		$ui->j = isset($db->qty) ? $db->qty : "";
+		$ui->biaya = isset($db->harga) ? number_format($db->harga) : "";
+		$ui->total = isset($db->harga) && isset($db->qty) ? number_format($db->harga * $db->qty) : "";
+		$ui->totalRaw = isset($db->harga) && isset($db->qty) ? $db->harga * $db->qty : "";
+		$ui->cttn = isset($db->catatan) ? $db->catatan : "";
 
 		return $ui;
 	}

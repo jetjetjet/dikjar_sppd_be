@@ -17,6 +17,7 @@ class NotifController extends Controller
 
 		$q = SPT::whereNull('finished_at')
 		->whereNotNull('proceed_at')
+		->where('status', '!=', 'VOID')
 		->whereRaw("now()::date - tgl_kembali::date > 1")
 		->orderBy('tgl_kembali');
 
@@ -52,6 +53,7 @@ class NotifController extends Controller
 		$isAdmin = $user->tokenCan('is_admin') ? 1 : 0;
 
 		$q = SPT::whereNull('finished_at')
+				->where('status', '!=', 'VOID')
 				->whereNotNull('proceed_at')
 				->whereRaw("now()::date - tgl_kembali::date > 1");
 

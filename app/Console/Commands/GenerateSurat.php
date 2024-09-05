@@ -106,63 +106,59 @@ class GenerateSurat extends Command
 
                     $tempUserValue = array();
 
-                    $sppdId = $this->option('sppd');
-
                     foreach($users as $user){
-                        if($sppdId){
-                            $tempSppd = new TemplateProcessor($templateSppdPath);
+                        $tempSppd = new TemplateProcessor($templateSppdPath);
 
-                            $tempSppd->setValue('nama_pegawai', $user->nama_pegawai);
-                            $tempSppd->setValue('jabatan_pegawai', $user->jabatan_pegawai);
-                            $tempSppd->setValue('golongan_pegawai', str_replace("- -","-", $user->golongan_pegawai));
-                            $tempSppd->setValue('untuk', $sptData->untuk);
-                            $tempSppd->setValue('transportasi', $sptData->transportasi);
-                            $tempSppd->setValue('jml_hari', $sptData->jml_hari . " Hari");
-                            $tempSppd->setValue('daerah_asal', $sptData->daerah_asal);
-                            $tempSppd->setValue('daerah_tujuan', $sptData->daerah_tujuan);
-                            $tempSppd->setValue('tgl_berangkat', $sptData->tgl_berangkat);
-                            $tempSppd->setValue('tgl_kembali', $sptData->tgl_kembali);
-                            $tempSppd->setValue('tgl_sppd', $sptData->tgl_spt);
-                            $tempSppd->setValue('no_spt', $sptData->no_spt);
-    
-                            $newFile = new \stdClass();
-                            $newFile->dbPath ='/storage/spt/';
-                            $newFile->ext = '.pdf';
-                            $newFile->originalName = "SPPD_" . $user->nip_pegawai;
-                            $newFile->newName = time()."_".$newFile->originalName;
-    
-                            $path = base_path('/public');
-                            $tempSppd->saveAs($path . $newFile->dbPath . $newFile->newName . ".docx", TRUE);
-                            //Convert kwe PDF
-                            $docPath = $path . $newFile->dbPath . $newFile->newName . ".docx";
-                            $converter = new OfficeConverter($docPath);
-                            //generates pdf file in same directory as test-file.docx
-                            $converter->convertTo($newFile->newName.".pdf");
-                            
-                            $oldFile = $path . $newFile->dbPath . $newFile->newName . ".docx";
-                            if(FaFile::exists($oldFile)) {
-                                FaFile::delete($oldFile);
-                            }
-    
-                            $newFile->newName = $newFile->newName.".pdf";
-    
-                            //upload to table
-                            $file = FileModel::create([
-                                'file_name' => $newFile->newName,
-                                'original_name' =>  $newFile->originalName,
-                                'file_path' => $newFile->dbPath,
-                                'ext' => $newFile->ext,
-                                // 'created_by' => 0,
-                                // 'created_at' => DB::raw("now()")
-                            ]);
-    
-                            // update table spt
-                            SPTDetail::where('spt_id', $id)
-                            ->where('pegawai_id', $user->pegawai_id)
-                            ->update([
-                                'sppd_file_id' => $file->id,
-                            ]);
+                        $tempSppd->setValue('nama_pegawai', $user->nama_pegawai);
+                        $tempSppd->setValue('jabatan_pegawai', $user->jabatan_pegawai);
+                        $tempSppd->setValue('golongan_pegawai', str_replace("- -","-", $user->golongan_pegawai));
+                        $tempSppd->setValue('untuk', $sptData->untuk);
+                        $tempSppd->setValue('transportasi', $sptData->transportasi);
+                        $tempSppd->setValue('jml_hari', $sptData->jml_hari . " Hari");
+                        $tempSppd->setValue('daerah_asal', $sptData->daerah_asal);
+                        $tempSppd->setValue('daerah_tujuan', $sptData->daerah_tujuan);
+                        $tempSppd->setValue('tgl_berangkat', $sptData->tgl_berangkat);
+                        $tempSppd->setValue('tgl_kembali', $sptData->tgl_kembali);
+                        $tempSppd->setValue('tgl_sppd', $sptData->tgl_spt);
+                        $tempSppd->setValue('no_spt', $sptData->no_spt);
+
+                        $newFile = new \stdClass();
+                        $newFile->dbPath ='/storage/spt/';
+                        $newFile->ext = '.pdf';
+                        $newFile->originalName = "SPPD_" . $user->nip_pegawai;
+                        $newFile->newName = time()."_".$newFile->originalName;
+
+                        $path = base_path('/public');
+                        $tempSppd->saveAs($path . $newFile->dbPath . $newFile->newName . ".docx", TRUE);
+                        //Convert kwe PDF
+                        $docPath = $path . $newFile->dbPath . $newFile->newName . ".docx";
+                        $converter = new OfficeConverter($docPath);
+                        //generates pdf file in same directory as test-file.docx
+                        $converter->convertTo($newFile->newName.".pdf");
+                        
+                        $oldFile = $path . $newFile->dbPath . $newFile->newName . ".docx";
+                        if(FaFile::exists($oldFile)) {
+                            FaFile::delete($oldFile);
                         }
+
+                        $newFile->newName = $newFile->newName.".pdf";
+
+                        //upload to table
+                        $file = FileModel::create([
+                            'file_name' => $newFile->newName,
+                            'original_name' =>  $newFile->originalName,
+                            'file_path' => $newFile->dbPath,
+                            'ext' => $newFile->ext,
+                            // 'created_by' => 0,
+                            // 'created_at' => DB::raw("now()")
+                        ]);
+
+                        // update table spt
+                        SPTDetail::where('spt_id', $id)
+                        ->where('pegawai_id', $user->pegawai_id)
+                        ->update([
+                            'sppd_file_id' => $file->id,
+                        ]);
                         
                         $temp = array(
                             'n-o' => $user->index_no,

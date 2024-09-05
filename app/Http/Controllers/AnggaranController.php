@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\AnggaranRequest;
 use App\Models\Anggaran;
 use App\Models\PejabatTtd;
 use DB;
@@ -25,6 +26,7 @@ class AnggaranController extends Controller
 			->join('biaya as b', 'b.spt_id', 's.id')
 			->whereNull('b.deleted_at')
 			->whereNull('s.deleted_at')
+			->whereNull('s.voided_at')
 			->whereNotNull('s.settled_at')
 			->groupBy('s.anggaran_id')
 			->select('s.anggaran_id', DB::raw("sum(b.total_biaya) as realisasi"));
@@ -36,7 +38,9 @@ class AnggaranController extends Controller
 			
 			$datas = Anggaran::leftJoinSub($realisasi, 'r', function ($join) {
 				$join->on('anggaran.id', '=', 'r.anggaran_id');
-			})->where('periode', date('Y'));
+			})->orderByDesc('periode')
+			->orderBy('kode_rekening')
+			->orderBy('nama_rekening');
 
 			if(!$isAdmin){
 				$datas = $datas->where('bidang', $role);
@@ -90,6 +94,7 @@ class AnggaranController extends Controller
 			->whereNull('b.deleted_at')
 			->whereNull('s.deleted_at')
 			->whereNotNull('s.settled_at')
+			->whereNull('s.voided_at')
 			->groupBy('s.anggaran_id')
 			->select('s.anggaran_id', DB::raw("sum(b.total_biaya) as realisasi"));
 	
@@ -149,30 +154,10 @@ class AnggaranController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
-	public function store(Request $request)
+	public function store(AnggaranRequest $request)
 	{
 		$results = $this->responses;
-
-		$year = date('Y');
-		$year1 = $year + 1;
-		$inputs = $request->all();
-		$rules = array(
-			'kode_rekening' => 'required',
-			'nama_rekening' => 'required',
-      'periode' => 'required|numeric|min:'.$year.'|max:'.$year1,
-      'pagu' => 'required|numeric|min:1000000|max:999999999999',
-      'pptk_id' => 'required',
-			'bidang' => 'required',
-			'bendahara_id' => 'required',
-      'pengguna_id' => 'required'
-		);
-
-		$validator = Validator::make($inputs, $rules);
-		// Validation fails?
-		if ($validator->fails()){
-      $results['messages'] = Array($validator->messages()->first());
-      return response()->json($results, 200);
-    }
+		$inputs = $request->validated();
 
 		try {
 			$anggaran = Anggaran::create([
@@ -189,12 +174,13 @@ class AnggaranController extends Controller
 		} catch (\Exception $e) {
 			Log::channel('spderr')->info('anggaran_save: '. json_encode($e->getMessage()));
 			array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
+			return response()->json($results, $results['state_code']);
 		}
 
-    array_push($results['messages'], 'Berhasil menambahkan Anggaran baru.');
+		array_push($results['messages'], 'Berhasil menambahkan Anggaran baru.');
 
-    $results['success'] = true;
-    $results['state_code'] = 201;
+		$results['success'] = true;
+		$results['state_code'] = 201;
 
 		return response()->json($results, $results['state_code']);
 	}
@@ -210,29 +196,10 @@ class AnggaranController extends Controller
 		return response()->json($results, $results['state_code']);
 	}
 
-	public function update(Request $request, $id)
+	public function update(AnggaranRequest $request, $id)
 	{
 		$results = $this->responses;
-		$year = date('Y');
-		$year1 = $year + 1;
-		$inputs = $request->all();
-		$rules = array(
-			'kode_rekening' => 'required',
-			'bidang' => 'required',
-			'nama_rekening' => 'required',
-      'periode' => 'required|numeric|min:'.$year.'|max:'.$year1,
-      'pagu' => 'required|numeric|min:1000000|max:999999999999',
-      'pptk_id' => 'required',
-			'bendahara_id' => 'required',
-      'pengguna_id' => 'required'
-		);
-
-		$validator = Validator::make($request->all(), $rules);
-		// Validation fails?
-		if ($validator->fails()){
-      $results['messages'] = Array($validator->messages()->first());
-      return response()->json($results, $results['state_code']);
-    }
+		$inputs = $request->validated();
     
 		try {
 			$anggaran = Anggaran::find($id);
@@ -251,6 +218,7 @@ class AnggaranController extends Controller
 		} catch (\Exception $e) {
 			Log::channel('spderr')->info('anggaran_save: '. json_encode($e->getMessage()));
 			array_push($results['messages'], 'Kesalahan! Tidak dapat memproses.');
+			return response()->json($results, $results['state_code']);
 		}
 
     array_push($results['messages'], 'Berhasil mengubah Anggaran.');

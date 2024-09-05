@@ -110,7 +110,7 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	
 	Route::get('/pegawai-grid', [PegawaiController::class, 'grid'])->middleware('can:pegawai-view');
 	Route::get('/pegawai-search', [PegawaiController::class, 'search']);
-	Route::get('/pegawai/{id}', [PegawaiController::class, 'show'])->middleware('can:pegawai-view');
+	Route::get('/pegawai/{id}', [PegawaiController::class, 'show']);
 	Route::post('/pegawai', [PegawaiController::class, 'store'])->middleware('can:pegawai-add');
 	Route::put('/pegawai/{id}', [PegawaiController::class, 'update'])->middleware('can:pegawai-edit');
 	Route::put('/pegawai/{id}/change-password', [PegawaiController::class, 'changePassword'])->middleware('can:pegawai-edit');
@@ -158,6 +158,7 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::get('/spt/{id}/lihat', [SPTController::class, 'getSPT'])->middleware('can:spt-view');
 	Route::get('/spt/{id}/cetak', [SPTController::class, 'cetakSPT'])->middleware('can:spt-generate');
 	Route::post('/spt', [SPTController::class, 'store'])->middleware('can:spt-add');
+	Route::post('/spt/{id}/void', [SPTController::class, 'void'])->middleware('can:spt-void');
 	Route::put('/spt/{id}', [SPTController::class, 'update'])->middleware('can:spt-edit');
 	Route::patch('/spt/{id}/selesai', [SPTController::class, 'finish'])->middleware('can:spt-finish');
 	Route::patch('/spt/{id}/proses', [SPTController::class, 'proses'])->middleware('can:spt-edit');
@@ -196,7 +197,7 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 	Route::put('/pengeluaran/{id}/upload', [PengeluaranController::class, 'uploadFile']);
 	Route::delete('/pengeluaran/{id}/{biayaId}/{pegawaiId}', [PengeluaranController::class, 'destroy']);
 
-	Route::get('/report/spt/selesai', [ReportController::class, 'reportByFinishedSPT'])->middleware('can:laporan-tahunan');
+	Route::post('/report/spt/selesai', [ReportController::class, 'reportByFinishedSPT'])->middleware('can:laporan-tahunan');
 	Route::post('/report/spt/pegawai', [ReportController::class, 'reportByPegawai'])->middleware('can:laporan-pegawai');
 	
 	Route::get('/spt/{id}/kwitansi', [SPPDController::class, 'cetakKwitansi']);

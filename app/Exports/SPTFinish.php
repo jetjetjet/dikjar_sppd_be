@@ -11,6 +11,15 @@ use Carbon\Carbon;
 
 class SPTFinish implements FromView, ShouldAutoSize, WithStyles
 {
+  protected $jenis_dinas;
+  protected $tahun;
+
+  public function __construct($jenis_dinas, $tahun)
+  {
+    $this->jenis_dinas = $jenis_dinas;
+    $this->tahun = $tahun;
+  }
+
   public function styles(Worksheet $sheet)
   {
     $header = ['font' => ['bold' => true],  'alignment' => [ 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER]];
@@ -33,13 +42,23 @@ class SPTFinish implements FromView, ShouldAutoSize, WithStyles
 
   public function view(): View
   {
-    $date = Carbon::now();
+    $date = Carbon::parse('01-01-' . $this->tahun);
 
-    $startOfYear = ($date->copy()->startOfYear())->isoFormat('D MMMM Y');
+    $startOfYear = ($date->copy())->isoFormat('D MMMM Y');
     $endOfYear   = ($date->copy()->endOfYear())->isoFormat('D MMMM Y');
 
+    $q = ReportSPPD::orderBy('id', 'DESC');
+
+    if ($this->jenis_dinas == 'Dalam Daerah') {
+			$q = $q->whereRaw("upper(lok_asal) != 'KABUPATEN KERINCI'");
+		} else if ($this->jenis_dinas == 'Luar Daerah') {
+			$q = $q->whereRaw("upper(lok_asal) = 'KABUPATEN KERINCI'");
+		}
+
+    $data = $q->get();
+
     return view('Exports.sptFinish', [
-      'data' => ReportSPPD::all(),
+      'data' => $data,
       'startDate' => $startOfYear,
       'endDate' => $endOfYear,
     ]);
