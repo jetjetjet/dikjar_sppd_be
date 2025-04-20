@@ -62,7 +62,7 @@ class AnggaranRequest extends BaseRequest
                     })
                 ],
                 'periode' => 'required|numeric|min:' . $year . '|max:' . $year1,
-                'pagu' => 'required|numeric|min:1000000|max:999999999999',
+                'pagu' => 'required|numeric|min:500000|max:999999999999',
                 'pptk_id' => 'required',
                 'bidang' => 'required',
                 'uraian' => 'sometimes',
