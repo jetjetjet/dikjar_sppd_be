@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Models;
+
+use App\Traits\LogUser;
+use Illuminate\Database\Eloquent\Model;
+
+class Pegawai extends Model
+{
+    use LogUser;
+
+    protected $table = 'pegawai';
+
+    protected $fillable = [
+        'nip', 'pegawai_app', 'jabatan', 'pangkat', 'golongan', 'email', 'full_name', 'tgl_lahir', 'ttd', 'jenis_kelamin', 'path_foto', 'phone', 'address', 'active', 'created_by', 'updated_by', 'status_pegawai',
+    ];
+
+    public function scopeAktif($query)
+    {
+        return $query->where('status_pegawai', 'aktif');
+    }
+
+    public function user()
+    {
+        // return $this->belongsTo(User::class);
+        return $this->hasOne(User::class, 'nip');
+    }
+}

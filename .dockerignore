@@ -1,0 +1,24 @@
+# Dependencies (installed inside container)
+/vendor
+/node_modules
+
+# Runtime / caches
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/.phpunit.cache
+/public/hot
+
+# Local environment & secrets
+.env
+.env.*
+!.env.example
+
+# Git & editor
+/.git
+.gitignore
+.gitattributes
+.idea
+.vscode
+*.log
