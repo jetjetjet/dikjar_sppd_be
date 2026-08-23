@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Exceptions\BiayaLockedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\InapRequest;
 use App\Services\InapService;
@@ -29,6 +30,8 @@ class InapController extends Controller
             $total = $this->inapService->store($request->validated());
 
             return $this->successResponse('Berhasil menambah data Penginapan.', ['total' => $total], null, 201);
+        } catch (BiayaLockedException $e) {
+            return $this->errorResponse($e->getMessage());
         } catch (\Exception $e) {
             Log::error('Gagal menambahkan penginapan.', ['exception' => $e]);
 
@@ -47,6 +50,8 @@ class InapController extends Controller
             );
 
             return $this->successResponse('Berhasil mengubah data checkin.', ['total' => $total]);
+        } catch (BiayaLockedException $e) {
+            return $this->errorResponse($e->getMessage());
         } catch (\Exception $e) {
             Log::error('Gagal mengubah penginapan.', ['id' => $id, 'exception' => $e]);
 
@@ -60,6 +65,8 @@ class InapController extends Controller
             $total = $this->inapService->destroy($id, $biayaId, $pegawaiId);
 
             return $this->successResponse('Berhasil menghapus data Penginapan.', ['total' => $total]);
+        } catch (BiayaLockedException $e) {
+            return $this->errorResponse($e->getMessage());
         } catch (\Exception $e) {
             Log::error('Gagal menghapus penginapan.', ['id' => $id, 'exception' => $e]);
 
@@ -73,6 +80,8 @@ class InapController extends Controller
             $this->inapService->uploadFile($id);
 
             return $this->successResponse('Berhasil upload struk penginapan.');
+        } catch (BiayaLockedException $e) {
+            return $this->errorResponse($e->getMessage());
         } catch (\Exception $e) {
             Log::error('Gagal upload struk penginapan.', ['id' => $id, 'exception' => $e]);
 

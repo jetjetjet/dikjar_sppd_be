@@ -24,6 +24,8 @@ class InapService
     public function store(array $data)
     {
         try {
+            $this->biayaService->assertEditable((int) $data['biaya_id']);
+
             DB::transaction(function () use ($data) {
                 $this->inapRepository->createInap([
                     'pegawai_id' => $data['pegawai_id'],
@@ -54,6 +56,8 @@ class InapService
     public function update(int $id, int $pegawaiId, int $biayaId, array $data)
     {
         try {
+            $this->biayaService->assertEditable($biayaId);
+
             DB::transaction(function () use ($id, $pegawaiId, $biayaId, $data) {
                 $inap = $this->inapRepository->findScoped($id, $pegawaiId, $biayaId);
 
@@ -82,6 +86,8 @@ class InapService
     public function destroy(int $id, int $biayaId, int $pegawaiId)
     {
         try {
+            $this->biayaService->assertEditable($biayaId);
+
             DB::transaction(function () use ($id, $biayaId, $pegawaiId) {
                 $inap = $this->inapRepository->findScoped($id, $pegawaiId, $biayaId);
                 $this->inapRepository->delete($inap);
@@ -100,6 +106,8 @@ class InapService
     public function uploadFile(int $id): void
     {
         $inap = $this->inapRepository->findOrFail($id);
+
+        $this->biayaService->assertEditable($inap->biaya_id);
 
         $file = request()->file('file');
         $fileId = $file ? $this->fileStorageService->storeUploadedFile($file, 'struk') : null;

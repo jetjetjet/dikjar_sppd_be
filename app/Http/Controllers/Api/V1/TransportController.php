@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Exceptions\BiayaLockedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\TransportRequest;
 use App\Services\TransportService;
@@ -29,6 +30,8 @@ class TransportController extends Controller
             $total = $this->transportService->store($request->validated());
 
             return $this->successResponse('Berhasil menambahkan Perjalanan.', ['total' => $total], null, 201);
+        } catch (BiayaLockedException $e) {
+            return $this->errorResponse($e->getMessage());
         } catch (\Exception $e) {
             Log::error('Gagal menambahkan transportasi.', ['exception' => $e]);
 
@@ -47,6 +50,8 @@ class TransportController extends Controller
             );
 
             return $this->successResponse('Berhasil memperbaharui transportasi.', ['total' => $total]);
+        } catch (BiayaLockedException $e) {
+            return $this->errorResponse($e->getMessage());
         } catch (\Exception $e) {
             Log::error('Gagal mengubah transportasi.', ['id' => $id, 'exception' => $e]);
 
@@ -60,6 +65,8 @@ class TransportController extends Controller
             $total = $this->transportService->destroy($id, $biayaId, $pegawaiId);
 
             return $this->successResponse('Berhasil menghapus data transportasi.', ['total' => $total]);
+        } catch (BiayaLockedException $e) {
+            return $this->errorResponse($e->getMessage());
         } catch (\Exception $e) {
             Log::error('Gagal menghapus transportasi.', ['id' => $id, 'exception' => $e]);
 
@@ -73,6 +80,8 @@ class TransportController extends Controller
             $this->transportService->uploadFile($id);
 
             return $this->successResponse('Berhasil upload struk transportasi.');
+        } catch (BiayaLockedException $e) {
+            return $this->errorResponse($e->getMessage());
         } catch (\Exception $e) {
             Log::error('Gagal upload struk transportasi.', ['id' => $id, 'exception' => $e]);
 

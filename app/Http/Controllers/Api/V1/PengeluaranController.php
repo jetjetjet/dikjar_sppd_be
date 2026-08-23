@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Exceptions\BiayaLockedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\PengeluaranRequest;
 use App\Services\PengeluaranService;
@@ -29,6 +30,8 @@ class PengeluaranController extends Controller
             $total = $this->pengeluaranService->store($request->validated());
 
             return $this->successResponse('Berhasil menambahkan Pengeluaran.', ['total' => $total], null, 201);
+        } catch (BiayaLockedException $e) {
+            return $this->errorResponse($e->getMessage());
         } catch (\Exception $e) {
             Log::error('Gagal menambahkan pengeluaran.', ['exception' => $e]);
 
@@ -47,6 +50,8 @@ class PengeluaranController extends Controller
             );
 
             return $this->successResponse('Berhasil memperbaharui Pengeluaran.', ['total' => $total]);
+        } catch (BiayaLockedException $e) {
+            return $this->errorResponse($e->getMessage());
         } catch (\Exception $e) {
             Log::error('Gagal mengubah pengeluaran.', ['id' => $id, 'exception' => $e]);
 
@@ -60,6 +65,8 @@ class PengeluaranController extends Controller
             $total = $this->pengeluaranService->destroy($id, $biayaId, $pegawaiId);
 
             return $this->successResponse('Berhasil menghapus data Pengeluaran.', ['total' => $total]);
+        } catch (BiayaLockedException $e) {
+            return $this->errorResponse($e->getMessage());
         } catch (\Exception $e) {
             Log::error('Gagal menghapus pengeluaran.', ['id' => $id, 'exception' => $e]);
 
@@ -73,6 +80,8 @@ class PengeluaranController extends Controller
             $this->pengeluaranService->uploadFile($id);
 
             return $this->successResponse('Berhasil memperbaharui data Pengeluaran.');
+        } catch (BiayaLockedException $e) {
+            return $this->errorResponse($e->getMessage());
         } catch (\Exception $e) {
             Log::error('Gagal upload struk pengeluaran.', ['id' => $id, 'exception' => $e]);
 

@@ -24,6 +24,8 @@ class PengeluaranService
     public function store(array $data)
     {
         try {
+            $this->biayaService->assertEditable((int) $data['biaya_id']);
+
             DB::transaction(function () use ($data) {
                 $this->pengeluaranRepository->createPengeluaran([
                     'biaya_id' => $data['biaya_id'],
@@ -52,6 +54,8 @@ class PengeluaranService
     public function update(int $id, int $pegawaiId, int $biayaId, array $data)
     {
         try {
+            $this->biayaService->assertEditable($biayaId);
+
             DB::transaction(function () use ($id, $pegawaiId, $biayaId, $data) {
                 $pengeluaran = $this->pengeluaranRepository->findScoped($id, $pegawaiId, $biayaId);
 
@@ -80,6 +84,8 @@ class PengeluaranService
     public function destroy(int $id, int $biayaId, int $pegawaiId)
     {
         try {
+            $this->biayaService->assertEditable($biayaId);
+
             DB::transaction(function () use ($id, $biayaId, $pegawaiId) {
                 $pengeluaran = $this->pengeluaranRepository->findScoped($id, $pegawaiId, $biayaId);
                 $this->pengeluaranRepository->delete($pengeluaran);
@@ -98,6 +104,8 @@ class PengeluaranService
     public function uploadFile(int $id): void
     {
         $pengeluaran = $this->pengeluaranRepository->findOrFail($id);
+
+        $this->biayaService->assertEditable($pengeluaran->biaya_id);
 
         $file = request()->file('file');
         $fileId = $file ? $this->fileStorageService->storeUploadedFile($file, 'struk') : null;

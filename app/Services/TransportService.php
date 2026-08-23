@@ -24,6 +24,8 @@ class TransportService
     public function store(array $data)
     {
         try {
+            $this->biayaService->assertEditable((int) $data['biaya_id']);
+
             $transport = DB::transaction(function () use ($data) {
                 $transport = $this->transportRepository->createTransport([
                     'pegawai_id' => $data['pegawai_id'],
@@ -57,6 +59,8 @@ class TransportService
     public function update(int $id, int $pegawaiId, int $biayaId, array $data)
     {
         try {
+            $this->biayaService->assertEditable($biayaId);
+
             $biaya = DB::transaction(function () use ($id, $pegawaiId, $biayaId, $data) {
                 $transport = $this->transportRepository->findScoped($id, $pegawaiId, $biayaId);
 
@@ -88,6 +92,8 @@ class TransportService
     public function destroy(int $id, int $biayaId, int $pegawaiId)
     {
         try {
+            $this->biayaService->assertEditable($biayaId);
+
             $total = DB::transaction(function () use ($id, $biayaId, $pegawaiId) {
                 $transport = $this->transportRepository->findScoped($id, $pegawaiId, $biayaId);
                 $this->transportRepository->delete($transport);
@@ -108,6 +114,8 @@ class TransportService
     public function uploadFile(int $id): void
     {
         $transport = $this->transportRepository->findOrFail($id);
+
+        $this->biayaService->assertEditable($transport->biaya_id);
 
         $file = request()->file('file');
         $fileId = $file ? $this->fileStorageService->storeUploadedFile($file, 'struk') : null;
