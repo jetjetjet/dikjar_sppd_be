@@ -95,7 +95,9 @@ class SPTService
 
             $spt = $this->sptRepository->create([
                 'no_index' => $noMax,
-                'no_spt' => $data['no_spt'],
+                // Nomor surat sekarang ditulis tangan di dokumen fisik setelah dicetak,
+                // bukan diisi lewat aplikasi — dikosongkan di sini.
+                'no_spt' => '',
                 'jenis_dinas' => $data['jenis_dinas'],
                 'anggaran_id' => $data['anggaran_id'],
                 'pttd_id' => $data['pttd_id'],
@@ -133,9 +135,9 @@ class SPTService
 
     public function update(int $id, array $data): void
     {
-        $spt = $this->sptRepository->findOrFail($id);
+        $this->sptRepository->findOrFail($id);
 
-        DB::transaction(function () use ($id, $data, $spt) {
+        DB::transaction(function () use ($id, $data) {
             $berangkat = new Carbon($data['tgl_berangkat']);
             $kembali = new Carbon($data['tgl_kembali']);
             // Carbon 3: diffInDays() default balikin float — dibulatkan (int cast)
@@ -160,11 +162,6 @@ class SPTService
                 'jumlah_hari' => $jumlahHari,
                 'tgl_spt' => $data['tgl_spt'],
             ];
-
-            // Nomor surat cuma boleh diubah selama SPT belum diproses.
-            if ($spt->proceed_at === null && array_key_exists('no_spt', $data)) {
-                $updateData['no_spt'] = $data['no_spt'];
-            }
 
             $this->sptRepository->updateById($id, $updateData);
 

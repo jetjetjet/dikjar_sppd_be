@@ -2,14 +2,11 @@
 
 namespace App\Http\Requests\Api\V1;
 
-use Illuminate\Validation\Rule;
-
 class UpdateSPTRequest extends BaseApiRequest
 {
     public function rules(): array
     {
         return [
-            'no_spt' => ['required', 'string', 'max:255', Rule::unique('spt', 'no_spt')->ignore($this->route('id'))],
             'jenis_dinas' => ['required', 'string'],
             'anggaran_id' => ['required', 'integer'],
             'pttd_id' => ['required', 'integer'],

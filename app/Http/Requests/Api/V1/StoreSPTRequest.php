@@ -7,7 +7,6 @@ class StoreSPTRequest extends BaseApiRequest
     public function rules(): array
     {
         return [
-            'no_spt' => ['required', 'string', 'max:255', 'unique:spt,no_spt'],
             'anggaran_id' => ['required', 'integer'],
             'jenis_dinas' => ['required', 'string'],
             'pttd_id' => ['required', 'integer'],
