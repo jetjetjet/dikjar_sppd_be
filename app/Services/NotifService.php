@@ -80,7 +80,10 @@ class NotifService
 
     protected function telatLabel($r): string
     {
-        $days = Carbon::parse($r->tgl_kembali)->diffInDays(Carbon::now(), false);
+        // Carbon 3 default-nya diffInDays() balikin float (mis. 2.6543), bukan
+        // int seperti Carbon 2 — dibulatkan (int cast) supaya labelnya bulat,
+        // tanpa desimal.
+        $days = (int) Carbon::parse($r->tgl_kembali)->diffInDays(Carbon::now(), false);
 
         return $days < 0 ? 'Telat '.abs($days).' hari' : '';
     }

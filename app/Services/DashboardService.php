@@ -118,7 +118,8 @@ class DashboardService
     protected function lateKeterangan($row): string
     {
         if ($row->proceed_at !== null && $row->finished_at === null) {
-            $days = Carbon::parse($row->tgl_kembali)->diffInDays(Carbon::now(), false);
+            // Carbon 3: diffInDays() default balikin float — dibulatkan (int cast).
+            $days = (int) Carbon::parse($row->tgl_kembali)->diffInDays(Carbon::now(), false);
             if ($days < 0) {
                 return 'Telat '.abs($days).' hari';
             }

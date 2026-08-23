@@ -42,7 +42,8 @@ class SPTService
     protected function lateKeterangan($spt): string
     {
         if ($spt->proceed_at !== null && $spt->finished_at === null) {
-            $days = Carbon::parse($spt->tgl_kembali)->diffInDays(Carbon::now(), false);
+            // Carbon 3: diffInDays() default balikin float — dibulatkan (int cast).
+            $days = (int) Carbon::parse($spt->tgl_kembali)->diffInDays(Carbon::now(), false);
             if ($days < 0) {
                 return 'Telat '.abs($days).' hari';
             }
@@ -85,7 +86,9 @@ class SPTService
         DB::transaction(function () use ($data) {
             $berangkat = new Carbon($data['tgl_berangkat']);
             $kembali = new Carbon($data['tgl_kembali']);
-            $jumlahHari = $berangkat->diffInDays($kembali) + 1;
+            // Carbon 3: diffInDays() default balikin float — dibulatkan (int cast)
+            // supaya jumlah_hari yang tersimpan & tercetak di dokumen tetap bulat.
+            $jumlahHari = (int) $berangkat->diffInDays($kembali) + 1;
             $tahun = Carbon::now()->format('Y');
 
             $noMax = $this->sptRepository->allocateNoIndex($tahun);
@@ -135,7 +138,9 @@ class SPTService
         DB::transaction(function () use ($id, $data, $spt) {
             $berangkat = new Carbon($data['tgl_berangkat']);
             $kembali = new Carbon($data['tgl_kembali']);
-            $jumlahHari = $berangkat->diffInDays($kembali) + 1;
+            // Carbon 3: diffInDays() default balikin float — dibulatkan (int cast)
+            // supaya jumlah_hari yang tersimpan & tercetak di dokumen tetap bulat.
+            $jumlahHari = (int) $berangkat->diffInDays($kembali) + 1;
 
             $updateData = [
                 'jenis_dinas' => $data['jenis_dinas'],
