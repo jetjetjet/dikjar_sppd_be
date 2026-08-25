@@ -135,7 +135,7 @@ class SPTService
 
     public function update(int $id, array $data): void
     {
-        $this->sptRepository->findOrFail($id);
+        $spt = $this->sptRepository->findOrFail($id);
 
         DB::transaction(function () use ($id, $data) {
             $berangkat = new Carbon($data['tgl_berangkat']);
@@ -178,6 +178,30 @@ class SPTService
                 'Ubah SPT'
             );
         });
+
+        // SPT yang sudah pernah diproses (dokumen SPT/SPPD sudah pernah digenerate)
+        // tetap bisa diedit (lihat update() di atas) — supaya dokumen yang sudah
+        // ter-generate tidak basi terhadap data yang baru diubah, generate ulang.
+        // Dicek dari status SPT SEBELUM update ($spt, di-fetch di awal method) —
+        // proceed_at tidak pernah berubah lewat update(), jadi aman dipakai apa adanya.
+        if ($spt->proceed_at !== null) {
+            $this->regenerateDocument($id);
+        }
+    }
+
+    protected function regenerateDocument(int $id): void
+    {
+        $spt = $this->sptRepository->findOrFail($id);
+        $users = $this->sptDetailRepository->getUsersForProses($id);
+        $loginId = auth('sanctum')->id();
+
+        $result = $this->documentGenerator->generateProses($spt, $users);
+
+        $this->sptRepository->updateById($id, [
+            'spt_file_id' => $result['file_id'],
+            'spt_generated_at' => now()->toDateTimeString(),
+            'spt_generated_by' => $loginId,
+        ]);
     }
 
     public function proses(int $id): string
