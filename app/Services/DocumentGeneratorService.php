@@ -11,9 +11,11 @@ use App\Models\SPT;
 use App\Models\SPTDetail;
 use App\Models\Transport;
 use App\Repositories\Contracts\FileRepositoryInterface;
+use App\Repositories\Contracts\PejabatTtdRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File as FaFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpWord\TemplateProcessor;
 
@@ -23,6 +25,7 @@ class DocumentGeneratorService
         protected FileRepositoryInterface $fileRepository,
         protected FileStorageService $fileStorageService,
         protected DocumentMapperService $mapper,
+        protected PejabatTtdRepositoryInterface $pejabatTtdRepository,
     ) {}
 
     /**
@@ -367,19 +370,77 @@ class DocumentGeneratorService
 
     // --- internal helpers ---
 
+    /**
+     * Resolve path template SPT untuk pejabat (pttdId = pegawai_id, lihat catatan
+     * di PLAN_TEMPLATE_PER_PEJABAT.md). Fallback berlapis 3 tingkat supaya generate
+     * SPT tidak pernah gagal total hanya karena masalah template:
+     *   1. Template milik pejabat sendiri (hasil upload Master Pejabat).
+     *   2. Logic lama (branching pttd_id) — dipertahankan untuk pejabat yang belum
+     *      di-setting template custom-nya.
+     *   3. Template default terakhir (spt_fallback_default) — kalau tingkat 1 & 2
+     *      dua-duanya gagal resolve (mis. file hilang dari disk).
+     */
     protected function resolveSptTemplate(int $pttdId): string
     {
-        if ($pttdId == 2 || $pttdId == 3) {
-            return $this->templatePath('spt_bupati');
-        }
-        if ($pttdId == 4) {
-            return $this->templatePath('spt_sekda');
-        }
-        if ($pttdId == 219) {
-            return $this->templatePath('spt_default');
+        try {
+            $pejabat = $this->pejabatTtdRepository->findByPegawaiAndAutorisasi($pttdId, 'PTTD');
+
+            if ($pejabat && $pejabat->template_file_id) {
+                return $this->resolveUploadedTemplatePath($pejabat->template_file_id);
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Gagal resolve template pejabat, fallback ke logic lama.', ['pttd_id' => $pttdId, 'exception' => $e]);
         }
 
-        return $this->templatePath('spt_an');
+        return $this->resolveLegacySptTemplate($pttdId);
+    }
+
+    protected function resolveLegacySptTemplate(int $pttdId): string
+    {
+        try {
+            $key = match (true) {
+                $pttdId == 2 || $pttdId == 3 => 'spt_bupati',
+                $pttdId == 4 => 'spt_sekda',
+                $pttdId == 219 => 'spt_default',
+                default => 'spt_an',
+            };
+
+            $path = $this->templatePath($key);
+
+            if (! FaFile::exists($path)) {
+                throw new \Exception("Template '{$key}' tidak ditemukan di disk.");
+            }
+
+            return $path;
+        } catch (\Throwable $e) {
+            Log::warning('Template legacy juga gagal resolve, fallback ke default terakhir.', ['pttd_id' => $pttdId, 'exception' => $e]);
+
+            return $this->templatePath('spt_fallback_default');
+        }
+    }
+
+    /**
+     * Resolve file_id hasil upload (FileStorageService, disk 'public') ke path
+     * filesystem asli. `files.file_path` formatnya URL ('/storage/{subFolder}'),
+     * BUKAN path filesystem — tidak bisa dipakai langsung ke TemplateProcessor.
+     */
+    protected function resolveUploadedTemplatePath(int $fileId): string
+    {
+        $file = $this->fileRepository->getById($fileId);
+
+        if (! $file) {
+            throw new \Exception("File template pejabat (id={$fileId}) tidak ditemukan di database.");
+        }
+
+        $path = Storage::disk('public')->path(
+            ltrim($file->file_path, '/storage/').'/'.$file->file_name
+        );
+
+        if (! FaFile::exists($path)) {
+            throw new \Exception("File template pejabat (id={$fileId}) tidak ditemukan di disk.");
+        }
+
+        return $path;
     }
 
     protected function getPejabat(int $pttdId): object

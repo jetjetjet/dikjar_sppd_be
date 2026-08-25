@@ -3,10 +3,14 @@
 namespace App\Services;
 
 use App\Repositories\Contracts\PejabatTtdRepositoryInterface;
+use Illuminate\Http\UploadedFile;
 
 class PejabatTtdService
 {
-    public function __construct(protected PejabatTtdRepositoryInterface $pejabatRepository) {}
+    public function __construct(
+        protected PejabatTtdRepositoryInterface $pejabatRepository,
+        protected FileStorageService $fileStorageService,
+    ) {}
 
     public function getGrid()
     {
@@ -36,23 +40,38 @@ class PejabatTtdService
             throw new \Exception('Pejabat sudah ada pada sistem.');
         }
 
-        $this->pejabatRepository->create([
+        $payload = [
             'pegawai_id' => $data['pegawai_id'],
             'autorisasi' => $data['autorisasi'],
             'anggaran_id' => $data['anggaran_id'] ?? null,
             'autorisasi_code' => $this->mapAutorisasi($data['autorisasi']),
             'is_active' => $data['is_active'] ?? '1',
-        ]);
+        ];
+
+        if (isset($data['template']) && $data['template'] instanceof UploadedFile) {
+            $payload['template_file_id'] = $this->fileStorageService->storeUploadedFile($data['template'], 'template-pejabat');
+        }
+
+        $this->pejabatRepository->create($payload);
     }
 
     public function update(int $id, array $data): void
     {
-        $this->pejabatRepository->updateById($id, [
+        $payload = [
             'pegawai_id' => $data['pegawai_id'],
             'autorisasi' => $data['autorisasi'],
             'anggaran_id' => $data['anggaran_id'] ?? null,
             'autorisasi_code' => $this->mapAutorisasi($data['autorisasi']),
-        ]);
+        ];
+
+        // Template lama SENGAJA dibiarkan di storage kalau diganti (tidak dihapus) —
+        // lihat PLAN_TEMPLATE_PER_PEJABAT.md Keputusan #5. Kalau tidak ada file baru
+        // di request ini, template_file_id existing tidak disentuh sama sekali.
+        if (isset($data['template']) && $data['template'] instanceof UploadedFile) {
+            $payload['template_file_id'] = $this->fileStorageService->storeUploadedFile($data['template'], 'template-pejabat');
+        }
+
+        $this->pejabatRepository->updateById($id, $payload);
     }
 
     public function setActive(int $id, bool $isActive): void

@@ -33,5 +33,10 @@ return [
         // 'spt_default' => 'template_spt.docx',       // pttd_id 219
         'spt_default' => 'spt_default_rev.docx',       // pttd_id 219
         'spt_an' => 'template_spt_an.docx',         // pttd_id lainnya
+        // Lapisan fallback terakhir kalau template pejabat (upload) MAUPUN template
+        // legacy di atas dua-duanya gagal resolve (mis. file hilang dari disk) —
+        // lihat DocumentGeneratorService::resolveLegacySptTemplate() dan
+        // PLAN_TEMPLATE_PER_PEJABAT.md Keputusan #4.
+        'spt_fallback_default' => 'template_spt_an.docx',
     ],
 ];
