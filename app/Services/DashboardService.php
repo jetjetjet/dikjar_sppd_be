@@ -119,8 +119,10 @@ class DashboardService
     {
         if ($row->proceed_at !== null && $row->finished_at === null) {
             // Carbon 3: diffInDays() default balikin float — dibulatkan (int cast).
+            // diffInDays($other, false): POSITIF kalau tgl_kembali sudah lewat dari $other
+            // (now), NEGATIF kalau tgl_kembali masih di masa depan — jadi "telat" itu > 0.
             $days = (int) Carbon::parse($row->tgl_kembali)->diffInDays(Carbon::now(), false);
-            if ($days < 0) {
+            if ($days > 0) {
                 return 'Telat '.abs($days).' hari';
             }
         }

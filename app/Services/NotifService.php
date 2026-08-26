@@ -83,8 +83,10 @@ class NotifService
         // Carbon 3 default-nya diffInDays() balikin float (mis. 2.6543), bukan
         // int seperti Carbon 2 — dibulatkan (int cast) supaya labelnya bulat,
         // tanpa desimal.
+        // diffInDays($other, false): POSITIF kalau tgl_kembali sudah lewat dari $other
+        // (now), NEGATIF kalau tgl_kembali masih di masa depan — jadi "telat" itu > 0.
         $days = (int) Carbon::parse($r->tgl_kembali)->diffInDays(Carbon::now(), false);
 
-        return $days < 0 ? 'Telat '.abs($days).' hari' : '';
+        return $days > 0 ? 'Telat '.abs($days).' hari' : '';
     }
 }

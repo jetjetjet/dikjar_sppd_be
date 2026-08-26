@@ -65,7 +65,11 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    // App ini dipakai di Kerinci/Jambi (WIB, UTC+7) — default diubah dari 'UTC' Laravel
+    // supaya Carbon::now() cocok dengan tanggal kalender lokal user, terutama jam 00:00-07:00
+    // WIB (saat UTC masih tanggal kemarin). Lihat juga keterlambatan SPT (SPTService/
+    // NotifService/DashboardService::lateKeterangan) yang membandingkan tgl_kembali vs now().
+    'timezone' => env('APP_TIMEZONE', 'Asia/Jakarta'),
 
     /*
     |--------------------------------------------------------------------------
