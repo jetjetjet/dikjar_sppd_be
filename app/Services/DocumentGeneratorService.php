@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File as FaFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use PhpOffice\PhpWord\TemplateProcessor;
 
 class DocumentGeneratorService
@@ -432,9 +433,10 @@ class DocumentGeneratorService
             throw new \Exception("File template pejabat (id={$fileId}) tidak ditemukan di database.");
         }
 
-        $path = Storage::disk('public')->path(
-            ltrim($file->file_path, '/storage/').'/'.$file->file_name
-        );
+        // NB: ltrim() takes a character mask, not a prefix — ltrim($x, '/storage/') would also
+        // strip leading letters shared with "storage" (e.g. eating into "template-pejabat").
+        $relativeDir = Str::after($file->file_path, '/storage/');
+        $path = Storage::disk('public')->path($relativeDir.'/'.$file->file_name);
 
         if (! FaFile::exists($path)) {
             throw new \Exception("File template pejabat (id={$fileId}) tidak ditemukan di disk.");
