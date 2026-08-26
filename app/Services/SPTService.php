@@ -41,6 +41,10 @@ class SPTService
 
     protected function lateKeterangan($spt): string
     {
+        if ($spt->status === 'VOID') {
+            return '';
+        }
+
         if ($spt->proceed_at !== null && $spt->finished_at === null) {
             // Carbon 3: diffInDays() default balikin float — dibulatkan (int cast).
             // diffInDays($other, false): POSITIF kalau tgl_kembali sudah lewat dari $other
